@@ -1,0 +1,1 @@
+export {useAuthDispatch, useAuthSelector} from "./authHooks";
