@@ -2,18 +2,17 @@
 
 import { Github, Linkedin } from "lucide-react";
 import Image from "next/image";
-
-import DivGap, {HorizontalDivider, VerticalDivider} from "../custom-elements/UIUtilities";
-
+import { AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+import DivGap, {HorizontalDivider, VerticalDivider} from "../custom-elements/UIUtilities";
 import { AboutSection } from "../page-content/AboutSection";
-import { useGetUserAuthenticationRQ } from "@/services/api/userApi";
 
 const Footer: React.FC = () => {
     const router = useRouter();
     
-    const { data: authResponse } = useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
 
     const onLogInClick = () => {

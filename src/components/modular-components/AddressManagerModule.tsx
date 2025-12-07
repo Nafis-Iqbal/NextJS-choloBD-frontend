@@ -16,7 +16,7 @@ const MAX_ADDRESSES = 5;
 
 interface AddressManagerModuleProps {
     className?: string;
-    userId: string | null;
+    userId: string | undefined;
     addressBlockCustomStyle?: string;
     showFullList?: boolean;
     hideActions?: boolean;
@@ -127,7 +127,7 @@ export const AddressManagerModule = ({
             const tempAddresses: Address[] = addressesData?.data || [];
     
             for (let i = 0; i < tempAddresses.length; i++) {
-                if (tempAddresses[i].id === userData.addressId) {
+                if (tempAddresses[i].id === userData.serviceAddressId) {
                     const temp = tempAddresses[0];
                     tempAddresses[0] = tempAddresses[i];
                     tempAddresses[i] = temp;
@@ -167,7 +167,7 @@ export const AddressManagerModule = ({
 
         updateUserDefaultAddress({
             id: userData.id,
-            addressId
+            serviceAddressId: address.id
         });
     }
 
@@ -176,7 +176,7 @@ export const AddressManagerModule = ({
 
         const payload = {
             ...addressData,
-            user_id: userId
+            userId: userId
         };
 
         if (editingAddress?.id) {
@@ -236,7 +236,7 @@ export const AddressManagerModule = ({
                     addresses={addresses}
                     onSelect={({ id, address } : { id: string, address: Address }) => handleChangeDefaultAddress(id, address)}
                     onCancel={() => setIsAddressSelectionModalOpen(false)}
-                    selectedAddressId={userData.addressId || ""}
+                    selectedAddressId={userData.serviceAddressId || ""}
                 />
             }
 
@@ -269,7 +269,7 @@ export const AddressManagerModule = ({
                             key={address.id}
                             showActions={!infoOnlyMode}
                             noEditMode={selectOnlyMode || infoOnlyMode || hideActions}
-                            selectedAddressId={userData.addressId || "Unknown"}
+                            selectedAddressId={userData.serviceAddressId || "Unknown"}
                             AddressInfo={address}
                             onEdit={() => handleEditAddress(address)}
                             onDelete={() => handleDeleteAddress(address.id)}

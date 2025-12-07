@@ -2,8 +2,8 @@ import Image from "next/image";
 
 export const Logo = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : {textSize?: string, position?: string}) => {
     return (
-        <div className={`md:w-[20%] ${position} md:p-2 text-center bg-[#0F0F0F] ${textSize} text-[#00FF99] font-satisfy rounded-sm`}>
-            Suit up!
+        <div className={`md:w-fit ${position} md:p-4 text-center bg-[#0F0F0F] ${textSize} text-[#00FF99] font-satisfy rounded-sm`}>
+            Cholo BD!
         </div>
     );
 }

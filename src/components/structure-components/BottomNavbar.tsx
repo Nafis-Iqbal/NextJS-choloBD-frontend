@@ -5,10 +5,10 @@ import Link from "next/link";
 import { FaShoppingCart, FaUser, FaSignInAlt, FaCog, FaGift } from "react-icons/fa";
 import IconWithBadge from "../custom-elements/IconWithBadge";
 import { useSelector } from "react-redux";
-import { useGetUserAuthenticationRQ } from "@/services/api/userApi";
+import { AuthApi } from "@/services/api";
 
 const BottomNavbar = () => {
-    const { data: authResponse } = useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
 

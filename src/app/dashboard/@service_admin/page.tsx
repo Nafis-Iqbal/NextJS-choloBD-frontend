@@ -1,12 +1,12 @@
 "use client";
 
-import { UserApi } from "@/services/api";
+import { AuthApi } from "@/services/api";
 
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
 import { ComplaintManagerModule } from "@/components/modular-components/ComplaintManagerModule"
 
 export default function AdminDashboard() {
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
     

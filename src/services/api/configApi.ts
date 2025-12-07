@@ -47,8 +47,8 @@ export function useUpdateSiteConfigRQ(
 }
 
 export async function deleteHeroSectionImages(configId: string, imageIds: string[]) {
-  const response = await apiFetch<ApiResponse<null>>(`/config/site`, {
-    method: 'PUT',
+  const response = await apiFetch<ApiResponse<null>>(`/config/site/hero-images`, {
+    method: 'DELETE',
     body: JSON.stringify({ imageIds }),
   });
 

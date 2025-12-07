@@ -2,7 +2,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { UserApi } from "@/services/api";
+import { AuthApi, UserApi } from "@/services/api";
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
 
 import TableLayout from "@/components/layout-elements/TableLayout";
@@ -11,7 +11,7 @@ import { useEffect, useState, Suspense } from "react";
 
 function UserProfileListContent() {
     const router = useRouter();
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
     const searchParams = useSearchParams();

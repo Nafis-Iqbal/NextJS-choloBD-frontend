@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import { useGetUserAuthenticationRQ } from "@/services/api/userApi";
+import { AuthApi } from "@/services/api";
 import useLogout from "@/hooks/UtilHooks/logoutHooks";
 
 import { Menu } from "lucide-react";
@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
     const router = useRouter();
     const logout = useLogout();
     
-    const { data: authResponse } = useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
 
@@ -50,6 +50,10 @@ const Navbar: React.FC = () => {
 
     const onLogOutClick = () => {
         logout();
+    }
+
+    const onLogoClick = () => {
+        router.push("/");
     }
     
     return (
@@ -89,9 +93,9 @@ const Navbar: React.FC = () => {
                     <button 
                         className="hidden md:block w-[20%] ml-5 p-2 text-center bg-[#0F0F0F] md:text-xl lg:text-2xl text-[#00FF99] font-satisfy
                         rounded-sm transition-all duration-150 hover:scale-110 hover:brightness-130 hover:backdrop-blur-sm"
-                        onClick={() => router.push("/")}
+                        onClick={() => onLogoClick()}
                     >
-                        Suit up!
+                        Cholo BD!
                     </button>
                     
                     <SearchInputBar 
@@ -161,19 +165,27 @@ const Navbar: React.FC = () => {
                             <IconWithBadge Icon={FaGift} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
                         </Link>
 
-                        <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href="/cart">
-                            <IconWithBadge Icon={FaGift} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
-                        </Link>
-
                         <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href="/dashboard">
                             <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-gray-800 text-xl md:text-2xl scale-110"/>
                         </Link>
 
                         {!isAuthenticated ? (<Link className="p-2 hover:scale-110" href="/login">Log In</Link>) : 
                         (
-                            <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href={`/user_profile/${currentUserId}`}>
-                                <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
-                            </Link>
+                            <>
+                                <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href={`/user_profile/${currentUserId}`}>
+                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
+                                </Link>
+
+                                <div className="flex flex-col items-center justify-center bg-transparent">
+                                    <p className="h-1/2 text-black">$5.00</p>
+                                    <button 
+                                        className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-black text-green-900 hover:text-green-400 text-sm text-center rounded-sm"
+                                        onClick={() => router.push("wallet/wallet-recharge")}
+                                    >
+                                        Get Credits!
+                                    </button>
+                                </div>
+                            </>
                         )}
 
                         {isAuthenticated && <FaSignOutAlt className="text-3xl text-gray-800 hover:scale-120 cursor-pointer" onClick={onLogOutClick} />}

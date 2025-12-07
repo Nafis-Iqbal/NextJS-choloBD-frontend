@@ -4,10 +4,7 @@ import { HeroSection } from "@/types/enums";
 import { HeroSectionImageViewer } from "../structure-components/HeroSectionImageViewer";
 
 export const HomepageContent = async () => {
-    //const productsData = await ProductApi.getProducts();
     const configData = await ConfigApi.getSiteConfig();
-    
-    //const products = productsData?.data || [];
     
     const siteHeroSectionImages = configData?.data?.heroImages || [];
     const topHeroSectionImages = siteHeroSectionImages.filter(image => image.section === HeroSection.TOP);

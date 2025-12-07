@@ -1,7 +1,7 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import { UserApi } from "@/services/api";
+import { AuthApi } from "@/services/api";
 
 import Navbar from "@/components/structure-components/Navbar";
 import Footer from "@/components/structure-components/Footer";
@@ -15,7 +15,7 @@ export default function UserDataLayout({
 } : {
     children: React.ReactNode,
 }){
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
 
     if(!isAuthenticated) redirect("/login");

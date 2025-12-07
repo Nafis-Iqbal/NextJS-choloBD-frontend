@@ -1,6 +1,6 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { AuthApi } from "@/services/api";
 
 import Navbar from "@/components/structure-components/Navbar";
@@ -8,33 +8,17 @@ import Footer from "@/components/structure-components/Footer";
 import BottomNavbar from "@/components/structure-components/BottomNavbar";
 import SidebarMenu from "@/components/structure-components/SIdebarMenu";
 import DivGap from "@/components/custom-elements/UIUtilities";
-import React, { useEffect } from "react";
+import React from "react";
 
-export default function DashboardLayout({
+export default function WalletRechargeLayout({
     children, 
-    user,
-    consumer,
-    admin, 
-    master_admin, 
-    stats
 } : {
-    children: React.ReactNode, 
-    user: React.ReactNode,
-    consumer: React.ReactNode,
-    admin: React.ReactNode, 
-    master_admin: React.ReactNode,
-    stats: React.ReactNode,
+    children: React.ReactNode,
 }){
-    const router = useRouter();
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
 
     //if(!isAuthenticated) redirect("/login");
-    // Use useEffect for redirect to avoid hydration issues
-    
-    if(isAuthenticated === false){
-        redirect("/");
-    }
 
     return (
         <section className="flex flex-col min-h-screen">
@@ -54,17 +38,9 @@ export default function DashboardLayout({
                     />
                 </aside>
 
-                <div className="flex flex-col flex-grow w-full md:w-[85%] md:border-r-4">
-                    {[children, master_admin, admin, consumer, user].map((el, i) => (
-                        <React.Fragment key={i}>
-                            {el}
-                        </React.Fragment>
-                    ))}
+                <div className="flex flex-col flex-grow w-[85%] border-r-4">
+                    {children}
                 </div>
-
-                {/* <aside className="relative z-10 flex-grow w-[25%] shadow-[0_0_20px_#00FF99]">
-                    {stats}
-                </aside> */}
             </div>
             
             <nav>

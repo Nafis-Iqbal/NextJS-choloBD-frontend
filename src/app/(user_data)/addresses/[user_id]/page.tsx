@@ -2,13 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { AddressApi, UserApi } from "@/services/api";
+import { AddressApi, UserApi, AuthApi } from "@/services/api";
 import { Role } from "@/types/enums";
 import { AddressManagerModule } from "@/components/modular-components/AddressManagerModule";
 
 export default function UserAddressListPage() {
     const router = useRouter();
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
     const currentUserRole = authResponse?.data?.userRole;

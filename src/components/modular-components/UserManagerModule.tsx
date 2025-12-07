@@ -11,6 +11,7 @@ import { CustomSelectInput } from "../custom-elements/CustomInputElements"
 import { CustomTextInput } from "../custom-elements/CustomInputElements"
 import { HorizontalDivider } from "../custom-elements/UIUtilities"
 import { NoContentTableRow } from "../placeholder-components/NoContentTableRow"
+import { useRouter } from "next/navigation"
 
 type UserFilter = {
     role: Role;
@@ -35,6 +36,7 @@ const defaultFilterValues: UserFilter = {
 }
 
 export const UserManagerModule = () => {
+    const router = useRouter();
     const [filters, setFilters] = useState<Partial<UserFilter>>(defaultFilterValues);
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
     const [queryString, setQueryString] = useState<string>();
@@ -114,7 +116,7 @@ export const UserManagerModule = () => {
             <TableLayout className="md:mr-5">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[900px]">
-                        <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
+                        <div className="flex border border-green-800 p-2 bg-gray-600 text-center">
                             <p className="w-[5%]">Sr.</p>
                             <p className="w-[25%]">User Name</p>
                             <p className="w-[15%]">Role</p>
@@ -132,12 +134,14 @@ export const UserManagerModule = () => {
                                     usersList?.data?.map((user, index) => (
                                         <UserListTableRow 
                                             key={user.id} 
-                                            id={index + 1} 
+                                            id={index + 1}
+                                            userId={user.id} 
                                             userName={user.userName} 
                                             role={user.role} 
                                             email={user.email} 
                                             spent={5000} 
                                             joined={user.emailVerified ?? new Date(2025, 0, 31)}
+                                            navigateOnClick={() => router.push(`/user_profile/${user.id}`)}
                                         />
                                     ))
                                 )
@@ -256,14 +260,14 @@ export const UserManagerModule = () => {
 }
 
 const UserListTableRow = ({
-    id, userName, role, email, spent, joined
+    id, userId, userName, role, email, spent, joined, navigateOnClick
 } : {
-    id: number, userName: string, role: Role, email: string, spent: number, joined: Date
+    id: number, userId: string, userName: string, role: Role, email: string, spent: number, joined: Date, navigateOnClick: () => void
 }) => {
     return (
-        <div className="flex p-2 w-full border-b-1 border-green-900 hover:bg-gray-600 text-center">
+        <div className="flex p-2 w-full border-green-900 hover:bg-gray-600 text-center" onClick={() => navigateOnClick()}>
             <p className="w-[5%]">{id}</p>
-            <p className="w-[25%]">{userName}</p>
+            <p className="w-[25%] hover:cursor-pointer">{userName}</p>
             <p className="w-[15%]">{role}</p>
             <p className="w-[25%]">{email}</p>
             <p className="w-[15%]">{spent}</p>

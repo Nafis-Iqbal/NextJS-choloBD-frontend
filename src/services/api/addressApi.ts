@@ -42,7 +42,7 @@ export function useGetAddressesRQ(queryString?: string) {
 }
 
 export async function getUserAddresses(userId: string) {
-  const response = await apiFetch<ApiResponse<Address[]>>(`/addresses/users/${userId}`, {
+  const response = await apiFetch<ApiResponse<Address[]>>(`/addresses/user/${userId}`, {
     method: 'GET'
   });
 

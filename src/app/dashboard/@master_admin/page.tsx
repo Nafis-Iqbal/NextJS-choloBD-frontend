@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ConfigApi, UserApi } from "@/services/api";
+import { ConfigApi, UserApi, AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
@@ -11,9 +11,10 @@ import { ImageUploadModule } from "@/components/modular-components/ImageUploadMo
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
 import { HeroSection } from "@/types/enums";
+import { LocationWalletManagerModule } from "@/components/modular-components/LocationWalletManagerModule";
 
 export default function MasterAdminDashboard() {
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
     const router = useRouter();
@@ -74,7 +75,7 @@ export default function MasterAdminDashboard() {
     }
 
     const configHeroSectionPicUploadURLBuilder = (configId: string) => {
-        return `suitup_ecommerce/config/heroSection${configId}/images`;
+        return `cholo_bd/config/heroSection${configId}/images`;
     }
 
     if(!isAuthenticated || currentUserRole !== "MASTER_ADMIN"){
@@ -89,6 +90,8 @@ export default function MasterAdminDashboard() {
             <div className="md:ml-6 flex flex-col space-y-2">
                 <h2 className="text-green-500">Your System</h2>
                 <p className="text-green-200">Site management functions here.</p>
+
+                <LocationWalletManagerModule/>
 
                 <UserManagerModule/>
 
@@ -188,12 +191,12 @@ export default function MasterAdminDashboard() {
 
                     <div className="flex flex-col w-[90%] md:w-[40%] space-y-5 justify-between">
                         <div className="flex justify-between items-center p-2 space-x-2 hover:bg-gray-700">
-                            <label>Freeze New Orders</label>
+                            <label>Freeze New Trip Requests</label>
                             <input className="w-6 h-6" type="checkbox"></input>
                         </div>
 
                         <div className="flex justify-between items-center p-2 space-x-2 hover:bg-gray-700">
-                            <label>Freeze New Product Request</label>
+                            <label>Freeze Refund Requests</label>
                             <input className="w-6 h-6" type="checkbox"></input>
                         </div>
 

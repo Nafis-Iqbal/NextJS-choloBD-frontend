@@ -3,7 +3,7 @@
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useGetUserAuthenticationRQ } from "@/services/api/userApi";
+import { AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 
 interface DropdownMenuProps {
@@ -13,7 +13,7 @@ interface DropdownMenuProps {
 const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(({ className = "top-full right-0" }, ref) => {
     const router = useRouter();
     
-    const { data: authResponse } = useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
 

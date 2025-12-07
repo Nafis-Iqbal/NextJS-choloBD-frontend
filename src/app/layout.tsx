@@ -32,24 +32,24 @@ const satisfy = Satisfy({
 
 export const metadata: Metadata = {
   title: {
-    default: "Suit Up! - Premium E-Commerce Experience",
-    template: "%s | Suit Up!"
+    default: "Cholo BD! - Premium Tour Management Experience",
+    template: "%s | Cholo BD!"
   },
   description: "Discover premium products at Suit Up! Your one-stop destination for quality goods, exceptional service, and unbeatable prices.",
-  keywords: ["e-commerce", "online shopping", "premium products", "suit up", "quality goods"],
+  keywords: ["e-commerce", "online shopping", "premium products", "Cholo BD", "quality goods"],
   authors: [{ name: "Nafis Iqbal" }],
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: 'Suit Up! - Premium E-Commerce Experience',
+    title: 'Cholo BD! - Premium Tour Management Experience',
     description: 'Discover premium products at Suit Up! Your one-stop destination for quality goods and exceptional service.',
     images: ['/TIcon.PNG'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Suit Up! - Premium E-Commerce Experience',
+    title: 'Cholo BD! - Premium Tour Management Experience',
     description: 'Discover premium products at Suit Up! Your one-stop destination for quality goods and exceptional service.',
   },
   icons: {

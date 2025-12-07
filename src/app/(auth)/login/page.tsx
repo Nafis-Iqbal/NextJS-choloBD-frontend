@@ -2,8 +2,8 @@
 
 import Image from 'next/image';
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams, useRouter } from 'next/navigation';
-import { UserApi } from '@/services/api';
+import { useSearchParams, useRouter, redirect } from 'next/navigation';
+import { AuthApi } from '@/services/api';
 import { queryClient } from '@/services/apiInstance';
 
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
@@ -11,7 +11,7 @@ import DivGap, {HorizontalDividerWithText, Logo} from "@/components/custom-eleme
 
 function LoginContent() {
     const router = useRouter();
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     
     const searchParams = useSearchParams();
@@ -45,7 +45,7 @@ function LoginContent() {
         }
     }, [searchParams]);
 
-    const {mutate: createUserMutate} = UserApi.useCreateUserRQ(
+    const {mutate: createUserMutate} = AuthApi.useCreateUserRQ(
         (responseData) => {
             if(responseData.status === "success")
             {
@@ -60,13 +60,14 @@ function LoginContent() {
         }
     );
 
-    const {mutate: loginUserMutate} = UserApi.useLoginUserRQ(
+    const {mutate: loginUserMutate} = AuthApi.useLoginUserRQ(
         (responseData) => {
             console.log("Login response data:", responseData);
             if(responseData.status === "success")
             {
                 console.log("Login successful, redirecting to dashboard");
-                router.push("/");
+                router.push("/dashboard");
+                //redirect("/");
             }
             else{
                 console.log("Login failed with status:", responseData.status);
@@ -140,12 +141,12 @@ function LoginContent() {
                     isSignUpPage ? (
                         <div className="flex flex-col justify-between">
                             <p className="text-xl md:text-2xl mb-2">Get started</p>
-                            <p className="font-light text-sm">Create a Suit Up account!!</p>
+                            <p className="font-light text-sm">Create a Cholo BD account!!</p>
                         </div>
                     ) : (
                         <div className="flex flex-col justify-between">
                             <p className="text-xl md:text-2xl mb-2">Log in</p>
-                            <p className="font-light text-sm">Go suit up!!</p>
+                            <p className="font-light text-sm">Get a tailored tour experience!!</p>
                         </div>
                     )
                 }

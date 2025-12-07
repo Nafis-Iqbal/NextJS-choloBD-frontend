@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { forwardRef } from 'react';
 import { redirect, usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { useGetUserAuthenticationRQ } from '@/services/api/userApi';
+import { AuthApi } from '@/services/api';
 
 import { FaBlackTie, FaWindowClose } from 'react-icons/fa';
 
@@ -20,7 +20,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
     const pathName = usePathname();
     const router = useRouter();
     
-    const { data: authResponse } = useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
     const currentUserRole = authResponse?.data?.userRole;
@@ -76,7 +76,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
             {isPopOutSidebar && (
                 <div>
                     <div className="flex justify-center items-center min-h-[120px] font-bold text-[#00FF99] text-3xl bg-black
-                     border-b-4 border-pink-100">Suit Up!</div>
+                     border-b-4 border-pink-100">Cholo BD!</div>
                     <button className="w-[100%] h-[40px] bg-emerald-500 text-lg text-white font-sans" onClick={() => onClose()}>Close</button>
                 </div>
             )}
@@ -102,7 +102,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
             {isPopOutSidebar && (
                 <div className='relative font-satisfy'>
                     <div className="flex justify-center items-center min-h-[80px] md:min-h-[120px] font-bold text-[#00FF99] text-2xl md:text-3xl
-                     bg-black border-b-1 border-t-2 border-[#00FF99]">Suit Up!</div>
+                     bg-black border-b-1 border-t-2 border-[#00FF99]">Cholo BD</div>
                     <button className="absolute top-0 right-0 w-[20px] h-[20px] text-lg text-center text-red-400" onClick={() => onClose()}>
                         <FaWindowClose/>
                     </button>
@@ -123,7 +123,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
                     <button onClick={() => {
                         navigateToPage(pathName === "/dashboard" ? "/products" : "/dashboard")
                     }} className="w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100">
-                        {pathName === "/dashboard" ? "Browse Products" : "Dashboard"}
+                        {pathName === "/dashboard" ? "Browse Tour Plans" : "Dashboard"}
                     </button>
                 </li>
                 <li>
@@ -133,39 +133,14 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
                         {sessionConditionedButtonName({adminUserButton: "Your Products", userButton: "Your Offers", masterAdminUserButton: "All Users"})}
                     </button>
                 </li>
-                <li>
-                    <button onClick={() => {navigateToPage(`/cart`);}} className="w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100">Cart</button>
-                </li>
-                <li>
-                    <button onClick={() => 
-                        navigateBySession({adminURL: `/seller-orders?self=true`, userURL: `/orders`})
-                    } className="w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100">
-                        {sessionConditionedButtonName({adminUserButton: "Seller Orders", userButton: "Order History"})}
-                    </button>
-                </li>
             </ul>
 
             <div className="p-3 text-xl text-center border-b-1 md:border-b-2 text-pink-100 font-sans bg-gray-600">Quick Actions</div>
             
             <ul className="flex flex-col font-sans">
                 <li>
-                    <button className="w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100" onClick={() =>navigateToPage('/products/create')}>
-                        {sessionConditionedButtonName({adminUserButton: "Create New Product", userButton: "View Wishlists"})}
-                    </button>
-                </li>
-                <li>
                     <button disabled className="w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100 disabled:bg-gray-400 disabled:cursor-not-allowed" onClick={() =>navigateToPage('/track-order')}>
                         Track Order
-                    </button>
-                </li>
-                <li>
-                    <button className={`w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100 ${isButtonInvisible(["USER", "SERVICE_ADMIN"])}`} onClick={() => navigateToPage('/dashboard#dashboard_products')}>
-                        {sessionConditionedButtonName({adminUserButton: "", userButton: "", masterAdminUserButton: "All Products"})}
-                    </button>
-                </li>
-                <li>
-                    <button className={`w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100 ${isButtonInvisible(["USER"])}`} onClick={() => navigateToPage('/dashboard#dashboard_buyer_orders')}>
-                        {sessionConditionedButtonName({adminUserButton: "Your Orders", userButton: "", masterAdminUserButton: "Your Orders"})}
                     </button>
                 </li>
                 <li>

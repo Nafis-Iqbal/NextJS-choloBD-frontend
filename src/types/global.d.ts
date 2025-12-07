@@ -58,17 +58,22 @@ declare global {
     email: string;
     phoneNumber?: string;
     imageUrl?: string;
+    profileImage?: Image;
     role: Role;
+    serviceTypeAdmin?: ServiceType;
+    serviceAddressId?: string; 
+
     userStatus: UserStatus;
     paymentStatus: PaymentStatus;
-    serviceTypeAdmin?: ServiceType;
-    spent: number;
-    earned: number;
     emailVerified?: Date;
     phoneVerified?: Date;
     createdAt: Date;
-    profileImage?: Image;
+
     wallet?: Wallet;
+    spent: number;
+    earned: number;
+    
+    serviceAddresses?: Address[]
     notifications?: Notification[];
     reviews?: Review[];
     userTripPlans?: UserTripPlan[];
@@ -390,6 +395,19 @@ declare global {
     createdAt: Date;
     wallet: Wallet;
     walletTransaction?: WalletTransaction;
+  }
+
+  interface WalletRechargeOption {
+    id:         string;
+    title:       string;
+    description: string;
+
+    rechargeAmount: float;
+    rechargeCost:   Float
+    bonusAmount:    float;
+
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   // Media and Images

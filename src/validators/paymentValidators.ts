@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Payment initialization schema - simplified to only require orderId
 export const initializePaymentSchema = z.object({
-    orderId: z.string().min(1, "Order ID is required")
+    serviceTypeId: z.string().min(1, "Service Type ID is required")
 });
 
 // Payment validation schema

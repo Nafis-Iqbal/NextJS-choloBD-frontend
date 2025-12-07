@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { PaymentStatus, PaymentMethod } from '@/types/enums';
+import { PaymentStatus, ServiceType } from '@/types/enums';
 
 interface PaymentInitData {
-  orderId: string;
+  serviceType: ServiceType;
+  serviceTypeId: string;
 }
 
 interface PaymentValidationData {
@@ -20,7 +21,7 @@ interface PaymentTransaction {
   amount: number;
   currency: string;
   status: PaymentStatus;
-  method?: PaymentMethod;
+  method?: string;
   gatewayResponse?: any;
   validatedAt?: Date;
   createdAt?: Date;

@@ -1,6 +1,6 @@
 "use client";
 
-import { UserApi } from "@/services/api";
+import { UserApi, AuthApi } from "@/services/api";
 import { useEffect, useState } from "react";
 import { Role, UserStatus } from "@/types/enums";
 
@@ -16,7 +16,7 @@ import { useParams } from "next/navigation";
 
 export default function UserDetailPage() {
     const params = useParams();
-    const { data: authResponse } = UserApi.useGetUserAuthenticationRQ("", true);
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
     const currentUserRole = authResponse?.data?.userRole;
@@ -99,7 +99,7 @@ export default function UserDetailPage() {
     };
 
     const profilePicUploadURLBuilder = (userId: string) => {
-        return `suitup_ecommerce/users/${userId}/image`;
+        return `cholo_bd/users/${userId}/image`;
     }
 
     const handleCheckboxChange = (role: Role) => {
@@ -156,7 +156,7 @@ export default function UserDetailPage() {
                     <div className="flex relative w-[180px] h-[180px]">
                         <Image 
                             className="bg-gray-100 object-cover" 
-                            src={userDetail?.profileImage?.url || "/NoUserImage.jpeg"} 
+                            src={userDetail?.imageUrl || "/NoUserImage.jpeg"} 
                             alt="Profile Picture" 
                             fill
                         />
@@ -216,8 +216,8 @@ export default function UserDetailPage() {
                         {isEditingUserRole &&
                             <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row space-x-0 md:space-x-4 p-2 bg-gray-700 border-2 border-gray-600">
                                 <CustomCheckboxInput
-                                    label="Admin"
-                                    checked={userRole === "ADMIN"}
+                                    label="Service Admin"
+                                    checked={userRole === "SERVICE_ADMIN"}
                                     onChange={() => handleCheckboxChange(Role.SERVICE_ADMIN)}
                                     className="p-2 rounded-xs"
                                 />
@@ -226,6 +226,13 @@ export default function UserDetailPage() {
                                     label="Master Admin"
                                     checked={userRole === "MASTER_ADMIN"}
                                     onChange={() => handleCheckboxChange(Role.MASTER_ADMIN)}
+                                    className="p-2 rounded-xs"
+                                />
+
+                                <CustomCheckboxInput
+                                    label="Employee"
+                                    checked={userRole === "EMPLOYEE"}
+                                    onChange={() => handleCheckboxChange(Role.EMPLOYEE)}
                                     className="p-2 rounded-xs"
                                 />
 

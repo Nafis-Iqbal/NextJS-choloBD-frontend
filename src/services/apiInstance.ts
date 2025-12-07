@@ -47,8 +47,6 @@ export async function apiFetchExternalURL(endpoint: string, options: FetchOption
 
   const res = await fetch(`${endpoint}`, {
     ...rest,
-    headers: mergedHeaders,
-    credentials: 'include', // Include cookies for external API calls too
   });
 
   return res.json() as Promise<any>;

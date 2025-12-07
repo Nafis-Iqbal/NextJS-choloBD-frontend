@@ -23,11 +23,14 @@ export enum UserTripStatus {
 
 // Location and Tourism Enums
 export enum LocationType {
+  COUNTRY = "COUNTRY",
+  STATE = "STATE",
+  DIVISION = "DIVISION",
+  DISTRICT = "DISTRICT",
   CITY = "CITY",
-  BEACH = "BEACH",
-  MOUNTAIN = "MOUNTAIN",
-  FOREST = "FOREST",
-  DESERT = "DESERT",
+  METROPOLITON = "METROPOLITON",
+  VILLAGE = "VILLAGE",
+  AREA = "AREA",
   ISLAND = "ISLAND",
   COUNTRYSIDE = "COUNTRYSIDE"
 }
