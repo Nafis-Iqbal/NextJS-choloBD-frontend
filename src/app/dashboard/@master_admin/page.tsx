@@ -11,12 +11,13 @@ import { ImageUploadModule } from "@/components/modular-components/ImageUploadMo
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
 import { HeroSection } from "@/types/enums";
-import { LocationWalletManagerModule } from "@/components/modular-components/LocationWalletManagerModule";
+import { LocationWalletManagerModule } from "@/components/modular-components/LocationAndWalletManagerModule";
 
 export default function MasterAdminDashboard() {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
+    
     const router = useRouter();
 
     const [actionTriggerTop, setActionTriggerTop] = useState<boolean>(false);
@@ -90,6 +91,27 @@ export default function MasterAdminDashboard() {
             <div className="md:ml-6 flex flex-col space-y-2">
                 <h2 className="text-green-500">Your System</h2>
                 <p className="text-green-200">Site management functions here.</p>
+
+                <div className="flex flex-col space-y-6 my-10">
+                    <h3 className="text-green-500 font-semibold mr-5">Manage Site Content Pages</h3>
+
+                    <div className="flex flex-col w-full md:w-[40%] space-y-3">
+                        <div className="flex justify-between mx-2">
+                            <button className="green-underline-button text-xl" onClick={() => router.push('/hotels')}>View Hotel List</button>
+                            <button className="green-button" onClick={() => router.push('/hotels/create')}>Add new Hotel</button>
+                        </div>
+
+                        <div className="flex justify-between mx-2">
+                            <button className="green-underline-button text-xl" onClick={() => router.push('/tour-spots')}>View Tour Spot List</button>
+                            <button className="green-button" onClick={() => router.push('/tour-spots/create')}>Add new Tour Spot</button>
+                        </div>
+                        
+                        <div className="flex justify-between mx-2">
+                            <button className="green-underline-button text-xl" onClick={() => router.push('/activity-spots')}>View Activity Spot List</button>
+                            <button className="green-button" onClick={() => router.push('/activity-spots/create')}>Add new Activity Spot</button>
+                        </div>
+                    </div>
+                </div>
 
                 <LocationWalletManagerModule/>
 

@@ -1,18 +1,20 @@
 import { ReviewApi } from "@/services/api";
+import { ReviewType } from "@/types/enums";
 
-import { InfoPageReviewConsole } from "../console-elements/InfoPageReviewConsole";
+import { PageReviewConsole } from "../console-elements/PageReviewConsole";
 import RatingStats from "../custom-elements/RatingStats";
 import { HorizontalDivider } from "../custom-elements/UIUtilities";
-import { ProductReviewList } from "../data-list-elements/ProductReviewList";
+import { PageReviewList } from "../data-list-modules/PageReviewList";
 
 interface Props {
-  productId: string;
-  productName: string;
-  productUserId: string;
+    pageAssetType: ReviewType;
+    assetId: string;
+    assetName: string;
 }
 
-export const ReviewModule = async ({productId, productName, productUserId} : Props) => {
-    const productReviewsData = await ReviewApi.getProductReviews(productId);
+export const ReviewModule = async ({pageAssetType, assetId, assetName} : Props) => {
+    const productReviewsData = await ReviewApi.getPageReviews({reviewType: pageAssetType, reviewAssetId: assetId});
+
     const productReviews = productReviewsData?.data || [];
     const noReviewsSubmitted = productReviews.length === 0;
 
@@ -23,10 +25,10 @@ export const ReviewModule = async ({productId, productName, productUserId} : Pro
             <h3 className="text-green-500 mt-5 pl-2">Reviews</h3>
 
             <div className="flex flex-col md:flex-row justify-between px-2">
-                <InfoPageReviewConsole
-                    productId={productId} 
-                    productVendorId={productUserId}
-                    productName={productName}
+                <PageReviewConsole
+                    pageAssetType={pageAssetType} 
+                    pageAssetId={assetId}
+                    pageAssetName={assetName}
                     reviewUserIds={productReviews.map(review => review.userId)}
                 />
 
@@ -45,9 +47,9 @@ export const ReviewModule = async ({productId, productName, productUserId} : Pro
             
             <HorizontalDivider className="my-6"/>
 
-            <ProductReviewList 
+            <PageReviewList 
                 noReviewsSubmitted={noReviewsSubmitted} 
-                productReviews={productReviews}
+                pageReviews={productReviews}
             />
         </div>
     );

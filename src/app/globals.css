@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@layer components {
+    .green-button {
+        @apply bg-emerald-600 text-white px-4 py-2 rounded;
+        @apply hover:bg-emerald-500 hover:cursor-pointer;
+    }
+
+    .green-underline-button {
+        @apply text-white;
+        @apply hover:text-emerald-500 hover:cursor-pointer;
+    }
+}
+
 @layer base {
   div {
     @apply bg-gray-800; /* or any Tailwind bg utility */

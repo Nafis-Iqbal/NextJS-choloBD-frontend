@@ -36,7 +36,7 @@ interface UpdateWalletRechargeOptionData {
 // API Methods (exactly 8)
 
 async function getMyWallet() {
-  const response = await apiFetch<ApiResponse<Wallet>>('/wallet/own-wallet', {
+  const response = await apiFetch<ApiResponse<Wallet>>('/wallets/own-wallet', {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -53,7 +53,7 @@ export function useGetMyWalletRQ() {
 }
 
 async function getWalletTransactionDetail(transactionId: string) {
-  const response = await apiFetch<ApiResponse<WalletTransaction>>(`/wallet/own-wallet/transactions/${transactionId}`, {
+  const response = await apiFetch<ApiResponse<WalletTransaction>>(`/wallets/own-wallet/transactions/${transactionId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -71,7 +71,7 @@ export function useGetWalletTransactionDetailRQ(transactionId: string) {
 }
 
 async function createWalletRechargeTransaction(rechargeData: WalletRechargeData) {
-  const response = await apiFetch<ApiResponse<WalletTransaction>>('/wallet/recharge-transaction', {
+  const response = await apiFetch<ApiResponse<WalletTransaction>>('/wallets/recharge-transaction', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(rechargeData),
@@ -91,7 +91,7 @@ export function useCreateWalletRechargeTransactionRQ(
 }
 
 async function refundWalletTransaction(refundData: WalletRefundData) {
-  const response = await apiFetch<ApiResponse<WalletRefund>>('/wallet/refund-transaction', {
+  const response = await apiFetch<ApiResponse<WalletRefund>>('/wallets/refund-transaction', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(refundData),
@@ -111,7 +111,7 @@ export function useRefundWalletTransactionRQ(
 }
 
 async function getWalletById(walletId: string) {
-  const response = await apiFetch<ApiResponse<Wallet>>(`/wallet/${walletId}`, {
+  const response = await apiFetch<ApiResponse<Wallet>>(`/wallets/${walletId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -129,7 +129,7 @@ export function useGetWalletByIdRQ(walletId: string) {
 }
 
 async function getWalletByUser(userId: string) {
-  const response = await apiFetch<ApiResponse<Wallet>>(`/wallet/user/${userId}`, {
+  const response = await apiFetch<ApiResponse<Wallet>>(`/wallets/user/${userId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -147,7 +147,7 @@ export function useGetWalletByUserRQ(userId: string) {
 }
 
 async function getWalletTransactionByUser(userId: string, transactionId: string) {
-  const response = await apiFetch<ApiResponse<WalletTransaction>>(`/wallet/user/${userId}/transactions/${transactionId}`, {
+  const response = await apiFetch<ApiResponse<WalletTransaction>>(`/wallets/user/${userId}/transactions/${transactionId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -165,7 +165,7 @@ export function useGetWalletTransactionByUserRQ(userId: string, transactionId: s
 }
 
 async function updateWalletStatus(walletId: string, statusData: WalletStatusUpdate) {
-  const response = await apiFetch<ApiResponse<Wallet>>(`/wallet/${walletId}`, {
+  const response = await apiFetch<ApiResponse<Wallet>>(`/wallets/${walletId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(statusData),
@@ -186,7 +186,7 @@ export function useUpdateWalletStatusRQ(
 }
 
 async function getWalletRechargeOptions() {
-  const response = await apiFetch<ApiResponse<WalletRechargeOption[]>>('/wallet/recharge-options', {
+  const response = await apiFetch<ApiResponse<WalletRechargeOption[]>>('/wallets/recharge-options', {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -203,7 +203,7 @@ export function useGetWalletRechargeOptionsRQ() {
 }
 
 async function getWalletRechargeOptionById(optionId: string) {
-  const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallet/recharge-options/${optionId}`, {
+  const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallets/recharge-options/${optionId}`, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
@@ -221,7 +221,7 @@ export function useGetWalletRechargeOptionByIdRQ(optionId: string) {
 }
 
 async function createWalletRechargeOption(optionData: CreateWalletRechargeOptionData) {
-  const response = await apiFetch<ApiResponse<WalletRechargeOption>>('/wallet/recharge-options', {
+  const response = await apiFetch<ApiResponse<WalletRechargeOption>>('/wallets/recharge-options', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(optionData),
@@ -241,7 +241,7 @@ export function useCreateWalletRechargeOptionRQ(
 }
 
 async function updateWalletRechargeOption(walletOptionId: string, optionData: UpdateWalletRechargeOptionData) {
-  const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallet/recharge-options/${walletOptionId}`, {
+  const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallets/recharge-options/${walletOptionId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(optionData),
@@ -262,7 +262,7 @@ export function useUpdateWalletRechargeOptionRQ(
 }
 
 async function deleteWalletRechargeOption(walletOptionId: string) {
-  const response = await apiFetch<ApiResponse<{ message: string }>>(`/wallet/recharge-options/${walletOptionId}`, {
+  const response = await apiFetch<ApiResponse<{ message: string }>>(`/wallets/recharge-options/${walletOptionId}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
   });

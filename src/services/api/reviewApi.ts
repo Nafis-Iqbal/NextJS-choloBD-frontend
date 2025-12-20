@@ -1,37 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { ReviewType } from "@/types/enums";
 
-export const getProductReviews = async (productId: string, queryString?: string) => {
-    const response = await apiFetch<ApiResponse<Review[]>>(`/products/${productId}/reviews?${queryString}`, {
-        method: 'GET',
-        cache: 'no-store'
+interface GetReviewsParams {
+    reviewType: ReviewType;
+    reviewAssetId: string;
+    own?: string;
+}
+
+export const getPageReviews = async ({
+    reviewType,
+    reviewAssetId,
+    own = 'false'
+}: GetReviewsParams) => {
+    const params = new URLSearchParams({
+        reviewType,
+        reviewAssetId,
+        own
     });
+
+    const response = await apiFetch<ApiResponse<Review[]>>(
+        `/reviews?${params.toString()}`,
+        {
+            method: "GET",
+            cache: "no-store",
+        }
+    );
 
     return response;
-}
+};
 
-export function useGetProductReviewsRQ(productId: string, queryString?: string) {
-    return useQuery<ApiResponse<Review[]>>({
-        queryFn: () => getProductReviews(productId, queryString),
-        queryKey: ["reviews", productId],
-        staleTime: queryString ? 0 : 30_000, 
-        gcTime: 30 * 1000
-    });
-}
-
-export const createProductReview = async (productId: string, reviewData: Omit<Review, 'id'>) => {
-    const response = await apiFetch<ApiResponse<Review>>(`/products/${productId}/reviews`, {
+export const createPageReview = async ({reviewType, reviewAssetId, reviewData}:{reviewType: ReviewType, reviewAssetId: string, reviewData: Omit<Review, 'id'>}) => {
+    const response = await apiFetch<ApiResponse<Review>>(`/reviews`, {
         method: 'POST',
-        body: JSON.stringify(reviewData)
+        body: JSON.stringify({reviewType, reviewAssetId, reviewData})
     });
 
     return response;
 }
 
-export function useCreateProductReviewRQ(onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) {
+export function useCreatePageReviewRQ(onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) {
     return useMutation({
-        mutationFn: ({productId, reviewData} : {productId: string, reviewData: Omit<Review, 'id'>}) => createProductReview(productId, reviewData),
+        mutationFn: createPageReview,
         onSuccess: (data) => {
             onSuccessFn(data);
         },
@@ -41,8 +52,8 @@ export function useCreateProductReviewRQ(onSuccessFn: (ApiResponse: any) => void
     });
 }
 
-export const updateProductReview = async (productId: string, reviewId: string, reviewData: { id: string } & Partial<Omit<Review, "id">>) => {
-    const response = await apiFetch<ApiResponse<Review>>(`/products/${productId}/reviews/${reviewId}`, {
+export const updatePageReview = async (reviewId: string, reviewData: { id: string } & Partial<Omit<Review, "id">>) => {
+    const response = await apiFetch<ApiResponse<Review>>(`/reviews/${reviewId}`, {
         method: 'PUT',
         body: JSON.stringify(reviewData)
     });
@@ -52,8 +63,8 @@ export const updateProductReview = async (productId: string, reviewId: string, r
 
 export const useUpdateProductReviewRQ = (onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) => {
     return useMutation({
-        mutationFn: ({productId, reviewId, reviewData} : 
-            {productId: string, reviewId: string, reviewData: { id: string } & Partial<Omit<Review, "id">>}) => updateProductReview(productId, reviewId, reviewData),
+        mutationFn: ({reviewId, reviewData} : 
+            {reviewId: string, reviewData: { id: string } & Partial<Omit<Review, "id">>}) => updatePageReview(reviewId, reviewData),
         onSuccess: (data) => {
             onSuccessFn(data);
         },
@@ -63,8 +74,8 @@ export const useUpdateProductReviewRQ = (onSuccessFn: (ApiResponse: any) => void
     });
 }
 
-export const deleteProductReview = async (productId: string, reviewId: string) => {
-    const response = await apiFetch<ApiResponse<void>>(`/products/${productId}/reviews/${reviewId}`, {
+export const deleteProductReview = async (reviewId: string) => {
+    const response = await apiFetch<ApiResponse<void>>(`/reviews/${reviewId}`, {
         method: 'DELETE'
     });
 
@@ -73,7 +84,7 @@ export const deleteProductReview = async (productId: string, reviewId: string) =
 
 export const useDeleteProductReviewRQ = (onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) => {
     return useMutation({
-        mutationFn: ({productId, reviewId} : {productId: string, reviewId: string}) => deleteProductReview(productId, reviewId),
+        mutationFn: deleteProductReview,
         onSuccess: (data) => {
             onSuccessFn(data);
         },

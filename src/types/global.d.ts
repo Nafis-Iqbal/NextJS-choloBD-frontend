@@ -29,6 +29,8 @@ import {
   ComplaintStatus
 } from './enums';
 
+declare module '*.css';
+
 declare global {
 
   interface ApiResponse<T> {
@@ -202,12 +204,7 @@ declare global {
     description?: string;
     locationId: string;
     addressId?: string;
-    entryCost?: number;
-    openingHours?: string;
     bestTimeToVisit?: string;
-    contactInfo?: Record<string, any>;
-    facilities: string[];
-    accessibility: string[];
     seasonalInfo?: Record<string, any>;
     spotType: ActivityType;
     rating?: number;
@@ -224,15 +221,11 @@ declare global {
     description?: string;
     locationId: string;
     addressId?: string;
-    maxParticipants: number;
     entryCost: number;
     openingHours?: string;
     bestTimeToVisit?: string;
     duration?: string;
-    difficulty?: string;
     ageRestriction?: string;
-    equipment: string[];
-    safetyGuidelines: string[];
     activityType: ActivityType;
     rating?: number;
     isActive: boolean;
@@ -253,7 +246,6 @@ declare global {
     phoneNumber?: string;
     email?: string;
     website?: string;
-    priceRange?: string;
     totalRooms?: number;
     availableRooms?: number;
     policies?: Record<string, any>;
@@ -267,6 +259,7 @@ declare global {
     createdAt: Date;
     location: Location;
     reviews?: Review[];
+    images?: Image[];
   }
 
   // Reviews and Ratings
@@ -276,13 +269,12 @@ declare global {
     description: string;
     rating: number;
     reviewType: ReviewType;
-    isVerified: boolean;
-    createdAt: Date;
+    createdAt?: Date;
     userId: string;
     tourSpotId?: string;
     activitySpotId?: string;
     hotelId?: string;
-    user: User;
+    user?: User;
     TourSpot?: TourSpot;
     ActivitySpot?: ActivitySpot;
     Hotel?: Hotel;

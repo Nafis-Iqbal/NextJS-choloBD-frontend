@@ -1,10 +1,14 @@
 import * as AuthApi from "./authApi";
 import * as UserApi from "./userApi";
 import * as LocationApi from "./locationApi";
+import * as TourSpotApi from "./tourSpotApi";
+import * as ActivitySpotApi from "./activitySpotApi";
+import * as HotelApi from "./hotelApi";
 import * as PaymentApi from "./paymentApi";
 import * as WalletApi from "./walletApi";
 import * as AddressApi from "./addressApi";
 import * as ReviewApi from "./reviewApi";
 import * as ConfigApi from "./configApi";
 
-export { AuthApi, UserApi, LocationApi, PaymentApi, WalletApi, AddressApi, ReviewApi, ConfigApi };
+export { AuthApi, UserApi, LocationApi, TourSpotApi, ActivitySpotApi, HotelApi, PaymentApi, WalletApi, 
+    AddressApi, ReviewApi, ConfigApi };

@@ -34,6 +34,111 @@ export const ProductViewListTableRow = ({
     )
 }
 
+export const TourSpotViewListTableRow = ({
+    id,
+    tourSpotName,
+    tourSpot_id,
+    tourSpotImageURL,
+    spotType,
+    rating,
+    isPopular,
+    onClickNavigate
+} : {
+    id: number,
+    tourSpotName: string,
+    tourSpot_id: string,
+    tourSpotImageURL?: string,
+    spotType: string,
+    rating?: number,
+    isPopular: boolean,
+    onClickNavigate: () => void
+}) => 
+{
+    return (
+        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+            <p className="w-[5%]">{id}</p>
+            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpotName}</button>
+            <NextImage className="w-[30%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={tourSpotImageURL || '/image-not-found.png'} alt={tourSpotName}/>
+            <p className="w-[15%]">{spotType}</p>
+            <div className="w-[10%]">
+                {rating ? <StarRating rating={rating} /> : <span>N/A</span>}
+            </div>
+            <p className="w-[10%]">{isPopular !== null ? ((isPopular === true) ? "Yes" : "No") : "N/A"}</p>
+            <button className="w-[10%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpot_id}</button>
+        </div>
+    )
+}
+
+export const ActivitySpotViewListTableRow = ({
+    id,
+    activitySpotName,
+    activitySpot_id,
+    activitySpotImageURL,
+    activityType,
+    rating,
+    entryCost,
+    onClickNavigate
+} : {
+    id: number,
+    activitySpotName: string,
+    activitySpot_id: string,
+    activitySpotImageURL?: string,
+    activityType: string,
+    rating?: number,
+    entryCost: number,
+    onClickNavigate: () => void
+}) => 
+{
+    return (
+        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+            <p className="w-[5%]">{id}</p>
+            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpotName}</button>
+            <NextImage className="w-[30%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={activitySpotImageURL || '/image-not-found.png'} alt={activitySpotName}/>
+            <p className="w-[15%]">{activityType}</p>
+            <div className="w-[10%]">
+                {rating ? <StarRating rating={rating} /> : <span>N/A</span>}
+            </div>
+            <p className="w-[10%]">{entryCost ?? "N/A"}</p>
+            <button className="w-[10%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpot_id}</button>
+        </div>
+    )
+}
+
+export const HotelViewListTableRow = ({
+    id,
+    hotelName,
+    hotel_id,
+    hotelImageURL,
+    hotelType,
+    rating,
+    totalRooms,
+    onClickNavigate
+} : {
+    id: number,
+    hotelName: string,
+    hotel_id: string,
+    hotelImageURL?: string,
+    hotelType: string,
+    rating: number,
+    totalRooms?: number,
+    onClickNavigate: () => void
+}) => 
+{
+    return (
+        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+            <p className="w-[5%]">{id}</p>
+            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotelName}</button>
+            <NextImage className="w-[30%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={hotelImageURL || '/image-not-found.png'} alt={hotelName}/>
+            <p className="w-[15%]">{hotelType}</p>
+            <div className="w-[10%]">
+                <StarRating rating={rating} />
+            </div>
+            <p className="w-[10%]">{totalRooms ?? "N/A"}</p>
+            <button className="w-[10%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotel_id}</button>
+        </div>
+    )
+}
+
 export const ReviewListTableRow = ({
     reviewUserId,
     reviewUserName, 

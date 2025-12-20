@@ -1,27 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { ReviewApi } from "@/services/api";
+import { ReviewApi, AuthApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
+import { ReviewType } from "@/types/enums";
 
 import { CustomTextAreaInput } from "../custom-elements/CustomInputElements";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import RatingInputModal from "../modals/RatingInputModal";
 
-export const InfoPageReviewConsole = ({
-    productId, 
-    productVendorId,
-    productName,
+export const PageReviewConsole = ({
+    pageAssetId, 
+    pageAssetName,
+    pageAssetType,
     reviewUserIds,
 } : {
-    productId: string, 
-    productVendorId: string,
-    productName: string,
+    pageAssetId: string, 
+    pageAssetName: string,
+    pageAssetType: ReviewType,
     reviewUserIds: string[]
 }) => {
-    const {data: session} = useSession();
+    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+    const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+    const sessionUserId = authResponse?.data?.userId;
+    const userSubmittedReview = reviewUserIds.some(userId => userId === sessionUserId);
+
     const router = useRouter();
 
     const [reviewDescription, setReviewDescription] = useState<string>("");
@@ -31,11 +35,11 @@ export const InfoPageReviewConsole = ({
 
     const {openNotificationPopUpMessage} = useGlobalUI();
 
-    const {mutate: createProductReview} = ReviewApi.useCreateProductReviewRQ(
+    const {mutate: createPageReviewMutate} = ReviewApi.useCreatePageReviewRQ(
         (responseData) => {
             if(responseData.status === "success")
             {               
-                queryClient.invalidateQueries({queryKey: ["reviews", productId]});
+                queryClient.invalidateQueries({queryKey: ["reviews", pageAssetId]});
                 setReviewDescription("");
                 setReviewRating(0);
 
@@ -55,7 +59,7 @@ export const InfoPageReviewConsole = ({
     }
 
     const onReviewSubmitClicked = () => {
-        if(!session)
+        if(!isAuthenticated)
         {
             openNotificationPopUpMessage("You must be logged in to submit a review.");
         }
@@ -70,12 +74,6 @@ export const InfoPageReviewConsole = ({
         setReviewDescription("");
     }
 
-    const sessionUserId = session?.user?.user_id;
-    const userSubmittedReview = reviewUserIds.some(userId => userId === sessionUserId);
-    const showReviewConsole = sessionUserId && sessionUserId !== productVendorId;
-    
-    if(!showReviewConsole) return null;
-
     return (
         <div className="flex flex-col justify-between space-y-5 mt-5 w-full md:w-[65%]">
             <div className="flex items-end space-x-3">
@@ -86,15 +84,16 @@ export const InfoPageReviewConsole = ({
 
             <RatingInputModal
                 isVisible={isRatingModalOpen}
-                message={`Please rate your experience for ${productName}`}
+                message={`Please rate your experience for ${pageAssetName}`}
                 onConfirm={() => {
-                    createProductReview({
-                        productId, 
+                    createPageReviewMutate({
+                        reviewType: pageAssetType, 
+                        reviewAssetId: pageAssetId,
                         reviewData: {
                             description: reviewDescription, 
                             rating: reviewRating,
-                            product_id: productId,
-                            user_id: session?.user?.user_id || "",
+                            reviewType: pageAssetType,
+                            userId: sessionUserId || "",
                         }
                     });
 
@@ -104,7 +103,7 @@ export const InfoPageReviewConsole = ({
                 setRating={setReviewRating}
             />
 
-            <pre className="">for    <span className="text-lg text-green-500">{productName}</span></pre>
+            <pre className="">for    <span className="text-lg text-green-500">{pageAssetName}</span></pre>
 
             <CustomTextAreaInput 
                 className="min-h-[100px] md:min-h-[150px]" 

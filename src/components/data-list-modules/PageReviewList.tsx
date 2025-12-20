@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import { ReviewListTableRow } from "../data-elements/DataTableRowElements";
 
-export const ProductReviewList = ({noReviewsSubmitted, productReviews} : {noReviewsSubmitted: boolean, productReviews: Review[]}) => {
+export const PageReviewList = ({noReviewsSubmitted, pageReviews} : {noReviewsSubmitted: boolean, pageReviews: Review[]}) => {
     const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
-    const sortedReviews = [...productReviews].sort((a, b) =>
+    const sortedReviews = [...pageReviews].sort((a, b) =>
         sortOrder === "asc" ? a.rating - b.rating : b.rating - a.rating
     );
     
@@ -34,7 +34,7 @@ export const ProductReviewList = ({noReviewsSubmitted, productReviews} : {noRevi
                     <div className="text-gray-500 mb-5">   
                         <h4 className="text-center text-green-700">No reviews submitted yet.</h4>
                     </div>
-                ) : (Array.isArray(productReviews) &&
+                ) : (Array.isArray(pageReviews) &&
                     sortedReviews.map((review) => (
                         <ReviewListTableRow 
                             key={review.id}
