@@ -4,7 +4,14 @@ import { HeroSection } from "@/types/enums";
 import { HeroSectionImageViewer } from "../structure-components/HeroSectionImageViewer";
 
 export const HomepageContent = async () => {
-    const configData = await ConfigApi.getSiteConfig();
+    let configData;
+    try {
+        configData = await ConfigApi.getSiteConfig();
+        console.log(configData?.data);
+    } catch (error) {
+        console.error("Failed to fetch Tour Spot Details. Error: ", error);
+        configData = {data: null};
+    }
     
     const siteHeroSectionImages = configData?.data?.heroImages || [];
     const topHeroSectionImages = siteHeroSectionImages.filter(image => image.section === HeroSection.TOP);
@@ -21,11 +28,6 @@ export const HomepageContent = async () => {
                 }))} 
             />
 
-            {/* <div className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-4 w-[95%] md:w-full [grid-auto-rows:1fr]">
-                {(products ?? []).map((item, index) => (
-                    (index % 2 === 0) && <ProductInfoCard key={index} productInfo={item}/>
-                ))}
-            </div> */}
 
             <HeroSectionImageViewer
                 className="md:rounded-xl bg-gray-700 md:w-[110%]"
@@ -34,12 +36,6 @@ export const HomepageContent = async () => {
                     imageAlt: image?.altText
                 }))} 
             />
-
-            {/* <div className="grid grid-cols-2 gap-2 md:grid-cols-5 md:gap-4 w-[95%] md:w-full mb-10 md:mb-20 [grid-auto-rows:1fr]">
-                {(products ?? []).map((item, index) => (
-                    (index % 2 !== 0) && <ProductInfoCard key={index} productInfo={item}/>
-                ))}
-            </div> */}
         </div>
     );
 };
