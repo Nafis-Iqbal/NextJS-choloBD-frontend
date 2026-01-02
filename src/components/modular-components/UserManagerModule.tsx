@@ -203,37 +203,6 @@ export const UserManagerModule = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2 md:gap-6 justify-left space-x-6">
-                    <CustomTextInput 
-                        placeholderText="Enter City"
-                        onChange={handleChange}
-                        value={filters?.city}
-                        name="city"
-                        label="City"
-                        className="w-[100px] md:w-auto"
-                    />
-
-                    <CustomTextInput 
-                        type="number"
-                        placeholderText="Enter min. Spent"
-                        onChange={handleChange}
-                        value={filters?.minimum_spent ?? 0}
-                        name="minimum_spent"
-                        label="Min. Spent"
-                        className="w-[80px] md:w-auto"
-                        error={errors.minimum_spent}
-                    />
-
-                    <CustomTextInput 
-                        type="number"
-                        placeholderText="Enter min. Order"
-                        onChange={handleChange}
-                        value={filters?.minimum_order_count ?? 0}
-                        name="minimum_order_count"
-                        label="Min. Order Count"
-                        className="w-[80px] md:w-auto"
-                        error={errors.minimum_order_count}
-                    />
-
                     <div className="flex space-x-5 md:space-x-10 mt-2 md:mt-0">
                         <button className="flex self-end items-center px-2 py-1 bg-green-700 hover:bg-green-600
                             text-white text-base md:text-lg rounded-sm" 

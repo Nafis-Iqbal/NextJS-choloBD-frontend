@@ -85,7 +85,7 @@ function UserProfileListContent() {
                                             user_id={user.id} 
                                             email={user.email || ''}
                                             role={user.role || 'USER'}
-                                            userImageURL={user.profileImage?.url || '/image-not-found.png'} 
+                                            userImageURL={user.imageUrl || '/image-not-found.png'} 
                                             totalSpent={user.spent}
                                             onClickNavigate={() => router.push(`/user_profile/${user.id}`)}
                                         />

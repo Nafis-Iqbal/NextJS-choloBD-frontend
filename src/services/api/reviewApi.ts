@@ -31,10 +31,10 @@ export const getPageReviews = async ({
     return response;
 };
 
-export const createPageReview = async ({reviewType, reviewAssetId, reviewData}:{reviewType: ReviewType, reviewAssetId: string, reviewData: Omit<Review, 'id'>}) => {
+export const createPageReview = async (reviewData: Omit<Review, 'id'>) => {
     const response = await apiFetch<ApiResponse<Review>>(`/reviews`, {
         method: 'POST',
-        body: JSON.stringify({reviewType, reviewAssetId, reviewData})
+        body: JSON.stringify(reviewData)
     });
 
     return response;

@@ -6,7 +6,7 @@ import { ReviewApi, AuthApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
 import { ReviewType } from "@/types/enums";
 
-import { CustomTextAreaInput } from "../custom-elements/CustomInputElements";
+import { CustomTextAreaInput, CustomTextInput } from "../custom-elements/CustomInputElements";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import RatingInputModal from "../modals/RatingInputModal";
 
@@ -28,6 +28,7 @@ export const PageReviewConsole = ({
 
     const router = useRouter();
 
+    const [reviewTitle, setReviewTitle] = useState<string>("");
     const [reviewDescription, setReviewDescription] = useState<string>("");
     const [reviewRating, setReviewRating] = useState<number>(0);
 
@@ -39,7 +40,7 @@ export const PageReviewConsole = ({
         (responseData) => {
             if(responseData.status === "success")
             {               
-                queryClient.invalidateQueries({queryKey: ["reviews", pageAssetId]});
+                queryClient.invalidateQueries({queryKey: ["reviews", pageAssetType, pageAssetId]});
                 setReviewDescription("");
                 setReviewRating(0);
 
@@ -54,8 +55,13 @@ export const PageReviewConsole = ({
         }
     );
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setReviewDescription(e.target.value);
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target as HTMLInputElement & HTMLTextAreaElement;
+        if (name === "title") {
+            setReviewTitle(value);
+        } else if (name === "description") {
+            setReviewDescription(value);
+        }
     }
 
     const onReviewSubmitClicked = () => {
@@ -87,14 +93,11 @@ export const PageReviewConsole = ({
                 message={`Please rate your experience for ${pageAssetName}`}
                 onConfirm={() => {
                     createPageReviewMutate({
-                        reviewType: pageAssetType, 
+                        reviewType: pageAssetType,
                         reviewAssetId: pageAssetId,
-                        reviewData: {
-                            description: reviewDescription, 
-                            rating: reviewRating,
-                            reviewType: pageAssetType,
-                            userId: sessionUserId || "",
-                        }
+                        title: reviewTitle || "My overall experience",
+                        description: reviewDescription, 
+                        rating: reviewRating
                     });
 
                     setIsRatingModalOpen(false);
@@ -105,10 +108,18 @@ export const PageReviewConsole = ({
 
             <pre className="">for    <span className="text-lg text-green-500">{pageAssetName}</span></pre>
 
+            <CustomTextInput 
+                name="title"
+                placeholderText="Give a title to your review?(optional, but helps others to find it)"
+                onChange={handleInputChange}
+                value={reviewTitle}
+            />
+
             <CustomTextAreaInput 
+                name="description"
                 className="min-h-[100px] md:min-h-[150px]" 
-                placeholderText="Does this product make you calm? or angry?"
-                onChange={handleChange}
+                placeholderText="Have something in mind?"
+                onChange={handleInputChange}
                 value={reviewDescription}
             />
 

@@ -40,7 +40,7 @@ export const PageReviewList = ({noReviewsSubmitted, pageReviews} : {noReviewsSub
                             key={review.id}
                             reviewUserId={review.user?.id || ""}
                             reviewUserName={review.user?.userName || "Unknown"} 
-                            reviewUserImage={review.user?.profileImage?.url || null} 
+                            reviewUserImage={review.user?.imageUrl || null} 
                             reviewDescription={review.description} 
                             rating={review.rating}
                         />

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActivityType } from "@/types/enums";
+import { TourType } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 interface TourSpotSearchParams {
     name?: string;
     locationId?: string;
-    spotType?: ActivityType;
+    tourType?: TourType;
     isPopular?: boolean;
     minRating?: number;
     limit?: number;
@@ -18,13 +18,9 @@ interface CreateTourSpotData {
     description?: string;
     locationId: string;
     addressId?: string;
-    entryCost?: number;
-    openingHours?: string;
     bestTimeToVisit?: string;
-    contactInfo?: Record<string, any>;
-    facilities: string[];
     seasonalInfo?: Record<string, any>;
-    spotType: ActivityType;
+    tourType: TourType;
     rating?: number;
     isPopular: boolean;
 }
@@ -41,7 +37,7 @@ interface UpdateTourSpotData {
     facilities?: string[];
     accessibility?: string[];
     seasonalInfo?: Record<string, any>;
-    spotType?: ActivityType;
+    tourType?: TourType;
     rating?: number;
     isPopular?: boolean;
 }
@@ -173,14 +169,14 @@ export function useCreateTourSpotRQ(
 }
 
 async function updateTourSpot(
-    tourSpotId: string,
-    data: UpdateTourSpotData
+    tourSpotData: { id: string } & Partial<Omit<TourSpot, "id">>
 ) {
+    const { id, ...updateData } = tourSpotData;
     const response = await apiFetch<ApiResponse<TourSpot>>(
-        `/tour-spots/${tourSpotId}`,
+        `/tour-spots/${id}`,
         {
             method: "PUT",
-            body: JSON.stringify(data),
+            body: JSON.stringify(updateData),
         }
     );
 
@@ -192,13 +188,7 @@ export function useUpdateTourSpotRQ(
     onErrorFn: () => void
 ) {
     return useMutation({
-        mutationFn: ({
-            tourSpotId,
-            data,
-        }: {
-            tourSpotId: string;
-            data: UpdateTourSpotData;
-        }) => updateTourSpot(tourSpotId, data),
+        mutationFn: updateTourSpot,
         onSuccess: (data) => {
             onSuccessFn(data);
         },

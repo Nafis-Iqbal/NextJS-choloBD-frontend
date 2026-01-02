@@ -8,7 +8,7 @@ import Footer from "@/components/structure-components/Footer";
 import BottomNavbar from "@/components/structure-components/BottomNavbar";
 import SidebarMenu from "@/components/structure-components/SIdebarMenu";
 import DivGap from "@/components/custom-elements/UIUtilities";
-import React, { useEffect } from "react";
+import React, { use, useEffect } from "react";
 
 export default function DashboardLayout({
     children, 
@@ -26,14 +26,17 @@ export default function DashboardLayout({
     stats: React.ReactNode,
 }){
     const router = useRouter();
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
+    const isAuthenticated = authResponse?.data?.isAuthenticated;
+    console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isLoading);
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, router]);
 
-    //if(!isAuthenticated) redirect("/login");
-    // Use useEffect for redirect to avoid hydration issues
-    
-    if(isAuthenticated === false){
-        redirect("/");
+    if (isLoading) {
+        return null; // or <FullPageLoader />
     }
 
     return (

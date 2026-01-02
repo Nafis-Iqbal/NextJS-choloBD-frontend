@@ -12,6 +12,7 @@ import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
 import { HeroSection } from "@/types/enums";
 import { LocationWalletManagerModule } from "@/components/modular-components/LocationAndWalletManagerModule";
+import CategoryManagerModule from "@/components/modular-components/CategoryManagerModule";
 
 export default function MasterAdminDashboard() {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
@@ -106,12 +107,16 @@ export default function MasterAdminDashboard() {
                             <button className="green-button" onClick={() => router.push('/tour-spots/create')}>Add new Tour Spot</button>
                         </div>
                         
-                        <div className="flex justify-between mx-2">
+                        <ul className="flex justify-between mx-2">
                             <button className="green-underline-button text-xl" onClick={() => router.push('/activity-spots')}>View Activity Spot List</button>
                             <button className="green-button" onClick={() => router.push('/activity-spots/create')}>Add new Activity Spot</button>
-                        </div>
+                        </ul>
                     </div>
                 </div>
+
+                <HorizontalDivider className="mr-5 my-10"/>
+
+                <CategoryManagerModule/>
 
                 <LocationWalletManagerModule/>
 

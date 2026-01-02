@@ -24,11 +24,11 @@ interface CreateHotelData {
     website?: string;
     totalRooms?: number;
     availableRooms?: number;
-    policies?: any;
+    policies?: Category[];
     nearbyAttractions?: string[];
     rating?: number;
     hotelType: HotelType;
-    amenities?: string[];
+    amenities?: Category[];
     checkInTime?: string;
     checkOutTime?: string;
     isActive?: boolean;
@@ -41,10 +41,10 @@ interface UpdateHotelData {
     website?: string;
     totalRooms?: number;
     availableRooms?: number;
-    policies?: any;
+    policies?: Category[];
     nearbyAttractions?: string[];
     rating?: number;
-    amenities?: string[];
+    amenities?: Category[];
     checkInTime?: string;
     checkOutTime?: string;
     isActive?: boolean;
@@ -141,7 +141,7 @@ export function useGetHotelsByLocationRQ(locationId: string) {
     });
 }
 
-async function getHotelDetail(hotelId: string) {
+export async function getHotelDetail(hotelId: string) {
     const response = await apiFetch<ApiResponse<any>>(`/hotels/${hotelId}`, { method: "GET" });
     return response;
 }
@@ -172,20 +172,33 @@ export function useCreateHotelRQ(onSuccessFn: (res: any) => void, onErrorFn: () 
     });
 }
 
-async function updateHotelInfo(hotelId: string, data: UpdateHotelData) {
-    const response = await apiFetch<ApiResponse<any>>(`/hotels/${hotelId}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-    });
+async function updateHotelInfo(
+    hotelData: { id: string } & Partial<Omit<Hotel, "id">>
+) {
+    const {id, ...updateData} = hotelData;
+    const response = await apiFetch<ApiResponse<Hotel>>(
+        `/hotels/${id}`,
+        {
+            method: "PUT",
+            body: JSON.stringify(updateData),
+        }
+    );
+
     return response;
 }
 
-export function useUpdateHotelInfoRQ(onSuccessFn: (res: any) => void, onErrorFn: () => void) {
+export function useUpdateHotelInfoRQ(
+    onSuccessFn: (response: any) => void, 
+    onErrorFn: () => void
+) {
     return useMutation({
-        mutationFn: ({ hotelId, data }: { hotelId: string; data: UpdateHotelData }) =>
-            updateHotelInfo(hotelId, data),
-        onSuccess: onSuccessFn,
-        onError: onErrorFn,
+        mutationFn: updateHotelInfo,
+        onSuccess: (data) => {
+            onSuccessFn(data);
+        },
+        onError: () => {
+            onErrorFn();
+        },
     });
 }
 

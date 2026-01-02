@@ -14,11 +14,13 @@ type LocationFormMode = "create" | "edit";
 interface LocationFormProps {
     mode: LocationFormMode;
     location_id?: string;
+    onCancel: () => void;
 }
 
 export const LocationForm: React.FC<LocationFormProps> = ({
     mode,
-    location_id
+    location_id,
+    onCancel
 }) => {
     const router = useRouter();
     const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
@@ -34,7 +36,8 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             if (responseData.status === "success") {
                 finishWithMessage("Location created successfully.");
                 queryClient.invalidateQueries({ queryKey: ["locations"] });
-                router.back();
+
+                onCancel();
             } else {
                 finishWithMessage("Failed to create location. Try again.");
             }
@@ -49,7 +52,8 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             if (responseData.status === "success") {
                 finishWithMessage("Location updated successfully.");
                 queryClient.invalidateQueries({ queryKey: ["locations"] });
-                router.back();
+
+                onCancel();
             } else {
                 finishWithMessage("Failed to update location. Try again.");
             }
@@ -74,7 +78,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
 
             if (result.success === true) {
                 showLoadingContent(true);
-                createLocationMutate(locationFormData as Location);
+                createLocationMutate(result.data as Location);
             }
         }else{
             if(location_id)
@@ -90,16 +94,13 @@ export const LocationForm: React.FC<LocationFormProps> = ({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
-        const numericFields = new Set(["latitude", "longitude", "popularityScore"]);
-        const booleanFields = new Set(["isPopular"]);
+        const numericFields = new Set(["latitude", "longitude"]);
 
-        let parsedValue: string | number | boolean | undefined;
+        let parsedValue: string | number | undefined;
 
         if (numericFields.has(name)) {
             const noLeadingZeros = value.replace(/^0+(?=\d)/, '');
             parsedValue = noLeadingZeros === '' ? undefined : Number(noLeadingZeros);
-        } else if (booleanFields.has(name)) {
-            parsedValue = value === 'true';
         } else {
             parsedValue = value || undefined;
         }
@@ -119,26 +120,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             setErrors((prev) => ({ ...prev, [name]: fieldError }));
         } else {
             setErrors((prev) => ({ ...prev, [name]: undefined }));
-        }
-    };
-
-    const handleFeaturesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        const { value } = e.target;
-        const featuresArray = value.split(',').map(feature => feature.trim()).filter(feature => feature !== '');
-        
-        setLocationFormData((prev) => ({
-            ...prev,
-            features: featuresArray
-        }));
-
-        const updatedData = { ...locationFormData, features: featuresArray };
-        
-        const result = createLocationSchema.safeParse(updatedData);
-        if (!result.success) {
-            const fieldError = result.error.formErrors.fieldErrors.features?.[0];
-            setErrors((prev) => ({ ...prev, features: fieldError }));
-        } else {
-            setErrors((prev) => ({ ...prev, features: undefined }));
         }
     };
 
@@ -265,81 +246,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                 value={locationFormData?.timezone || ""}
                 onChange={handleChange}
                 error={errors.timezone}
-            />
-
-            <CustomTextInput
-                type="number"
-                className="w-full px-2 md:px-0 md:w-[200px]"
-                placeholderText="Enter popularity score (0-100)"
-                label="Popularity Score"
-                labelStyle="text-green-300"
-                name="popularityScore"
-                value={locationFormData?.popularityScore || ""}
-                onChange={handleChange}
-                error={errors.popularityScore}
-            />
-
-            <CustomTextInput
-                type="url"
-                className="w-full px-2 md:px-0 md:w-[500px]"
-                placeholderText="Enter image URL (optional)"
-                label="Image URL"
-                labelStyle="text-green-300"
-                name="imageUrl"
-                value={locationFormData?.imageUrl || ""}
-                onChange={handleChange}
-                error={errors.imageUrl}
-            />
-
-            <div className="flex flex-col space-y-2">
-                <label className="text-green-300 font-medium">Features (comma-separated)</label>
-                <textarea
-                    className="w-full px-2 md:px-0 md:w-[500px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter features separated by commas (e.g., Beach, Mountains, Historical)"
-                    name="features"
-                    value={locationFormData?.features?.join(', ') || ""}
-                    onChange={handleFeaturesChange}
-                    rows={3}
-                />
-                {errors.features && <span className="text-red-500 text-sm">{errors.features}</span>}
-            </div>
-
-            <CustomTextInput
-                type="text"
-                className="w-full px-2 md:px-0 md:w-[300px]"
-                placeholderText="Enter climate description (optional)"
-                label="Climate"
-                labelStyle="text-green-300"
-                name="climate"
-                value={locationFormData?.climate || ""}
-                onChange={handleChange}
-                error={errors.climate}
-            />
-
-            <CustomTextInput
-                type="text"
-                className="w-full px-2 md:px-0 md:w-[400px]"
-                placeholderText="Enter best visit time (optional)"
-                label="Best Visit Time"
-                labelStyle="text-green-300"
-                name="bestVisitTime"
-                value={locationFormData?.bestVisitTime || ""}
-                onChange={handleChange}
-                error={errors.bestVisitTime}
-            />
-
-            <CustomSelectInput
-                className="w-full px-2 md:px-0 md:w-[200px] bg-gray-700 text-white"
-                label="Is Popular Location?"
-                labelStyle="text-green-300"
-                name="isPopular"
-                value={locationFormData?.isPopular ? 'true' : 'false'}
-                onChange={handleChange}
-                error={errors.isPopular}
-                options={[
-                    { value: "false", label: "No" },
-                    { value: "true", label: "Yes" }
-                ]}
             />
 
             <button 

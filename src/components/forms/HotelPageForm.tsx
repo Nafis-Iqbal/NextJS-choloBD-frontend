@@ -1,16 +1,19 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useState, useEffect} from "react";
 import { useRouter } from "next/navigation";
 import { queryClient } from "@/services/apiInstance";
 
+import { HotelType } from "@/types/enums";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { HotelValidators } from "@/validators";
-import { HotelApi, AuthApi } from "@/services/api";
-import { CustomTextInput, CustomTextAreaInput } from "@/components/custom-elements/CustomInputElements";
+import { HotelApi, LocationApi } from "@/services/api";
+import { CustomTextInput, CustomTextAreaInput, CustomSelectInput } from "@/components/custom-elements/CustomInputElements";
+import { CategorySelectionModule } from "../modular-components/CategorySelectionModule";
 import { ImageUploadModule } from "@/components/modular-components/ImageUploadModule";
+import { produceValidationErrorMessage, stripNulls } from "@/utilities/utilities";
 
 type HotelFormMode = "create" | "edit";
 
@@ -21,32 +24,37 @@ interface HotelFormProps {
   hotel_id?: string;
 }
 
-export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelFormProps) => {
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated || false;
-    const currentUserRole = authResponse?.data?.userRole;
-
+export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType.LUXURY}, hotel_id}: HotelFormProps) => {
     const router = useRouter();
 
     const [hotelId, setHotelId] = useState<string>(hotel_id ?? "");
-
+    
     const [hotelFormData, setHotelFormData] = useState<Partial<Hotel>>(hotelData);
+    const [hotelAmenities, setHotelAmenities] = useState<Category[]>([]);
+    const [hotelPolicies, setHotelPolicies] = useState<Category[]>([]);
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
     const [actionTrigger, setActionTrigger] = useState<boolean>(false);
 
     const {showLoadingContent, openNotificationPopUpMessage} = useGlobalUI();
 
     //Hooks
+    const {data: locationsListData} = LocationApi.useGetAllLocationsRQ();
+    const locationsList = locationsListData?.data?.filter((location) => location.locationType === 'CITY') || [];
+
     const {mutate: createHotelMutate} = HotelApi.useCreateHotelRQ(
         (responseData) => {
             if(responseData.status === "success")
-            {               
+            {
+                finishWithMessage("Hotel created successfully.");
                 setHotelId(responseData.data?.id || "");
+                
+                queryClient.invalidateQueries({ queryKey: ["hotels"] });
+                router.replace(`/hotels/${responseData.data?.id}`);
             }
-            else finishWithMessage(mode === "create" ? "Failed to create product. Try again." : "Failed to save changes. Kindly try again.");
+            else finishWithMessage("Failed to create hotel. Try again.");
         },
         () => {
-            finishWithMessage(mode === "create" ? "Failed to create product. Try again." : "Failed to save changes. Kindly try again.");
+            finishWithMessage("Failed to create hotel. Try again.");
         }
     );
 
@@ -54,21 +62,17 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
         (responseData) => {
             if(responseData.status === "success")
             {
-                finishWithMessage("Hotel created successfully. Images uploaded.");
+                finishWithMessage("Hotel updated successfully.");
 
                 queryClient.invalidateQueries({ queryKey: ["hotels"] });
                 router.replace(`/hotels/${responseData.data?.id}`);
             }
             else {
                 finishWithMessage("Failed to save changes. Please try again.");
-
-                showLoadingContent(false);
             }
         },
         () => {
             finishWithMessage("Failed to save changes. Please try again.");
-
-            showLoadingContent(false);
         }
     );
 
@@ -76,70 +80,108 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
         (responseData) => {
             if(responseData.status === "success")
             {
-                finishWithMessage("Hotel core info updated successfully. Images uploaded.");
+                finishWithMessage("Hotel updated successfully.");
 
                 queryClient.invalidateQueries({ queryKey: ["hotels"] });
                 router.replace(`/hotels/${responseData.data?.id}`);
             }
             else {
                 finishWithMessage("Failed to save changes. Please try again.");
-
-                showLoadingContent(false);
             }
         },
         () => {
             finishWithMessage("Failed to save changes. Please try again.");
-
-            showLoadingContent(false);
         }
     );
 
     const {mutate: deleteHotelImagesMutate} = HotelApi.useDeleteHotelImagesRQ(
-        (responseData) => {
-            if(responseData.status === "success") console.log("Product images deleted successfully.");
-            else console.log("Failed to delete image URLs from db. Try again.");
-        },
+        () => console.log("Hotel images deleted successfully."),
         () => {
-            console.log("Failed to delete image URLs from db. Try again.");
+            console.log("Failed to delete hotel images.");
         }
     );
 
     useEffect(() => {
         if(hotelFormData && mode === "edit") setHotelFormData(hotelData);
-    }, [hotelData]);
+
+        if(hotel_id) setHotelId(hotel_id);
+
+        if (!hotelData?.hotelCategories) return;
+
+        const amenities = hotelData.hotelCategories
+            .filter((hc) => hc.category.type === "AMENITY")
+            .map((hc) => hc.category);
+
+        const policies = hotelData.hotelCategories
+            .filter((hc) => hc.category.type === "POLICY")
+            .map((hc) => hc.category);
+
+        setHotelAmenities(amenities);
+        setHotelPolicies(policies);
+    }, [hotelData, hotel_id]);
 
     const onHotelFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        hotelFormData.amenities = hotelAmenities;
+        hotelFormData.policies = hotelPolicies;
+        console.log("Submitting hotel form data:", hotelFormData);
 
-        const result = HotelValidators.createHotelSchema.safeParse(hotelFormData);
+        const sanitizedData = stripNulls(hotelFormData);
+        console.log("Sanitized Data:", sanitizedData);
+        let result;
 
-        if(result.success === true){
-            if(mode === "create") createHotelMutate(hotelFormData as Hotel);
-            else {
-                if(editMode === "MASTER_ADMIN" && currentUserRole === "MASTER_ADMIN") {
-                    // Call master admin update mutation
-                }
-                else if(editMode === "SERVICE_ADMIN" && currentUserRole === "SERVICE_ADMIN") {
-                    updateHotelInfoMutate({hotelId, data: hotelFormData as Hotel});
-                }
-            }
-
-            setActionTrigger(true);
+        if(mode === "create") {
+            result = HotelValidators.createHotelSchema.safeParse(sanitizedData);
         }
+        else{
+            result = HotelValidators.updateHotelInfoSchema.safeParse(sanitizedData);
+        }
+
+        if (!result.success) {
+            const message = produceValidationErrorMessage(result);
+            finishWithMessage(`Validation Failed: ${message}. Try Again.`);
+            return;
+        }
+
+        console.log("res d ", result.data, "san d ", sanitizedData);
+        if(mode === "create") {
+            createHotelMutate(result.data as Hotel);
+        } else {
+            if(editMode === "MASTER_ADMIN") {
+                // Call master admin update mutation
+                updateHotelInfoMutate({id: sanitizedData.id, ...result.data} as Hotel);
+            }
+            else if(editMode === "SERVICE_ADMIN") {
+                updateHotelInfoMutate({id: sanitizedData.id, ...result.data} as Hotel);
+            }
+        }
+
+        setActionTrigger(true);
     }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
         const { name, value } = e.target;
 
-        const numericFields = new Set(["totalRooms", "availableRooms", "rating"]);
+        const numericFields = new Set(["totalRooms", "availableRooms"]);
 
         let parsedValue: string | number | undefined;
 
         if (numericFields.has(name)) {
             const noLeadingZeros = value.replace(/^0+(?=\d)/, '');
-
             parsedValue = noLeadingZeros === '' ? undefined : Number(noLeadingZeros);
-        } else {
+        }
+        else if (name === "website") {
+            if (!value) {
+                parsedValue = undefined;
+            } else if (/^https?:\/\//i.test(value)) {
+                parsedValue = value;
+            } else {
+                parsedValue = `https://${value}`;
+            }
+        }
+        else {
             parsedValue = value || undefined;
         }
 
@@ -147,19 +189,34 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
             ...prev,
             [name]: parsedValue
         }));
-        
+
         const updatedData = { ...hotelFormData, [name]: parsedValue };
-        
-        const result = HotelValidators.createHotelSchema.safeParse(updatedData);
+
+        let result;
+
+        if(mode === "create") {
+            result = HotelValidators.createHotelSchema.safeParse(updatedData);
+        }
+        else{
+            result = HotelValidators.updateHotelInfoSchema.safeParse(updatedData);
+        }
+
         if (!result.success) {
             const key = name as keyof typeof result.error.formErrors.fieldErrors;
             const fieldError = result.error.formErrors.fieldErrors[key]?.[0];
 
-            setErrors((prev) => ({ ...prev, [name]: fieldError }));
+            setErrors((prev) => ({
+                ...prev,
+                [name]: fieldError
+            }));
         } else {
-            setErrors((prev) => ({ ...prev, [name]: undefined }));
+            setErrors((prev) => ({
+                ...prev,
+                [name]: undefined
+            }));
         }
     };
+
 
     const productPicUploadURLBuilder = (productId: string) => {
         return `cholo_bd/hotels/${productId}/images`;
@@ -186,13 +243,28 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
 
             <CustomTextAreaInput
                 className="w-full px-2 md:px-0 md:w-[500px] md:h-[150px]"
-                placeholderText="Enter product description"
+                placeholderText="Enter hotel description"
                 label="Description"
                 labelStyle="text-green-300"
                 name="description"
                 value={hotelFormData?.description || ""}
                 onChange={handleChange}
                 error={errors.description}
+            />
+
+            <CustomSelectInput
+                className="w-full px-2 md:px-0 md:w-[500px] bg-gray-700 text-white"
+                label="Location"
+                name="locationId"
+                value={hotelFormData?.locationId || ""}
+                onChange={handleChange}
+                error={errors.locationId}
+                options={[
+                    { label: "-- Select a location --", value: "" },
+                    ...locationsList
+                        .map((loc) => ({ label: loc.name, value: loc.id }))
+                        .sort((a, b) => a.label.localeCompare(b.label))
+                ]}
             />
 
             <CustomTextInput
@@ -231,6 +303,53 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
                 error={errors.website}
             />
 
+            <CustomSelectInput
+                className="w-full px-2 md:px-0 md:w-[500px] bg-gray-700 text-white"
+                label="Hotel Type"
+                name="hotelType"
+                value={hotelFormData?.hotelType || HotelType.LUXURY}
+                onChange={handleChange}
+                error={errors.hotelType}
+                options={[
+                    { label: "-- Select Hotel Type --", value: "" },
+                    ...Object.values(HotelType).map((type) => ({
+                        label: type.charAt(0) + type.slice(1).toLowerCase(),
+                        value: type
+                    }))
+                ]}
+            />
+
+            {/* ActivitySpot-only fields */}
+            <CustomTextInput
+                type="text"
+                className="w-full md:w-[500px]"
+                label="Address ID - Un-implemented"
+                labelStyle="text-red-400"
+                name="addressId"
+                value={hotelFormData.addressId || ""}
+                onChange={() => {}}
+                error={errors.addressId}
+                disabled={true}
+            />
+            
+            <CategorySelectionModule
+                labelName="Hotel Amenities"
+                availableCategories="AMENITY"
+                editMode={mode}
+                selectedCategories={hotelAmenities || []}
+                setSelectedCategories={setHotelAmenities}
+                className=""
+            />
+
+            <CategorySelectionModule
+                labelName="Hotel Policies"
+                availableCategories="POLICY"
+                editMode={mode}
+                selectedCategories={hotelPolicies || []}
+                setSelectedCategories={setHotelPolicies}
+                className=""
+            />
+            
             <CustomTextInput
                 type="number"
                 className="w-full px-2 md:px-0 md:w-[250px]"
@@ -260,6 +379,7 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Enter check-in time (e.g., 2:00 PM)"
                 label="Check-in Time"
+                secondaryLabel="(24hrs format)"
                 labelStyle="text-green-300"
                 name="checkInTime"
                 value={hotelFormData?.checkInTime || ""}
@@ -272,23 +392,12 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Enter check-out time (e.g., 11:00 AM)"
                 label="Check-out Time"
+                secondaryLabel="(24hrs format)"
                 labelStyle="text-green-300"
                 name="checkOutTime"
                 value={hotelFormData?.checkOutTime || ""}
                 onChange={handleChange}
                 error={errors.checkOutTime}
-            />
-
-            <CustomTextInput
-                type="number"
-                className="w-full px-2 md:px-0 md:w-[200px]"
-                placeholderText="Enter hotel rating (0-5)"
-                label="Rating"
-                labelStyle="text-green-300"
-                name="rating"
-                value={hotelFormData?.rating || ""}
-                onChange={handleChange}
-                error={errors.rating}
             />
 
             <ImageUploadModule 
@@ -298,10 +407,7 @@ export const HotelPageForm = ({mode, editMode, hotelData = {}, hotel_id}: HotelF
                 resourceId={hotelId}
                 resourceLabel={mode === "edit" ? "Edit Hotel Images" : "Add Hotel Images"}
                 pic_url_Builder={() => productPicUploadURLBuilder(hotelId)} 
-                updateResourceMutation={editMode === "SERVICE_ADMIN" ? 
-                    () => updateHotelInfoMutate({hotelId, data: hotelFormData}) : 
-                    () => updateHotelCoreInfoMutate({hotelId, data: hotelFormData})
-                }
+                updateResourceMutation={editMode === "SERVICE_ADMIN" ? updateHotelInfoMutate : updateHotelInfoMutate}
                 deleteResourceMutation={({id, imageIds} : {id: string, imageIds: string[]}) => deleteHotelImagesMutate({hotelId: id, imageIds})}
                 oldResourceImages={hotelFormData?.images || []}
             />

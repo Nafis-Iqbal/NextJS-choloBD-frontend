@@ -34,6 +34,21 @@ export async function apiFetch<T>(endpoint: string, options: FetchOptions = {}):
 
     const res = await fetch(`${API_BASE_URL}${endpoint}`, fetchInit);
 
+    if (!res.ok) {
+      let errBody: any = null;
+      try {
+        errBody = await res.json();
+      } catch (e) {
+        // ignore json parse errors
+      }
+
+      const message = (errBody && (errBody.message || errBody.error)) || res.statusText || `Request failed with status ${res.status}`;
+      const error: any = new Error(message);
+      error.status = res.status;
+      error.body = errBody;
+      throw error;
+    }
+
     return res.json() as Promise<T>;
 }
 

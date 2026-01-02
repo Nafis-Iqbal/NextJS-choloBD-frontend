@@ -1,60 +1,42 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import { motion } from "framer-motion";
-import { LocationForm } from "../forms/LocationForm";
+import { CategoryForm } from "../forms/CategoryForm";
 
-interface LocationUpdateModalProps {
+interface CategoryUpdateModalProps {
     isVisible: boolean;
     mode: "create" | "edit";
-    location_id?: string;
+    category_id?: string;
     onCancel: () => void;
 }
 
-const LocationUpdateModal: React.FC<LocationUpdateModalProps> = ({ 
+const CategoryUpdateModal: React.FC<CategoryUpdateModalProps> = ({ 
     isVisible, 
     mode,
-    location_id,
+    category_id,
     onCancel
 }) => {
-    const isMouseDownInside = useRef(false);
-
     if (!isVisible) return null;
-
-    const handleBackdropMouseDown = () => {
-        isMouseDownInside.current = false;
-    };
-
-    const handleModalMouseDown = (e: React.MouseEvent) => {
-        isMouseDownInside.current = true;
-        e.stopPropagation();
-    };
-
-    const handleBackdropClick = () => {
-        if (!isMouseDownInside.current) {
-            onCancel();
-        }
-    };
 
     return ReactDOM.createPortal(
         <div
             className="fixed z-60 inset-0 flex items-center justify-center bg-black/50 font-sans"
-            onMouseDown={handleBackdropMouseDown}
-            onClick={handleBackdropClick}
+            onClick={onCancel} // Close modal when clicking outside
         >
             <motion.div
-                className="bg-gray-800 rounded-md shadow-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+                className="bg-gray-800 rounded-md shadow-lg max-w-xl w-full mx-4 max-h-[90vh] overflow-y-auto"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                onMouseDown={handleModalMouseDown}
+                onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
             >
                 <div className="p-6">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl font-semibold text-white">
-                            {mode === "create" ? "Add Location" : "Update Location"}
+                        <h2 className="text-2xl font-semibold text-white">
+                            {mode === "create" ? "Add Category" : "Update Category"}
                         </h2>
                         <button
                             onClick={onCancel}
@@ -63,9 +45,9 @@ const LocationUpdateModal: React.FC<LocationUpdateModalProps> = ({
                             ×
                         </button>
                     </div>
-                    <LocationForm
+                    <CategoryForm
                         mode={mode}
-                        location_id={location_id}
+                        category_id={category_id}
                         onCancel={() => onCancel()}
                     />
                 </div>
@@ -75,4 +57,4 @@ const LocationUpdateModal: React.FC<LocationUpdateModalProps> = ({
     );
 };
 
-export default LocationUpdateModal;
+export default CategoryUpdateModal;

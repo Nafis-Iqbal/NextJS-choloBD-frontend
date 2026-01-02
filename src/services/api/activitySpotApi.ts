@@ -128,13 +128,14 @@ export function useSearchActivitySpotsRQ(searchParams?: ActivitySpotSearchParams
 }
 
 export async function getActivitySpotDetail(activitySpotId: string) {
+    console.log("Fetching activity spot detail for ID:", activitySpotId);
     const response = await apiFetch<ApiResponse<ActivitySpot>>(
         `/activity-spots/${activitySpotId}`,
         {
             method: "GET",
         }
     );
-
+    console.log("Fetched activity spot detail:", response);
     return response;
 }
 
@@ -176,14 +177,14 @@ export function useCreateActivitySpotRQ(
 }
 
 export async function updateActivitySpot(
-    activitySpotId: string,
-    data: UpdateActivitySpotData
+    activitySpotData: { id: string } & Partial<Omit<TourSpot, "id">>
 ) {
+    const { id, ...updateData } = activitySpotData;
     const response = await apiFetch<ApiResponse<ActivitySpot>>(
-        `/activity-spots/${activitySpotId}`,
+        `/activity-spots/${id}`,
         {
             method: "PUT",
-            body: JSON.stringify(data),
+            body: JSON.stringify(updateData),
         }
     );
 
@@ -195,13 +196,7 @@ export function useUpdateActivitySpotRQ(
     onErrorFn: () => void
 ) {
     return useMutation({
-        mutationFn: ({
-            activitySpotId,
-            data,
-        }: {
-            activitySpotId: string;
-            data: UpdateActivitySpotData;
-        }) => updateActivitySpot(activitySpotId, data),
+        mutationFn: updateActivitySpot,
         onSuccess: (data) => {
             onSuccessFn(data);
         },

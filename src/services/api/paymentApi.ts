@@ -138,11 +138,12 @@ export function useGetRefundStatusRQ(refundId: string) {
   });
 }
 
-async function updatePaymentStatus(transactionId: string, status: PaymentStatus) {
-  const response = await apiFetch<ApiResponse<PaymentTransaction>>(`/payments/${transactionId}/status`, {
+async function updatePaymentStatus(paymentData: { id: string; status: PaymentStatus }) {
+  const { id, ...updateData } = paymentData;
+  const response = await apiFetch<ApiResponse<PaymentTransaction>>(`/payments/${id}/status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify(updateData),
   });
   return response;
 }
@@ -152,8 +153,8 @@ export function useUpdatePaymentStatusRQ(
   onErrorFn: (error: any) => void
 ) {
   return useMutation({
-    mutationFn: ({ transactionId, status }: { transactionId: string; status: PaymentStatus }) =>
-      updatePaymentStatus(transactionId, status),
+    mutationFn: (paymentData: { id: string; status: PaymentStatus }) =>
+      updatePaymentStatus(paymentData),
     onSuccess: (data) => onSuccessFn(data),
     onError: (error) => onErrorFn(error),
   });

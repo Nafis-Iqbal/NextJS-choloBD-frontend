@@ -1,13 +1,16 @@
 "use client";
 
-import { redirect, useParams } from "next/navigation";
+import { useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 
 import { TourSpotApi, AuthApi } from "@/services/api";
-import { TourAndActivitySpotPageForm } from "@/components/forms/TourAndActivitySpotForm";
+import { TourSpotForm } from "@/components/forms/TourSpotForm";
 import LoadingSpinnerBlock from "@/components/placeholder-components/LoadingSpinnerBlock";
 
 export default function TourSpotEditPage() {
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+    const router = useRouter();
+
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
 
@@ -16,9 +19,15 @@ export default function TourSpotEditPage() {
     const { data: tourSpotDetailData, isError: detailFetchError, isLoading: detailFetchLoading } = TourSpotApi.useGetTourSpotDetailRQ(params.tourSpot_id as string);
     const tourSpotDetail = tourSpotDetailData?.data;
 
-    if(!isAuthenticated || currentUserRole !== "MASTER_ADMIN") return (
-        redirect("/")
-    );
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
+    if (isLoading) {
+        return null; // or <FullPageLoader />
+    }
 
     return (
         <div className="flex flex-col p-2 mt-5">
@@ -30,9 +39,9 @@ export default function TourSpotEditPage() {
                     <LoadingSpinnerBlock isOpen={detailFetchLoading} className="w-[30px] h-[30px]"/>
                 </div>
 
-                <TourAndActivitySpotPageForm 
-                    mode={"edit"} infoPageData={tourSpotDetail ?? {}} 
-                    info_Id={params.tourSpot_id as string}
+                <TourSpotForm 
+                    mode={"edit"} tourSpotData={tourSpotDetail ?? {}} 
+                    tourSpot_Id={params.tourSpot_id as string}
                 />
             </div>
         </div>

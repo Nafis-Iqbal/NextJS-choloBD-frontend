@@ -13,6 +13,18 @@ export function errorResponse(error: unknown)
   );
 }
 
+export function stripNulls<T extends Record<string, any>>(obj: T): Partial<T> {
+    return Object.fromEntries(
+        Object.entries(obj).filter(([, value]) => {
+            if (value === null) return false;
+
+            if (Array.isArray(value) && value.length === 0) return false;
+
+            return true;
+        })
+    ) as Partial<T>;
+}
+
 const makeFirstLetterUppercase = (word: string | undefined): string => {
     if(word){
         return word.charAt(0).toUpperCase() + word.slice(1);
@@ -47,8 +59,25 @@ export const checkIfSubstring = (bigString: string, subString: string): boolean 
     }
 }
 
-export function isCategoryArray(data: any[]): data is Category[] {
-    return Array.isArray(data) && data.every((item) => !('comment' in item) && !('progress' in item) && !('project_id' in item && 'priority' in item));
-}
+/**
+ * Produce a readable validation error message from a Zod safeParse result.
+ * Returns a single string like: "Check fieldName: message; Check other: message"
+ */
+export const produceValidationErrorMessage = (result: any): string => {
+    const issues = result?.error?.issues || [];
+    if (!Array.isArray(issues) || issues.length === 0) {
+        return result?.error?.message || 'Validation failed';
+    }
+
+    const messages = (issues as any[]).map((i) => {
+        const path = Array.isArray(i.path) && i.path.length ? i.path.join('.') : 'form';
+        const msg = i.message || 'Invalid value';
+        return `Check ${path}: ${msg}`;
+    });
+
+    return messages.join('; ');
+};
+
+
 
 export default makeFirstLetterUppercase;

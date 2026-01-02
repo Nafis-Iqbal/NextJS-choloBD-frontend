@@ -51,36 +51,7 @@ export const createLocationSchema = z.object({
   timezone: z
     .string()
     .max(50, "Timezone must be less than 50 characters")
-    .optional(),
-    
-  popularityScore: z
-    .number()
-    .min(0, "Popularity score cannot be negative")
-    .max(100, "Popularity score cannot exceed 100")
-    .default(0),
-    
-  imageUrl: z
-    .string()
-    .url("Please provide a valid image URL")
-    .optional(),
-    
-  features: z
-    .array(z.string())
-    .default([]),
-    
-  climate: z
-    .string()
-    .max(100, "Climate description must be less than 100 characters")
-    .optional(),
-    
-  bestVisitTime: z
-    .string()
-    .max(200, "Best visit time must be less than 200 characters")
-    .optional(),
-    
-  isPopular: z
-    .boolean()
-    .default(false)
+    .optional()
 });
 
 export const updateLocationSchema = createLocationSchema.partial();

@@ -9,7 +9,6 @@ interface LocationSearchParams {
   country?: string;
   state?: string;
   city?: string;
-  isPopular?: boolean;
   limit?: number;
   offset?: number;
 }
@@ -25,12 +24,6 @@ interface CreateLocationData {
   longitude?: number;
   parentLocationId?: string;
   timezone?: string;
-  popularityScore: number;
-  imageUrl?: string;
-  features: string[];
-  climate?: string;
-  bestVisitTime?: string;
-  isPopular: boolean;
 }
 
 interface UpdateLocationData {

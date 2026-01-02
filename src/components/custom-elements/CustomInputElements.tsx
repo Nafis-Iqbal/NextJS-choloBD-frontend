@@ -4,6 +4,7 @@ type CustomInputProps = {
   className?: string;
   placeholderText?: string;
   label?: string;
+  secondaryLabel?: string;
   labelStyle?: string; 
   error?: string;
 } & React.InputHTMLAttributes<HTMLInputElement>
@@ -36,6 +37,7 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
       className,
       placeholderText,
       label,
+      secondaryLabel,
       labelStyle,
       error,
       ...rest
@@ -43,7 +45,10 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
 
     return (
       <div className="relative flex flex-col space-y-1 group">
-        {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
+        <div className="flex items-center space-x-2">
+          {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
+          {secondaryLabel && <span className="text-gray-400 text-sm">{secondaryLabel}</span>}
+        </div>
         
         <input className={`p-1 bg-gray-700 border border-gray-600 placeholder-gray-400 text-white rounded-sm
             focus:outline-none focus:ring-2 focus:ring-green-500 ${className}`} placeholder={placeholderText}

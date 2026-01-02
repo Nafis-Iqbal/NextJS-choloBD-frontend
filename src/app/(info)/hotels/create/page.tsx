@@ -1,17 +1,26 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { AuthApi } from "@/services/api";
 import { HotelPageForm } from "@/components/forms/HotelPageForm";
+import { useEffect } from "react";
 
 export default function HotelCreationPage() {
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+    const router = useRouter();
+    
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
 
-    if(!isAuthenticated || currentUserRole !== "MASTER_ADMIN") return (
-        redirect("/")
-    );
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
+    if (isLoading) {
+        return null; // or <FullPageLoader />
+    }
 
     return (
         <div className="flex flex-col p-2 mt-5">
@@ -21,7 +30,7 @@ export default function HotelCreationPage() {
 
                 <HotelPageForm 
                     mode={"create"}
-                    editMode={currentUserRole} 
+                    editMode={(currentUserRole === "MASTER_ADMIN" || currentUserRole === "SERVICE_ADMIN") ? currentUserRole : "MASTER_ADMIN"} 
                 />
             </div>
         </div>

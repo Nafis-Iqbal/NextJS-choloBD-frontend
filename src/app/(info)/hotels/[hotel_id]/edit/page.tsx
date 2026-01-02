@@ -1,13 +1,16 @@
 "use client";
 
-import { redirect, useParams } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 
 import { HotelApi, AuthApi } from "@/services/api";
 import { HotelPageForm } from "@/components/forms/HotelPageForm";
 import LoadingSpinnerBlock from "@/components/placeholder-components/LoadingSpinnerBlock";
+import { useEffect } from "react";
 
 export default function HotelEditPage() {
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+    const router = useRouter();
+    
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
 
@@ -16,9 +19,15 @@ export default function HotelEditPage() {
     const { data: hotelDetailData, isError: detailFetchError, isLoading: detailFetchLoading } = HotelApi.useGetHotelDetailRQ(params.hotel_id as string);
     const hotelDetail = hotelDetailData?.data;
 
-    if(!isAuthenticated || (currentUserRole !== "MASTER_ADMIN" && currentUserRole !== "SERVICE_ADMIN")) return (
-        redirect("/")
-    );
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
+    if (isLoading) {
+        return null; // or <FullPageLoader />
+    }
 
     return (
         <div className="flex flex-col p-2 mt-5">
@@ -32,9 +41,9 @@ export default function HotelEditPage() {
 
                 <HotelPageForm 
                     mode={"edit"} 
-                    editMode={currentUserRole}
+                    editMode={(currentUserRole === "MASTER_ADMIN" || currentUserRole === "SERVICE_ADMIN") ? currentUserRole : "MASTER_ADMIN"}
                     hotelData={hotelDetail ?? {}} 
-                    hotel_id={params.tourSpot_id as string}
+                    hotel_id={params.hotel_id as string}
                 />
             </div>
         </div>

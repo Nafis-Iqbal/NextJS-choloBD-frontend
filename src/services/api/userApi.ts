@@ -22,9 +22,10 @@ export function useGetUsersRQ(queryString?: string) {
 }
 
 export async function updateUser(userData: {id: string} & Partial<Omit<User, "id">>) {
+  const { id, ...updateData } = userData;
   const response = await apiFetch<ApiResponse<User>>(`/users/profile`, {
     method: 'PUT',
-    body: JSON.stringify(userData),
+    body: JSON.stringify(updateData),
   });
 
   return response;

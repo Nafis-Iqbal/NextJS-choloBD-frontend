@@ -35,6 +35,14 @@ export enum LocationType {
   COUNTRYSIDE = "COUNTRYSIDE"
 }
 
+export enum CategoryType {
+    AMENITY = "AMENITY",
+    POLICY = "POLICY",
+    HOTEL_TYPE = "HOTEL_TYPE",
+    FACILITY = "FACILITY",
+    RULE = "RULE" 
+}
+
 export enum TourType {
   ADVENTURE = "ADVENTURE",
   CULTURAL = "CULTURAL",

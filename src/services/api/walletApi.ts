@@ -164,11 +164,12 @@ export function useGetWalletTransactionByUserRQ(userId: string, transactionId: s
   });
 }
 
-async function updateWalletStatus(walletId: string, statusData: WalletStatusUpdate) {
-  const response = await apiFetch<ApiResponse<Wallet>>(`/wallets/${walletId}`, {
+async function updateWalletStatus(walletData: { id: string } & WalletStatusUpdate) {
+  const { id, ...updateData } = walletData;
+  const response = await apiFetch<ApiResponse<Wallet>>(`/wallets/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(statusData),
+    body: JSON.stringify(updateData),
   });
   return response;
 }
@@ -178,8 +179,8 @@ export function useUpdateWalletStatusRQ(
   onErrorFn: (error: any) => void
 ) {
   return useMutation({
-    mutationFn: ({ walletId, statusData }: { walletId: string; statusData: WalletStatusUpdate }) =>
-      updateWalletStatus(walletId, statusData),
+    mutationFn: (walletData: { id: string } & WalletStatusUpdate) =>
+      updateWalletStatus(walletData),
     onSuccess: (data) => onSuccessFn(data),
     onError: (error) => onErrorFn(error),
   });
@@ -240,11 +241,12 @@ export function useCreateWalletRechargeOptionRQ(
   });
 }
 
-async function updateWalletRechargeOption(walletOptionId: string, optionData: UpdateWalletRechargeOptionData) {
-  const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallets/recharge-options/${walletOptionId}`, {
+async function updateWalletRechargeOption(optionData: { id: string } & UpdateWalletRechargeOptionData) {
+  const { id, ...updateData } = optionData;
+  const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallets/recharge-options/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(optionData),
+    body: JSON.stringify(updateData),
   });
   return response;
 }
@@ -254,8 +256,8 @@ export function useUpdateWalletRechargeOptionRQ(
   onErrorFn: (error: any) => void
 ) {
   return useMutation({
-    mutationFn: ({ walletOptionId, optionData }: { walletOptionId: string; optionData: UpdateWalletRechargeOptionData }) =>
-      updateWalletRechargeOption(walletOptionId, optionData),
+    mutationFn: (optionData: { id: string } & UpdateWalletRechargeOptionData) =>
+      updateWalletRechargeOption(optionData),
     onSuccess: (data) => onSuccessFn(data),
     onError: (error) => onErrorFn(error),
   });

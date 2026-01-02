@@ -1,9 +1,9 @@
-import { LocationApi, WalletApi } from "@/services/api"
 import { useState } from "react"
 
+import { LocationType } from "@/types/enums"
+import { LocationApi, WalletApi } from "@/services/api"
 import LocationUpdateModal from "../modals/LocationUpdateModal"
 import WalletRechargeOptionModal from "../modals/WalletRechargeOptionModal"
-import { ComplaintStatus, LocationType } from "@/types/enums"
 import TableLayout from "../layout-elements/TableLayout"
 import FilterSectionLayout from "../layout-elements/FilterSectionLayout"
 import { CustomSelectInput, CustomTextInput} from "../custom-elements/CustomInputElements"
@@ -23,15 +23,42 @@ export const LocationWalletManagerModule = () => {
         mode: 'create'
     });
 
+    const [locationFilters, setLocationFilters] = useState<{
+        locationType: string;
+        locationName: string;
+    }>({
+        locationType: '',
+        locationName: ''
+    });
+
     const {data: locationListData, isLoading: isLocationLoading, isError: isLocationError} = LocationApi.useGetAllLocationsRQ();
     const {data: walletOptionsList, isLoading: isWalletOptionsLoading} = WalletApi.useGetWalletRechargeOptionsRQ();
     const locationList = locationListData?.data;
     const walletRechargeOptions = walletOptionsList?.data;
 
-    const complaintStatusOptions = Object.values(ComplaintStatus).map(status => ({
-        value: status,
-        label: status.replace("_", " ").toLowerCase().replace(/^\w/, c => c.toUpperCase())
+    const locationTypeOptions = Object.values(LocationType).map(locationType => ({
+        value: locationType,
+        label: locationType.replace("_", " ").toLowerCase().replace(/^\w/, c => c.toUpperCase())
     }));
+
+    const handleLocationFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setLocationFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const getFilteredLocations = () => {
+        if (!Array.isArray(locationList)) return [];
+        
+        return locationList.filter(location => {
+            const matchesType = locationFilters.locationType === '' || location.locationType === locationFilters.locationType;
+            const matchesName = locationFilters.locationName === '' || location.name.toLowerCase().includes(locationFilters.locationName.toLowerCase());
+            
+            return matchesType && matchesName;
+        });
+    };
 
     const filterByOrderStatus = () => {
 
@@ -46,7 +73,7 @@ export const LocationWalletManagerModule = () => {
     }
 
     return (
-        <section className="flex flex-col space-y-2 mt-4" id="dashboard_complaints">
+        <section className="flex flex-col space-y-2 mt-4" id="location_wallet_manager">
             <LocationUpdateModal
                 isVisible={locationModal.isOpen}
                 location_id={locationModal.locationId}
@@ -62,21 +89,17 @@ export const LocationWalletManagerModule = () => {
             />
 
             {/* Location List Section */}
-            <div className="flex space-x-5 mb-2">
-                <h4 className="">Location List</h4>
-            </div>
+            <h4 className="mb-2">Location List</h4>
 
             <TableLayout className="mr-5">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[900px]">
                         <div className="flex border border-green-800 p-2 bg-gray-600 text-center">
-                            <p className="w-[5%]">Sr.</p>
-                            <p className="w-[25%]">Location Name</p>
-                            <p className="w-[20%]">Type</p>
-                            <p className="w-[20%]">Country/City</p>
-                            <p className="w-[10%]">Popular</p>
-                            <p className="w-[10%]">Score</p>
-                            <p className="w-[10%]">Actions</p>
+                            <p className="w-[10%]">Sr.</p>
+                            <p className="w-[30%]">Location Name</p>
+                            <p className="w-[25%]">Type</p>
+                            <p className="w-[25%]">Country/City</p>
+                            <p className="w-[15%]">Actions</p>
                         </div>
                         <div className="flex flex-col border-1 border-green-800">
                             {
@@ -84,8 +107,8 @@ export const LocationWalletManagerModule = () => {
                                 isLocationError ? (<NoContentTableRow displayMessage="An error occured"  tdColSpan={1}/>) :
 
                                 (locationList && Array.isArray(locationList) && locationList.length <= 0) ? (<NoContentTableRow displayMessage="No locations found" tdColSpan={1}/>) :
-                                (Array.isArray(locationList) &&
-                                    locationList.map((location, index) => (
+                                (getFilteredLocations().length === 0) ? (<NoContentTableRow displayMessage="No locations match the selected filters" tdColSpan={1}/>) :
+                                (getFilteredLocations().map((location, index) => (
                                         <LocationListTableRow 
                                             key={location.id} 
                                             id={index + 1}
@@ -94,8 +117,6 @@ export const LocationWalletManagerModule = () => {
                                             locationType={location.locationType}
                                             country={location.country}
                                             city={location.city}
-                                            isPopular={location.isPopular}
-                                            popularityScore={location.popularityScore}
                                             createdAt={location.createdAt}
                                             navigateOnClick={() => console.log(`Navigate to location ${location.id}`)}
                                             onEditClick={() => toggleLocationFormModal(true, location.id, 'edit')}
@@ -113,19 +134,21 @@ export const LocationWalletManagerModule = () => {
                     <div className="flex flex-col space-y-1">
                         <CustomSelectInput
                             label="Location Type"
-                            options={complaintStatusOptions}
-                            value="Active"
-                            onChange={() => filterByOrderStatus()}
+                            name="locationType"
+                            options={[{ value: '', label: '-- All Types --' }, ...locationTypeOptions]}
+                            value={locationFilters.locationType}
+                            onChange={handleLocationFilterChange}
                             className="bg-gray-600"
-                            disabled
                         />
                     </div>
 
                     <div className="flex flex-col space-y-1">
                         <CustomTextInput
                             label="Location Name"  
+                            name="locationName"
                             placeholderText="Enter location name"
-                            disabled
+                            value={locationFilters.locationName}
+                            onChange={handleLocationFilterChange}
                         />
                     </div>
                 </div>
@@ -141,8 +164,9 @@ export const LocationWalletManagerModule = () => {
             <HorizontalDivider className="mr-5 my-10"/>
 
             {/* Wallet Recharge Options Section */}
-            <div className="flex space-x-5 mb-2">
+            <div className="flex space-x-5 mb-2 items-center">
                 <h4 className="">Wallet Recharge Options</h4>
+                <p className="text-gray-400">Will be moved to config files content</p>
             </div>
 
             <TableLayout className="mr-5">
@@ -219,7 +243,7 @@ export const LocationWalletManagerModule = () => {
 }
 
 const LocationListTableRow = ({
-    id, locationId, name, locationType, country, city, isPopular, popularityScore, createdAt, navigateOnClick, onEditClick
+    id, locationId, name, locationType, country, city, createdAt, navigateOnClick, onEditClick
 } : {
     id: number, 
     locationId: string, 
@@ -227,8 +251,6 @@ const LocationListTableRow = ({
     locationType: LocationType, 
     country: string, 
     city?: string, 
-    isPopular: boolean, 
-    popularityScore: number, 
     createdAt: Date, 
     navigateOnClick: () => void,
     onEditClick: () => void
@@ -237,15 +259,13 @@ const LocationListTableRow = ({
     
     return (
         <div className="flex p-2 w-full border-green-900 hover:bg-gray-600 text-center justify-center" onClick={() => navigateOnClick()}>
-            <p className="w-[5%]">{id}</p>
-            <p className="w-[25%] hover:cursor-pointer px-2">{name}</p>
-            <p className="w-[20%]">{locationType}</p>
-            <p className="w-[20%] px-2">{locationDisplay}</p>
-            <p className="w-[10%]">{isPopular ? '⭐' : '-'}</p>
-            <p className="w-[10%]">{popularityScore}</p>
-            <p className="w-[10%]">
+            <p className="w-[10%]">{id}</p>
+            <p className="w-[30%] hover:cursor-pointer px-2">{name}</p>
+            <p className="w-[25%]">{locationType}</p>
+            <p className="w-[25%] px-2">{locationDisplay}</p>
+            <p className="w-[15%]">
                 <button 
-                    className="text-blue-400 hover:text-blue-300 text-sm"
+                    className="text-blue-400 hover:text-blue-300 bg-inherit text-sm"
                     onClick={() => onEditClick()}
                 >
                     Edit

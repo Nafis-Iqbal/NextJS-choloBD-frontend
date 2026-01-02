@@ -13,12 +13,19 @@ interface Props {
 }
 
 export const ReviewModule = async ({pageAssetType, assetId, assetName} : Props) => {
-    const productReviewsData = await ReviewApi.getPageReviews({reviewType: pageAssetType, reviewAssetId: assetId});
+    let reviewsData;
+    try {
+        reviewsData = await ReviewApi.getPageReviews({reviewType: pageAssetType, reviewAssetId: assetId});
+    } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+        // Return early with a fallback UI
+        reviewsData = { data: [] };
+    }
 
-    const productReviews = productReviewsData?.data || [];
-    const noReviewsSubmitted = productReviews.length === 0;
+    const reviews = reviewsData?.data || [];
+    const noReviewsSubmitted = reviews.length === 0;
 
-    const averageRating = productReviews.reduce((acc, review) => acc + review.rating, 0) / (productReviews.length || 1);
+    const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / (reviews.length || 1);
 
     return (
         <div className="flex flex-col p-2 border-[0.5px] border-green-800">
@@ -29,19 +36,19 @@ export const ReviewModule = async ({pageAssetType, assetId, assetName} : Props) 
                     pageAssetType={pageAssetType} 
                     pageAssetId={assetId}
                     pageAssetName={assetName}
-                    reviewUserIds={productReviews.map(review => review.userId)}
+                    reviewUserIds={reviews.map(review => review.userId || "unknown_user_id")}
                 />
 
                 <div className="flex flex-col w-full md:w-[30%] space-y-1 mt-5">
                     <h4 className="font-semibold text-green-500">Customer Reviews</h4>
                     <h4 className="text-green-200">{averageRating} stars out of 5</h4>
-                    <p>{productReviews.length} user ratings</p>
+                    <p>{reviews.length} user ratings</p>
 
-                    <RatingStats totalReviews={productReviews.length} expectedReviews={productReviews.filter(review => review.rating === 5).length} rating={5}></RatingStats>
-                    <RatingStats totalReviews={productReviews.length} expectedReviews={productReviews.filter(review => review.rating === 4).length} rating={4}></RatingStats>
-                    <RatingStats totalReviews={productReviews.length} expectedReviews={productReviews.filter(review => review.rating === 3).length} rating={3}></RatingStats>
-                    <RatingStats totalReviews={productReviews.length} expectedReviews={productReviews.filter(review => review.rating === 2).length} rating={2}></RatingStats>
-                    <RatingStats totalReviews={productReviews.length} expectedReviews={productReviews.filter(review => review.rating === 1).length} rating={1}></RatingStats>
+                    <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 5).length} rating={5}></RatingStats>
+                    <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 4).length} rating={4}></RatingStats>
+                    <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 3).length} rating={3}></RatingStats>
+                    <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 2).length} rating={2}></RatingStats>
+                    <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 1).length} rating={1}></RatingStats>
                 </div>
             </div>
             
@@ -49,7 +56,7 @@ export const ReviewModule = async ({pageAssetType, assetId, assetName} : Props) 
 
             <PageReviewList 
                 noReviewsSubmitted={noReviewsSubmitted} 
-                pageReviews={productReviews}
+                pageReviews={reviews}
             />
         </div>
     );

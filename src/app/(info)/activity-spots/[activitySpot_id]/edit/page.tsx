@@ -1,13 +1,16 @@
 "use client";
 
-import { redirect, useParams } from "next/navigation";
+import { redirect, useParams, useRouter } from "next/navigation";
 
 import { ActivitySpotApi, AuthApi } from "@/services/api";
-import { TourAndActivitySpotPageForm } from "@/components/forms/TourAndActivitySpotForm";
+import { ActivitySpotForm } from "@/components/forms/ActivitySpotForm";
 import LoadingSpinnerBlock from "@/components/placeholder-components/LoadingSpinnerBlock";
+import { useEffect } from "react";
 
-export default function TourSpotEditPage() {
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+export default function ActivitySpotEditPage() {
+    const router = useRouter();
+    
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
 
@@ -16,9 +19,15 @@ export default function TourSpotEditPage() {
     const { data: activitySpotDetailData, isError: detailFetchError, isLoading: detailFetchLoading } = ActivitySpotApi.useGetActivitySpotDetailRQ(params.activitySpot_id as string);
     const activitySpotDetail = activitySpotDetailData?.data;
 
-    if(!isAuthenticated || currentUserRole !== "MASTER_ADMIN") return (
-        redirect("/")
-    );
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
+    if (isLoading) {
+        return null; // or <FullPageLoader />
+    }
 
     return (
         <div className="flex flex-col p-2 mt-5">
@@ -30,9 +39,9 @@ export default function TourSpotEditPage() {
                     <LoadingSpinnerBlock isOpen={detailFetchLoading} className="w-[30px] h-[30px]"/>
                 </div>
 
-                <TourAndActivitySpotPageForm 
-                    mode={"edit"} infoPageData={activitySpotDetail ?? {}} 
-                    info_Id={params.activitySpot_id as string}
+                <ActivitySpotForm 
+                    mode={"edit"} activitySpotData={activitySpotDetail ?? {}} 
+                    activitySpot_Id={params.activitySpot_id as string}
                 />
             </div>
         </div>

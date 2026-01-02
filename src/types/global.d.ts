@@ -18,6 +18,7 @@ import {
   WalletStatus,
   WalletTransactionType,
   TransactionStatus,
+  CategoryType,
   ServiceType,
   BookingStatus,
   ReviewType,
@@ -110,12 +111,6 @@ declare global {
     longitude?: number;
     parentLocationId?: string;
     timezone?: string;
-    popularityScore: number;
-    imageUrl?: string;
-    features: string[];
-    climate?: string;
-    bestVisitTime?: string;
-    isPopular: boolean;
     createdAt: Date;
     parentLocation?: Location;
     childLocations?: Location[];
@@ -123,6 +118,16 @@ declare global {
     tourSpots?: TourSpot[];
     activitySpots?: ActivitySpot[];
     hotels?: Hotel[];
+  }
+
+  interface Category {
+    id:       string;
+    name:     string;
+    type:     CategoryType;
+    slug:     string;
+    isActive: boolean;
+
+    hotels: Hotel[]
   }
 
   // Tour and Travel
@@ -203,10 +208,9 @@ declare global {
     name: string;
     description?: string;
     locationId: string;
-    addressId?: string;
     bestTimeToVisit?: string;
     seasonalInfo?: Record<string, any>;
-    spotType: ActivityType;
+    tourType: TourType;
     rating?: number;
     isPopular: boolean;
     createdAt: Date;
@@ -218,7 +222,7 @@ declare global {
   interface ActivitySpot {
     id: string;
     name: string;
-    description?: string;
+    description: string;
     locationId: string;
     addressId?: string;
     entryCost: number;
@@ -248,11 +252,12 @@ declare global {
     website?: string;
     totalRooms?: number;
     availableRooms?: number;
-    policies?: Record<string, any>;
+    amenities?: Category[];
+    policies?: Category[];
+    hotelCategories?: HotelCategory[];
     nearbyAttractions: string[];
     rating: number;
     hotelType: HotelType;
-    amenities: string[];
     checkInTime?: string;
     checkOutTime?: string;
     isActive: boolean;
@@ -262,15 +267,22 @@ declare global {
     images?: Image[];
   }
 
+  interface HotelCategory {
+    id: string;
+    hotelId: string;
+    categoryId: string;
+    category: Category;
+  }
+
   // Reviews and Ratings
   interface Review {
     id: string;
+    reviewType: ReviewType;
+    reviewAssetId: string;
     title?: string;
     description: string;
     rating: number;
-    reviewType: ReviewType;
-    createdAt?: Date;
-    userId: string;
+    userId?: string;
     tourSpotId?: string;
     activitySpotId?: string;
     hotelId?: string;
@@ -278,6 +290,7 @@ declare global {
     TourSpot?: TourSpot;
     ActivitySpot?: ActivitySpot;
     Hotel?: Hotel;
+    createdAt?: Date;
   }
 
   // Payment and Transactions
