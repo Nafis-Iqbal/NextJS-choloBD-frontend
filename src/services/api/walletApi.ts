@@ -241,8 +241,8 @@ export function useCreateWalletRechargeOptionRQ(
   });
 }
 
-async function updateWalletRechargeOption(optionData: { id: string } & UpdateWalletRechargeOptionData) {
-  const { id, ...updateData } = optionData;
+async function updateWalletRechargeOption(optionData: { id: string; optionData: UpdateWalletRechargeOptionData }) {
+  const { id, optionData: updateData } = optionData;
   const response = await apiFetch<ApiResponse<WalletRechargeOption>>(`/wallets/recharge-options/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -256,7 +256,7 @@ export function useUpdateWalletRechargeOptionRQ(
   onErrorFn: (error: any) => void
 ) {
   return useMutation({
-    mutationFn: (optionData: { id: string } & UpdateWalletRechargeOptionData) =>
+    mutationFn: (optionData: { id: string; optionData: UpdateWalletRechargeOptionData }) =>
       updateWalletRechargeOption(optionData),
     onSuccess: (data) => onSuccessFn(data),
     onError: (error) => onErrorFn(error),

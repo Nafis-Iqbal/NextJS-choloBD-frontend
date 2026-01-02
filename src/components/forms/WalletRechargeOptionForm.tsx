@@ -76,7 +76,7 @@ export const WalletRechargeOptionForm: React.FC<WalletRechargeOptionFormProps> =
                 createRechargeOptionMutate(walletRechargeOptionFormData as WalletRechargeOption);
             } else {
                 updateRechargeOptionMutate({
-                    walletOptionId: rechargeOption_id || "",
+                    id: rechargeOption_id || "",
                     optionData: walletRechargeOptionFormData as Partial<WalletRechargeOption>
                 });
             }

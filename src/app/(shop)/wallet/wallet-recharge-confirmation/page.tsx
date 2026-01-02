@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthApi } from "@/services/api";
 import { GreenButton, BlackButton } from "@/components/custom-elements/Buttons";
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities";
+import SuspenseFallback from "@/components/page-content/SuspenseFallback";
 
-export default function WalletRechargeConfirmationPage() {
+function WalletRechargeConfirmationContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const amount = parseInt(searchParams.get("amount") || "0");
@@ -104,5 +105,13 @@ export default function WalletRechargeConfirmationPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function WalletRechargeConfirmationPage() {
+    return (
+        <Suspense fallback={<SuspenseFallback />}>
+            <WalletRechargeConfirmationContent />
+        </Suspense>
     );
 }
