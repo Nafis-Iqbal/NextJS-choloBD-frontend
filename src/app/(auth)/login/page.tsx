@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter, redirect } from 'next/navigation';
 import { AuthApi } from '@/services/api';
+import { API_BASE_URL } from '@/lib/apiConfig';
 import { queryClient } from '@/services/apiInstance';
 
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
@@ -104,12 +105,12 @@ function LoginContent() {
 
     const onGoogleSignIn = () => {
         //loginGoogleMutate();
-        window.location.href = "http://localhost:5000/api/auth/google";
+        window.location.href = `${API_BASE_URL}/auth/google`;
     }
 
     const onFacebookSignIn = () => {
         //loginFacebookMutate();
-        window.location.href = "http://localhost:5000/api/auth/facebook";
+        window.location.href = `${API_BASE_URL}/auth/facebook`;
     }
 
     const onSignUpFailure = () => {
