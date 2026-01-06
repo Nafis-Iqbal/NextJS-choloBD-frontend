@@ -23,23 +23,25 @@ export enum UserTripStatus {
 
 // Location and Tourism Enums
 export enum LocationType {
-  COUNTRY = "COUNTRY",
-  STATE = "STATE",
+  //COUNTRY = "COUNTRY",
+  //STATE = "STATE",
   DIVISION = "DIVISION",
   DISTRICT = "DISTRICT",
   CITY = "CITY",
-  METROPOLITON = "METROPOLITON",
-  VILLAGE = "VILLAGE",
-  AREA = "AREA",
   ISLAND = "ISLAND",
   COUNTRYSIDE = "COUNTRYSIDE"
+}
+
+export enum LocationSubType {
+    CITY = "CITY",
+    COUNTRYSIDE = "COUNTRYSIDE",
+    ISLAND = "ISLAND"
 }
 
 export enum CategoryType {
     AMENITY = "AMENITY",
     POLICY = "POLICY",
     HOTEL_TYPE = "HOTEL_TYPE",
-    FACILITY = "FACILITY",
     RULE = "RULE" 
 }
 
@@ -72,13 +74,6 @@ export enum HotelType {
   HOSTEL = "HOSTEL",
   GUESTHOUSE = "GUESTHOUSE",
   APARTMENT = "APARTMENT"
-}
-
-export enum HotelServiceType {
-  MEDIUM_RANGE = "MEDIUM_RANGE",
-  LUXURY = "LUXURY",
-  BUDGET = "BUDGET",
-  SELF_MANAGED = "SELF_MANAGED"
 }
 
 // Transport Enums

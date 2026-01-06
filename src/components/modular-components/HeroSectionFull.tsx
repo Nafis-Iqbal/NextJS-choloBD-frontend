@@ -101,7 +101,7 @@ export const HeroSectionFull = ({ className, imageList }: { imageList: ImageProp
                             <NextImage
                                 className="w-full h-full min-h-[300px]"
                                 nextImageClassName={imageURLsList[displayedImageId]?.imageStyle ?? `object-cover object-top`} 
-                                src={imageURLsList[displayedImageId]?.imageURL ?? "/CPUPIC.webp"} 
+                                src={imageURLsList[displayedImageId]?.imageURL ?? "/404E.jpg"} 
                                 alt={imageURLsList[displayedImageId]?.imageAlt ?? "Some stuff about the pic."}
                             />
                         </motion.div>

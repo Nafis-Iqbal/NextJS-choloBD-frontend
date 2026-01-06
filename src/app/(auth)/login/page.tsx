@@ -48,6 +48,7 @@ function LoginContent() {
 
     const {mutate: createUserMutate} = AuthApi.useCreateUserRQ(
         (responseData) => {
+            console.log("Sign Up response data:", responseData);
             if(responseData.status === "success")
             {
                 router.push("/");

@@ -17,9 +17,13 @@ interface CreateLocationData {
   name: string;
   description?: string;
   locationType: LocationType;
-  country: string;
-  state?: string;
+  //country: string;
+  //state?: string;
+  division: string;
+  district?: string;
   city?: string;
+  countryside?: string;
+  island?: string;
   latitude?: number;
   longitude?: number;
   parentLocationId?: string;

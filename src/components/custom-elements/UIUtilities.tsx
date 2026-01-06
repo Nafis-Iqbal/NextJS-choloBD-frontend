@@ -1,4 +1,6 @@
+"use client";
 import Image from "next/image";
+import { useState } from "react";
 
 export const Logo = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : {textSize?: string, position?: string}) => {
     return (
@@ -9,30 +11,39 @@ export const Logo = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : 
 }
 
 export const NextImage = ({
-    className, 
+    className,
     priority = false,
-    src, 
-    alt, 
+    src,
+    alt,
     nextImageClassName = "object-cover"
-} : {
-    className?: string, 
-    priority?: boolean,
-    src: string | null, 
-    alt: string, 
-    nextImageClassName?: string
+}: {
+    className?: string;
+    priority?: boolean;
+    src: string | null;
+    alt: string;
+    nextImageClassName?: string;
 }) => {
+    const FALLBACK_SRC = "/404E.jpg";
+
+    const [imgSrc, setImgSrc] = useState<string>(
+        src && src.trim() !== "" ? src : FALLBACK_SRC
+    );
+
     return (
         <div className={`relative ${className}`}>
-            <Image 
-                className={nextImageClassName} 
-                src={src || "/image-not-found.png"} 
-                alt={alt} 
+            <Image
+                className={nextImageClassName}
+                src={imgSrc}
+                alt={alt}
                 fill
                 priority={priority}
+                onError={() => {
+                    setImgSrc(FALLBACK_SRC);
+                }}
             />
         </div>
-    )
-}
+    );
+};
 
 export const HorizontalDivider = ({className} : {className?: string}) => {
     return (

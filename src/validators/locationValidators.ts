@@ -5,7 +5,7 @@ export const createLocationSchema = z.object({
   name: z
     .string()
     .min(1, "Location name is required")
-    .min(2, "Location name must be at least 2 characters")
+    .min(4, "Location name must be at least 4 characters")
     .max(100, "Location name must be less than 100 characters"),
     
   description: z
@@ -16,22 +16,113 @@ export const createLocationSchema = z.object({
   locationType: z
     .nativeEnum(LocationType, { errorMap: () => ({ message: "Please select a valid location type" }) }),
     
-  country: z
-    .string()
-    .min(1, "Country is required")
-    .min(2, "Country must be at least 2 characters")
-    .max(50, "Country must be less than 50 characters"),
+  // country: z
+  //   .string()
+  //   .min(1, "Country is required")
+  //   .min(2, "Country must be at least 2 characters")
+  //   .max(50, "Country must be less than 50 characters"),
     
-  state: z
+  // state: z
+  //   .string()
+  //   .max(50, "State must be less than 50 characters")
+  //   .optional(),
+
+  division: z
     .string()
-    .max(50, "State must be less than 50 characters")
+    .min(4, "Division name must be at least 4 characters")
+    .max(50, "Division must be less than 50 characters")
+    .optional(),
+
+  district: z
+    .string()
+    .min(4, "District name must be at least 4 characters")
+    .max(50, "District must be less than 50 characters")
     .optional(),
     
   city: z
     .string()
-    .max(50, "City must be less than 50 characters")
+    .max(50, "City must be less than 15 characters")
+    .optional(),
+  
+  island: z
+    .string()
+    .max(50, "Island must be less than 15 characters")
+    .optional(),
+
+  countryside: z
+    .string()
+    .max(50, "Countryside must be less than 15 characters")
+    .optional(),
+  
+  latitude: z
+    .number()
+    .min(-90, "Latitude must be between -90 and 90")
+    .max(90, "Latitude must be between -90 and 90")
     .optional(),
     
+  longitude: z
+    .number()
+    .min(-180, "Longitude must be between -180 and 180")
+    .max(180, "Longitude must be between -180 and 180")
+    .optional(),
+    
+  parentLocationId: z//Derived from selected district/state/country,preferrably in the server(or not, unsure)
+    .string()
+    .optional(),
+    
+  timezone: z
+    .string()
+    .max(50, "Timezone must be less than 50 characters")
+    .optional()
+}).refine((data) => data.division || data.district, {
+  message: "At least one of Division or District must be provided",
+  path: ["division"],
+});
+
+export const updateLocationSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Location name is required")
+    .min(4, "Location name must be at least 4 characters")
+    .max(100, "Location name must be less than 100 characters")
+    .optional(),
+    
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
+    
+  // locationType: z
+  //   .nativeEnum(LocationType, { errorMap: () => ({ message: "Please select a valid location type" }) })
+  //   .optional(),
+    
+  division: z
+    .string()
+    .min(4, "Division name must be at least 4 characters")
+    .max(50, "Division must be less than 50 characters")
+    .optional(),
+
+  district: z
+    .string()
+    .min(4, "District name must be at least 4 characters")
+    .max(50, "District must be less than 50 characters")
+    .optional(),
+    
+  city: z
+    .string()
+    .max(50, "City must be less than 15 characters")
+    .optional(),
+  
+  island: z
+    .string()
+    .max(50, "Island must be less than 15 characters")
+    .optional(),
+
+  countryside: z
+    .string()
+    .max(50, "Countryside must be less than 15 characters")
+    .optional(),
+  
   latitude: z
     .number()
     .min(-90, "Latitude must be between -90 and 90")
@@ -53,5 +144,3 @@ export const createLocationSchema = z.object({
     .max(50, "Timezone must be less than 50 characters")
     .optional()
 });
-
-export const updateLocationSchema = createLocationSchema.partial();

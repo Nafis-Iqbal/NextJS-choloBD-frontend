@@ -36,7 +36,7 @@ export const ActivitySpotForm = ({ mode, activitySpotData = {activityType: Activ
     const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
 
     const {data: locationsListData} = LocationApi.useGetAllLocationsRQ();
-    const locationsList = locationsListData?.data || [];
+    const locationsList = locationsListData?.data?.filter((location) => location.locationType === 'DISTRICT') || [];
 
     const [activitySpotId, setActivitySpotId] = useState<string>(activitySpot_Id ?? "");
 

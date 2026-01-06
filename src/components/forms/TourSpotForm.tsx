@@ -33,7 +33,7 @@ export const TourSpotForm = ({ mode, tourSpotData = {tourType: TourType.ADVENTUR
     const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
 
     const {data: locationsListData} = LocationApi.useGetAllLocationsRQ();
-    const locationsList = locationsListData?.data || [];
+    const locationsList = locationsListData?.data?.filter((location) => location.locationType === 'DISTRICT') || [];
 
     const [tourSpotId, setTourSpotId] = useState<string>(tourSpot_Id ?? "");
 

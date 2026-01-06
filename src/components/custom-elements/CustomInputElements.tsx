@@ -145,7 +145,7 @@ export const CustomSelectInput = forwardRef<HTMLSelectElement, CustomSelectProps
         { ...rest }
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option className="bg-gray-700" key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}

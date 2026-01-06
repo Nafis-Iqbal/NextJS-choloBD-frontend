@@ -75,6 +75,34 @@ export const CategoryViewListTableRow = ({
     )
 }
 
+export const LocationListTableRow = ({
+    id, name, locationType, navigateOnClick, onEditClick
+} : {
+    id: number, 
+    name: string, 
+    locationType: string,
+    navigateOnClick: () => void,
+    onEditClick: () => void
+}) => {
+    const locationDisplay = "Bangladesh";
+    
+    return (
+        <div className="flex p-2 w-full border-green-900 hover:bg-gray-600 text-center justify-center" onClick={() => navigateOnClick()}>
+            <p className="w-[10%]">{id}</p>
+            <p className="w-[30%] hover:cursor-pointer px-2">{name}</p>
+            <p className="w-[25%]">{locationType}</p>
+            <p className="w-[25%] px-2">{locationDisplay}</p>
+            <p className="w-[15%]">
+                <button 
+                    className="text-blue-400 hover:text-blue-300 bg-inherit text-sm"
+                    onClick={() => onEditClick()}
+                >
+                    Edit
+                </button>
+            </p>
+        </div>
+    )
+}
 
 export const TourSpotViewListTableRow = ({
     id,

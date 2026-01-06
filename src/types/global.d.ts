@@ -8,7 +8,6 @@ import {
   TourType,
   ActivityType,
   HotelType,
-  HotelServiceType,
   TransportServiceType,
   BusServiceType,
   FlightServiceType,
@@ -70,7 +69,7 @@ declare global {
     paymentStatus: PaymentStatus;
     emailVerified?: Date;
     phoneVerified?: Date;
-    createdAt: Date;
+    createdAt: string;
 
     wallet?: Wallet;
     spent: number;
@@ -104,9 +103,13 @@ declare global {
     name: string;
     description?: string;
     locationType: LocationType;
-    country: string;
-    state?: string;
+    //country: string;
+    //state?: string;
+    division: string;
+    district?: string;
     city?: string;
+    island?: string;
+    countryside?: string;
     latitude?: number;
     longitude?: number;
     parentLocationId?: string;
@@ -157,7 +160,7 @@ declare global {
     tourSpotId: string;
     activitySpotId?: string;
     transportOption: TransportServiceType;
-    hotelOption: HotelServiceType;
+    hotelOption: HotelType;
     tourPackage: TourPackage;
     userSegments?: UserTripSegment[];
   }
@@ -191,7 +194,7 @@ declare global {
     customTourSpotId?: string;
     customActivitySpotId?: string;
     customTransport?: TransportServiceType;
-    customHotel?: HotelServiceType;
+    customHotel?: HotelType;
     customNotes?: string;
     estimatedCost?: number;
     startTime?: string;

@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { FaShoppingCart, FaUser, FaSignInAlt, FaCog, FaGift } from "react-icons/fa";
+import { FaUser, FaSignInAlt, FaCog, FaGift } from "react-icons/fa";
 import IconWithBadge from "../custom-elements/IconWithBadge";
 import { useSelector } from "react-redux";
 import { AuthApi } from "@/services/api";
@@ -29,7 +29,7 @@ const BottomNavbar = () => {
                     />
                 </Link>
 
-                <Link className="w-[25%] py-2 text-center border-r-1 border-green-600" href="/cart">
+                <Link className="w-[25%] py-2 text-center border-r-1 border-green-600" href="/">
                     <IconWithBadge
                         Icon={FaGift} 
                         iconClassName="text-gray-700 text-3xl"

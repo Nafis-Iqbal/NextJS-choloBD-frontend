@@ -36,9 +36,9 @@ const Footer: React.FC = () => {
                 <HorizontalDivider className="sm:hidden w-[80%] mx-auto border-green-700"/>
 
                 <div className="flex flex-col justify-center w-full sm:w-[50%] text-center sm:text-start text-sm text-green-800 font-sans font-semibold bg-inherit">
-                    <Link className="sm:ml-10 p-2 mt-5 hover:underline hover:text-green-700" href="#experience">Language</Link>
-                    <Link className="sm:ml-10 p-2 hover:underline hover:text-green-700" href="#projectLinks">Special Deals</Link>
-                    <Link className="sm:ml-10 p-2 hover:underline hover:text-green-700" href="/cart">Cart</Link>
+                    <Link className="sm:ml-10 p-2 mt-5 hover:underline hover:text-green-700" href="/">Language</Link>
+                    <Link className="sm:ml-10 p-2 hover:underline hover:text-green-700" href="/">Tickets</Link>
+                    <Link className="sm:ml-10 p-2 hover:underline hover:text-green-700" href="/">Hotels</Link>
                     {isAuthenticated ? (
                         <a className="sm:ml-10 p-2 cursor-pointer hover:underline hover:text-green-500" onClick={onLogOutClick}>Log Out</a>
                     ) : (

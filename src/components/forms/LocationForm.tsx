@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { LocationApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { createLocationSchema } from "../../validators/locationValidators";
 import { CustomTextInput, CustomSelectInput } from "../custom-elements/CustomInputElements";
 import { LocationType } from "@/types/enums";
+import { stripNulls, produceValidationErrorMessage } from "@/utilities/utilities";
 
 type LocationFormMode = "create" | "edit";
 
@@ -26,6 +28,9 @@ export const LocationForm: React.FC<LocationFormProps> = ({
     const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
 
     const {data: locationData } = LocationApi.useGetLocationByIdRQ(location_id || "");
+    const {data: allLocationsData } = LocationApi.useGetAllLocationsRQ();
+    const allLocations = allLocationsData?.data || [];
+
     const [locationFormData, setLocationFormData] = useState<Partial<Location>>({});
     
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -72,20 +77,26 @@ export const LocationForm: React.FC<LocationFormProps> = ({
     const onLocationFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        const result = createLocationSchema.safeParse(locationFormData);
+        
+        if (!result.success) {
+            const message = produceValidationErrorMessage(result);
+            finishWithMessage(`Validation Failed: ${message}. Try Again.`);
+            return;
+        }
+
+        const sanitizedData = stripNulls(locationFormData);
+        showLoadingContent(true);
+
         if(mode === "create")
         {
-            const result = createLocationSchema.safeParse(locationFormData);
-
-            if (result.success === true) {
-                showLoadingContent(true);
-                createLocationMutate(result.data as Location);
-            }
+            createLocationMutate(sanitizedData as Location);
         }else{
             if(location_id)
             {
                 updateLocationMutate({
                     locationId: location_id,
-                    locationData: locationFormData as Partial<Location>
+                    locationData: sanitizedData as Partial<Location>
                 });
             }
         }
@@ -105,12 +116,15 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             parsedValue = value || undefined;
         }
 
+        // Map parentLocation field name to parentLocationId
+        const fieldName = name === "parentLocation" ? "parentLocationId" : name;
+
         setLocationFormData((prev) => ({
             ...prev,
-            [name]: parsedValue
+            [fieldName]: parsedValue
         }));
         
-        const updatedData = { ...locationFormData, [name]: parsedValue };
+        const updatedData = { ...locationFormData, [fieldName]: parsedValue };
         
         const result = createLocationSchema.safeParse(updatedData);
         if (!result.success) {
@@ -173,7 +187,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <CustomTextInput
+                {/* <CustomTextInput
                     type="text"
                     className="w-full"
                     placeholderText="Enter country"
@@ -183,9 +197,9 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                     value={locationFormData?.country || ""}
                     onChange={handleChange}
                     error={errors.country}
-                />
+                /> */}
 
-                <CustomTextInput
+                {/* <CustomTextInput
                     type="text"
                     className="w-full"
                     placeholderText="Enter state (optional)"
@@ -195,19 +209,69 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                     value={locationFormData?.state || ""}
                     onChange={handleChange}
                     error={errors.state}
-                />
+                /> */}
+                <AnimatePresence mode="wait">
+                    {requiresDivision(locationFormData.locationType) &&
+                        (
+                            <motion.div
+                                key="division-field"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                            >
+                                <CustomSelectInput
+                                    className="w-full"
+                                    label="Division"
+                                    labelStyle="text-green-300"
+                                    name="parentLocation"
+                                    value={locationFormData?.parentLocationId || ""}
+                                    onChange={handleChange}
+                                    error={errors.parentLocation}
+                                    options={[
+                                        { value: "", label: "Select Division" },
+                                            ...Object.values(allLocations).filter((location) => location.locationType === "DIVISION").map(location => ({
+                                                value: location.id,
+                                                label: location.name
+                                        }))
+                                    ]}
+                                />
+                            </motion.div>
+                        )
+                    }
 
-                <CustomTextInput
-                    type="text"
-                    className="w-full"
-                    placeholderText="Enter city (optional)"
-                    label="City"
-                    labelStyle="text-green-300"
-                    name="city"
-                    value={locationFormData?.city || ""}
-                    onChange={handleChange}
-                    error={errors.city}
-                />
+                    {requiresDistrict(locationFormData.locationType) &&
+                        (
+                            <motion.div
+                                key="district-division-fields"
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.3, ease: "easeInOut" }}
+                                className="col-span-1 md:col-span-2"
+                            >
+                                <div className="flex flex-col md:flex-row gap-4">    
+                                    <CustomSelectInput
+                                        className="w-full"
+                                        label="District"
+                                        labelStyle="text-green-300"
+                                        value={locationFormData?.parentLocationId || ""}
+                                        onChange={handleChange}
+                                        name="parentLocation"
+                                        error={errors.parentLocation}
+                                        options={[
+                                            { value: "", label: "Select District" },
+                                                ...Object.values(allLocations).filter((location) => location.locationType === "DISTRICT").map(location => ({
+                                                    value: location.id,
+                                                    label: location.name
+                                            }))
+                                        ]}
+                                    />
+                                </div>
+                            </motion.div>
+                        )
+                    }
+                </AnimatePresence>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -257,3 +321,17 @@ export const LocationForm: React.FC<LocationFormProps> = ({
         </form>
     );
 };
+
+function requiresDistrict(locationType: LocationType | undefined): boolean {
+    return locationType === LocationType.CITY || locationType === LocationType.COUNTRYSIDE || 
+    locationType === LocationType.ISLAND;
+}
+
+//UNUSED FUNCTION
+function requiresDivision(locationType: LocationType | undefined): boolean {
+    return locationType === LocationType.DISTRICT;
+}
+
+function requiresCountry(locationType: LocationType | undefined): boolean {
+    return locationType === LocationType.DIVISION;
+}

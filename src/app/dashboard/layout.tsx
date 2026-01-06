@@ -29,6 +29,7 @@ export default function DashboardLayout({
     const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated;
     console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isLoading);
+    
     useEffect(() => {
         if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
             router.replace("/");

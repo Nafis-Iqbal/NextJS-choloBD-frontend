@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { ConfigApi, UserApi, AuthApi } from "@/services/api";
+import { ConfigApi, AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
 import { UserManagerModule } from "@/components/modular-components/UserManagerModule";
+import { WalletManagerModule } from "@/components/modular-components/WalletManagerModule";
 import { ComplaintManagerModule } from "@/components/modular-components/ComplaintManagerModule";
 import { ImageUploadModule } from "@/components/modular-components/ImageUploadModule";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
 import { HeroSection } from "@/types/enums";
-import { LocationWalletManagerModule } from "@/components/modular-components/LocationAndWalletManagerModule";
+import { LocationManagerModule } from "@/components/modular-components/LocationManagerModule";
 import CategoryManagerModule from "@/components/modular-components/CategoryManagerModule";
 
 export default function MasterAdminDashboard() {
@@ -116,18 +117,20 @@ export default function MasterAdminDashboard() {
 
                 <HorizontalDivider className="mr-5 my-10"/>
 
+                <LocationManagerModule/>
+
                 <CategoryManagerModule/>
 
-                <LocationWalletManagerModule/>
-
                 <UserManagerModule/>
+
+                <WalletManagerModule/>
 
                 <ComplaintManagerModule/>
 
                 <section className="ml-2 flex flex-col space-y-3" id="dashboard_site_settings">
                     <div className="flex items-center space-x-5">
                         <h3 className="text-green-500 font-bold">Site Config Features</h3>
-                        
+                        <p className="text-gray-400">(Hero Images take 500 seconds to take effect)</p>
                     </div>
 
                     <h4 className="my-2 text-green-300">Hero Section Branding Images</h4>

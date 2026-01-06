@@ -12,7 +12,7 @@ import useLogout from "@/hooks/UtilHooks/logoutHooks";
 import { Menu } from "lucide-react";
 import { MotionDropdownMenu } from "./DropdownMenu";
 import { MotionSidebarMenu } from "./SIdebarMenu";
-import { FaShoppingCart, FaUser, FaGift, FaGlobe, FaSignOutAlt, FaBlackTie, FaSearch, FaCaretDown, FaThList } from "react-icons/fa";
+import { FaUser, FaGift, FaGlobe, FaSignOutAlt, FaBlackTie, FaSearch, FaCaretDown, FaThList } from "react-icons/fa";
 import IconWithBadge from "../custom-elements/IconWithBadge";
 import BasicButton from "../custom-elements/Buttons";
 import { SearchInputBar } from "./SearchInputBar";
@@ -161,7 +161,7 @@ const Navbar: React.FC = () => {
                             <FaGlobe className="md:text-2xl text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130"/>
                         </a>
 
-                        <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href="/cart">
+                        <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href="/dashboard">
                             <IconWithBadge Icon={FaGift} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
                         </Link>
 

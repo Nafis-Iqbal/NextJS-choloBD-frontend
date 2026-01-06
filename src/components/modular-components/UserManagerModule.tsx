@@ -124,7 +124,7 @@ export const UserManagerModule = () => {
                             <p className="w-[15%]">Spent</p>
                             <p className="w-[15%]">Joined</p>
                         </div>
-                        <div className="flex flex-col border-1 border-green-800">
+                        <div className="flex flex-col border-1 border-green-800 h-[80vh] md:h-[50vh] overflow-y-auto">
                             {
                                 isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
                                 isFetchError ? (<NoContentTableRow displayMessage="An error occured"  tdColSpan={1}/>) :

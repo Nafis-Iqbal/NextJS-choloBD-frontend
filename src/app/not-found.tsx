@@ -87,19 +87,19 @@ export default function NotFound() {
                     <div className="border-t border-gray-700 pt-6">
                         <p className="text-gray-400 mb-4">Looking for something specific?</p>
                         <div className="flex flex-wrap justify-center gap-4 text-sm">
-                            <Link href="/shop" className="text-[#00FF99] hover:underline transition-colors">
-                                Shop
+                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
+                                Hotels
                             </Link>
-                            <Link href="/categories" className="text-[#00FF99] hover:underline transition-colors">
-                                Categories
+                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
+                                Tickets
                             </Link>
-                            <Link href="/cart" className="text-[#00FF99] hover:underline transition-colors">
-                                Cart
+                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
+                                Tour Spots
                             </Link>
-                            <Link href="/profile" className="text-[#00FF99] hover:underline transition-colors">
+                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
                                 Profile
                             </Link>
-                            <Link href="/contact" className="text-[#00FF99] hover:underline transition-colors">
+                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
                                 Contact
                             </Link>
                         </div>

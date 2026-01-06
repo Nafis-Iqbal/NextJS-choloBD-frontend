@@ -39,7 +39,7 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
 
     //Hooks
     const {data: locationsListData} = LocationApi.useGetAllLocationsRQ();
-    const locationsList = locationsListData?.data?.filter((location) => location.locationType === 'CITY') || [];
+    const locationsList = locationsListData?.data?.filter((location) => location.locationType === 'DISTRICT') || [];
 
     const {mutate: createHotelMutate} = HotelApi.useCreateHotelRQ(
         (responseData) => {
@@ -143,7 +143,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
             return;
         }
 
-        console.log("res d ", result.data, "san d ", sanitizedData);
         if(mode === "create") {
             createHotelMutate(result.data as Hotel);
         } else {
@@ -261,9 +260,10 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 error={errors.locationId}
                 options={[
                     { label: "-- Select a location --", value: "" },
-                    ...locationsList
-                        .map((loc) => ({ label: loc.name, value: loc.id }))
-                        .sort((a, b) => a.label.localeCompare(b.label))
+                        ...Object.values(locationsList).map(location => ({
+                            value: location.id,
+                            label: location.name
+                    }))
                 ]}
             />
 

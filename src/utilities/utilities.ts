@@ -78,6 +78,30 @@ export const produceValidationErrorMessage = (result: any): string => {
     return messages.join('; ');
 };
 
+export const stripLeadingDateFromISO = (datetime?: string | Date): string => {
+    if (datetime === undefined || datetime === null) return "";
 
+    // Normalize to string (if Date provided, convert to ISO)
+    const s = typeof datetime === "string" ? datetime : (datetime instanceof Date ? datetime.toISOString() : String(datetime));
+
+    // If ISO-like with 'T', return the date part before 'T'
+    const tIndex = s.indexOf("T");
+    if (tIndex !== -1) {
+        return s.substring(0, tIndex);
+    }
+
+    // If there's a space separator, return part before first space
+    const spaceIndex = s.indexOf(" ");
+    if (spaceIndex !== -1) {
+        return s.substring(0, spaceIndex);
+    }
+
+    // Fallback: extract leading YYYY-MM-DD if present
+    const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (m && m[1]) return m[1];
+
+    // Nothing to strip (no leading date found) - return original
+    return s;
+};
 
 export default makeFirstLetterUppercase;

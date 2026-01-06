@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { UserApi, AuthApi } from "@/services/api";
 
 import Image from "next/image"
+import { stripLeadingDateFromISO } from "@/utilities/utilities";
 import DivGap from "@/components/custom-elements/UIUtilities"
 import { EditButton } from "@/components/custom-elements/Buttons"
 import { AddressManagerModule } from "@/components/modular-components/AddressManagerModule";
@@ -15,8 +16,8 @@ export default function UserProfileInfoDashboard() {
     const currentUserRole = authResponse?.data?.userRole;
     const router = useRouter();
 
-    const { data: userDetailData} = UserApi.useGetUserDetailRQ(currentUserId || "", isAuthenticated && !!currentUserId);
-
+    const { data: userDetailData} = UserApi.useGetOwnUserDetailRQ(currentUserId || "", isAuthenticated && !!currentUserId);
+    console.log("User Detail Data in Dashboard:", userDetailData);
     if (!isAuthenticated || !currentUserId) {
         return (
             <section className="flex justify-center items-center h-64">
@@ -52,7 +53,7 @@ export default function UserProfileInfoDashboard() {
                     <div className="flex flex-col space-y-5">
                         <p>Email is&nbsp;&nbsp;<span className="text-xl text-green-300">{userDetail?.email}</span></p>
 
-                        <p>Account created,&nbsp;&nbsp;<span className="text-xl text-green-300">14th December, 2025</span></p>
+                        <p>Account created,&nbsp;&nbsp;<span className="text-xl text-green-300">{stripLeadingDateFromISO(userDetail?.createdAt) || "N/A"}</span></p>
                     </div>
                     
                     <AddressManagerModule 

@@ -1,25 +1,31 @@
 "use client";
 
-import { UserApi, AuthApi } from "@/services/api";
-import { useEffect, useState } from "react";
-import { Role, UserStatus } from "@/types/enums";
-
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+import { UserApi, AuthApi } from "@/services/api";
+import { Role, UserStatus } from "@/types/enums";
+import { queryClient } from "@/services/apiInstance";
+import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import DivGap from "@/components/custom-elements/UIUtilities";
+import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { ImageUploadButton } from "@/components/custom-elements/ImageUploadButton";
 import { EditButton } from "@/components/custom-elements/Buttons";
-import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { CustomCheckboxInput, CustomMiniTextInput } from "@/components/custom-elements/CustomInputElements";
-import ConfirmationModal from "@/components/modals/ConfirmationModal";
-import { queryClient } from "@/services/apiInstance";
-import { useParams } from "next/navigation";
 
 export default function UserDetailPage() {
+    const router = useRouter();
     const params = useParams();
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+
+    const {openNotificationPopUpMessage} = useGlobalUI();
+
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
     const currentUserRole = authResponse?.data?.userRole;
+    
     const userId = params.user_id as string;
 
     const [userName, setUserName] = useState<string>("");
@@ -32,17 +38,8 @@ export default function UserDetailPage() {
     const [isEditingUserStatus, setIsEditingUserStatus] = useState<boolean>(false);
 
     const [isUserUpdateConfirmationVisible, setIsUserUpdateConfirmationVisible] = useState<boolean>(false);
-    const {openNotificationPopUpMessage} = useGlobalUI();
 
     const { data: userDetailData} = UserApi.useGetUserDetailRQ(userId, true);
-
-    useEffect(() => {
-        if (userDetailData?.data) {
-            setUserName(userDetailData.data.userName || "");
-            setUserRole(userDetailData.data.role || "");
-            setUserStatus(userDetailData.data.userStatus || "");
-        }
-    }, [userDetailData]);
 
     const { mutate: updateUserRoleStatus } = UserApi.useUpdateUserRoleStatusRQ(
         (response) => {
@@ -79,6 +76,24 @@ export default function UserDetailPage() {
             openNotificationPopUpMessage("Failed to update user info. An error occurred.");
         }
     );
+
+    useEffect(() => {
+        if (userDetailData?.data) {
+            setUserName(userDetailData.data.userName || "");
+            setUserRole(userDetailData.data.role || "");
+            setUserStatus(userDetailData.data.userStatus || "");
+        }
+    }, [userDetailData]);
+
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined || currentUserRole !== "MASTER_ADMIN")) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, router]);
+
+    if (isLoading) {
+        return null; // or <FullPageLoader />
+    }
 
     const isOwnProfile = currentUserId === userId;
     const userDetail = userDetailData?.data as User;

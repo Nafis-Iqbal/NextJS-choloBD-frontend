@@ -64,6 +64,24 @@ export function useUpdateUserRoleStatusRQ(onSuccessFn: (ApiResponse: any) => voi
     });
 }
 
+export async function getOwnUserDetail(userId: string) {
+  const response = await apiFetch<ApiResponse<User>>(`/users/profile`, {
+    method: 'GET'
+  });
+
+  return response;
+}
+
+export function useGetOwnUserDetailRQ(userId: string, enabled: boolean) {
+    return useQuery<ApiResponse<User>>({
+        queryFn: () => getOwnUserDetail(userId),
+        queryKey: ["users", userId],
+        staleTime: 30_000,
+        gcTime: 30 * 1000,
+        enabled
+    });
+}
+
 export async function getUserDetail(userId: string) {
   const response = await apiFetch<ApiResponse<User>>(`/users/profile/${userId}`, {
     method: 'GET'

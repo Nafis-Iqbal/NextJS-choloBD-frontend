@@ -140,7 +140,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
             <ul className="flex flex-col font-sans">
                 <li>
                     <button disabled className="w-[100%] p-2 hover:bg-gray-600 border-b-1 text-pink-100 disabled:bg-gray-400 disabled:cursor-not-allowed" onClick={() =>navigateToPage('/track-order')}>
-                        Track Order
+                        Track Seat Bookings
                     </button>
                 </li>
                 <li>

@@ -50,7 +50,7 @@ export const AddressManagerModule = ({
 
     const { openNotificationPopUpMessage } = useGlobalUI();
 
-    const {data: userDetail} = UserApi.useGetUserDetailRQ(userId ? userId : "", userId ? true : false);
+    const {data: userDetail} = UserApi.useGetOwnUserDetailRQ(userId ? userId : "", userId ? true : false);
     const { data: addressesData } = AddressApi.useGetUserAddressesRQ(userId ? userId : "", userId ? true : false);
     const {data: addressInfoModeDetail} = AddressApi.useGetAddressDetailRQ(infoAddressId ? infoAddressId : "");
     
