@@ -10,11 +10,37 @@
         @apply text-white;
         @apply hover:text-emerald-500 hover:cursor-pointer;
     }
+
+    .bg-section{
+        @apply bg-gray-700; /* or any Tailwind bg utility */
+        @apply border-[#00FF994D];
+        @apply border-1;
+    }
+
+    .bg-sub-section{
+        @apply bg-gray-800; /* or any Tailwind bg utility */
+        @apply border-[#00FF994D];
+    }
+
+    .bg-title{
+        @apply bg-gray-800; /* or any Tailwind bg utility */
+        @apply border-[#00FF994D];
+    }
+
+    .bg-header{
+        @apply bg-gray-800; /* or any Tailwind bg utility */
+        @apply border-[#00FF994D];
+    }
+
+    .bg-sub-header{
+        @apply bg-gray-800; /* or any Tailwind bg utility */
+        @apply border-[#00FF994D];
+    }
 }
 
 @layer base {
   div {
-    @apply bg-gray-800; /* or any Tailwind bg utility */
+    @apply bg-inherit; /* or any Tailwind bg utility */
     @apply border-[#00FF99];
     @apply text-gray-100;
   }
@@ -75,6 +101,11 @@
   --foreground: #374151;
 }
 /* --foreground: #00FF99; */
+
+html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
 
 body {
   background: var(--background);

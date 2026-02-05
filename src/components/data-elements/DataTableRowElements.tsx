@@ -376,4 +376,102 @@ export const ProductViewListTableRow = ({
     )
 }
 
+export const TourPackageViewListTableRow = ({
+    id,
+    packageName,
+    tourPackage_id,
+    division,
+    tourType,
+    duration,
+    daySegments,
+    onClickNavigate,
+    onEdit,
+    onDelete
+} : {
+    id: number,
+    packageName: string,
+    tourPackage_id: string,
+    division: string,
+    tourType: string,
+    duration: number,
+    daySegments: Array<{
+        dayNumber: number,
+        tourSpotName?: string,
+        activitySpotName?: string,
+        transportOption?: string,
+        hotelOption?: string
+    }>,
+    onClickNavigate: () => void,
+    onEdit: () => void,
+    onDelete: () => void
+}) => {
+    // Group segments by day number and limit to duration
+    const groupedSegments = daySegments.reduce((acc, segment) => {
+        if (segment.dayNumber <= duration && segment.dayNumber > 0) {
+            if (!acc[segment.dayNumber]) {
+                acc[segment.dayNumber] = [];
+            }
+            acc[segment.dayNumber].push(segment);
+        }
+        return acc;
+    }, {} as Record<number, Array<{dayNumber: number, tourSpotName?: string, activitySpotName?: string}>>);
+
+    // Create summary of first 3 days with their spots
+    const daysSummary = Array.from({length: Math.min(duration, 3)}, (_, i) => i + 1)
+        .map(dayNum => {
+            const segments = groupedSegments[dayNum] || [];
+            const spots = segments
+                .map(s => s.tourSpotName || s.activitySpotName)
+                .filter(Boolean)
+                .slice(0, 3);
+            
+            if (spots.length === 0) return `Day ${dayNum}: No spots`;
+            if (spots.length > 1) return `Day ${dayNum}: ${spots[0]} +${spots.length - 1}`;
+            return `Day ${dayNum}: ${spots[0]}`;
+        });
+
+    return (
+        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+            <p className="w-[5%] text-sm">{id}</p>
+            
+            <button 
+                className="w-[20%] hover:text-green-500 hover:scale-105 transition-all duration-150 cursor-pointer text-left px-2"
+                onClick={() => onClickNavigate()}
+            >
+                <span className="font-semibold">{packageName}</span>
+            </button>
+            
+            <p className="w-[12%] text-sm text-gray-300">{division}</p>
+            <p className="w-[10%] text-sm">{tourType}</p>
+            <p className="w-[8%] text-sm font-medium text-green-300">{duration} days</p>
+            
+            <div className="w-[25%] text-xs text-left p-2 space-y-1 overflow-hidden">
+                {daysSummary.map((summary, idx) => (
+                    <p key={idx} className="truncate text-gray-200 leading-tight">{summary}</p>
+                ))}
+                {Object.keys(groupedSegments).length === 0 && 
+                    <p className="text-gray-400 italic">No segments added</p>
+                }
+            </div>
+            
+            <button 
+                className="w-[10%] hover:text-green-500 hover:scale-105 transition-all duration-150 cursor-pointer text-xs text-gray-400"
+                onClick={() => onClickNavigate()}
+            >
+                {tourPackage_id}
+            </button>
+            
+            <div className="w-[10%] flex items-center justify-center space-x-2">
+                <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
+                <button onClick={onDelete} className="p-1 bg-red-500 rounded hover:bg-red-400 hover:scale-110">
+                    <FaTrash className="text-black cursor-pointer"/>
+                </button>
+            </div>
+        </div>
+    )
+}
+
+
+
+
 export default ProductViewListTableRow;

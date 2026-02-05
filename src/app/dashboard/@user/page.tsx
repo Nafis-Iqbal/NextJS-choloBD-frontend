@@ -8,6 +8,7 @@ import { stripLeadingDateFromISO } from "@/utilities/utilities";
 import DivGap from "@/components/custom-elements/UIUtilities"
 import { EditButton } from "@/components/custom-elements/Buttons"
 import { AddressManagerModule } from "@/components/modular-components/AddressManagerModule";
+import { UserActivityHistoryModule } from "@/components/modular-components/UserActivityHistoryModule";
 
 export default function UserProfileInfoDashboard() {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
@@ -32,10 +33,12 @@ export default function UserProfileInfoDashboard() {
         <section className="flex flex-col p-2 font-sans" id="dashboard_profile">
             <div className="md:ml-6 flex flex-col space-y-2">
                 <div className="flex space-x-4">
-                    <h3 className="text-green-500">Your Profile</h3>
+                    <h3 className="text-green-500">Your Activities and Profile Info</h3>
 
                     <EditButton onClick={() => router.push(`/user_profile/${currentUserId}`)}></EditButton>
                 </div>
+
+                <UserActivityHistoryModule/>
                 
                 <p className="text-green-200">Personalize your account info, preferences.</p>
 

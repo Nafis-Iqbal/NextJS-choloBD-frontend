@@ -29,7 +29,7 @@ const NotificationPopUp: React.FC = () => {
     >
       {/* Modal Animation */}
       <motion.div
-        className="p-5 rounded-md shadow-lg md:w-120 text-center border-3 border-gray-600"
+        className="p-5 bg-section rounded-md shadow-lg md:w-120 text-center border-3 border-gray-600"
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.5 }}

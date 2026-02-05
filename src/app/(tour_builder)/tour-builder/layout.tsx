@@ -6,7 +6,7 @@ import { AuthApi } from "@/services/api";
 import Navbar from "@/components/structure-components/Navbar";
 import Footer from "@/components/structure-components/Footer";
 import BottomNavbar from "@/components/structure-components/BottomNavbar";
-import SidebarMenu from "@/components/structure-components/SIdebarMenu";
+import SidebarMenu, { MotionSidebarMenu } from "@/components/structure-components/SIdebarMenu";
 import DivGap from "@/components/custom-elements/UIUtilities";
 import React, { use, useEffect } from "react";
 
@@ -26,20 +26,9 @@ export default function DashboardLayout({
     const router = useRouter();
     const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated;
-    console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isLoading);
     
-    useEffect(() => {
-        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
-            router.replace("/");
-        }
-    }, [isLoading, isAuthenticated, router]);
-
-    if (isLoading) {
-        return null; // or <FullPageLoader />
-    }
-
     return (
-        <section className="flex flex-col min-h-screen">
+        <section className="flex flex-col">
             <header className="relative">
                 <nav>
                     <Navbar/>
@@ -48,25 +37,29 @@ export default function DashboardLayout({
             
             <DivGap customHeightGap="h-[55px] md:h-[70px]"/>
 
-            <div className="flex border min-h-screen">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 shadow-[0_0_20px_#00FF99] font-sans">
-                    <SidebarMenu 
-                        className="fixed w-[15%] top-17 left-0" 
+            <div className="flex">
+                <aside className="hidden md:block relative z-10 flex-grow w-[15%] font-sans">
+                    <MotionSidebarMenu
+                        variants={{
+                            rest: { x: '-100%', transition: { type: 'spring', stiffness: 500, damping: 40, delay: 2.0 } },
+                            hover: { x: '-2%', transition: { type: 'spring', stiffness: 200, damping: 20} }
+                        }}
+                        initial="rest"
+                        animate="rest"
+                        whileHover="hover"
                         isPopOutSidebar={false}
+                        opensOnHover={true}
+                        className="fixed w-[15%]"
                     />
                 </aside>
 
-                <div className="flex flex-col flex-grow w-full md:w-[85%] md:border-r-4">
-                    {[children, master_admin, service_admin, employee, user].map((el, i) => (
-                        <React.Fragment key={i}>
-                            {el}
-                        </React.Fragment>
-                    ))}
+                <div className="flex flex-col flex-grow w-full md:w-[70%]">
+                    {children}
                 </div>
 
-                {/* <aside className="relative z-10 flex-grow w-[25%] shadow-[0_0_20px_#00FF99]">
-                    {stats}
-                </aside> */}
+                <aside className="hidden md:block relative z-10 flex-grow w-[15%]">
+                    
+                </aside>
             </div>
             
             <nav>

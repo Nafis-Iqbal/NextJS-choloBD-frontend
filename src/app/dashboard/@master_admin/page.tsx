@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ConfigApi, AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 
-import { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
+import DivGap, { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
 import { UserManagerModule } from "@/components/modular-components/UserManagerModule";
 import { WalletManagerModule } from "@/components/modular-components/WalletManagerModule";
 import { ComplaintManagerModule } from "@/components/modular-components/ComplaintManagerModule";
@@ -91,11 +91,11 @@ export default function MasterAdminDashboard() {
     return (
         <section className="flex flex-col p-2 font-sans" id="dashboard_master_admin">
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h2 className="text-green-500">Your System</h2>
+                <h2 className="text-green-500">Master Admin Panel</h2>
                 <p className="text-green-200">Site management functions here.</p>
 
                 <div className="flex flex-col space-y-6 my-10">
-                    <h3 className="text-green-500 font-semibold mr-5">Manage Site Content Pages</h3>
+                    <h3 className="text-green-500 font-semibold mr-5">Manage Site Content</h3>
 
                     <div className="flex flex-col w-full md:w-[40%] space-y-3">
                         <div className="flex justify-between mx-2">
@@ -111,6 +111,13 @@ export default function MasterAdminDashboard() {
                         <ul className="flex justify-between mx-2">
                             <button className="green-underline-button text-xl" onClick={() => router.push('/activity-spots')}>View Activity Spot List</button>
                             <button className="green-button" onClick={() => router.push('/activity-spots/create')}>Add new Activity Spot</button>
+                        </ul>
+
+                        <DivGap/>
+
+                        <ul className="flex justify-between mx-2">
+                            <button className="green-underline-button text-xl" onClick={() => router.push('/tour-builder/tours')}>View Tour Plan Templates List</button>
+                            <button className="green-button" onClick={() => router.push('/tour-builder')}>Add new Tour Plan Template</button>
                         </ul>
                     </div>
                 </div>

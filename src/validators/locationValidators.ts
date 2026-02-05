@@ -74,7 +74,7 @@ export const createLocationSchema = z.object({
     .string()
     .max(50, "Timezone must be less than 50 characters")
     .optional()
-}).refine((data) => data.division || data.district, {
+}).refine((data) => data.locationType === LocationType.DIVISION || data.division || data.district, {
   message: "At least one of Division or District must be provided",
   path: ["division"],
 });

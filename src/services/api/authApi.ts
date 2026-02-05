@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Role, UserStatus } from "@/types/enums";
+import { Role, UserStatus, ServiceType } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
 
@@ -7,7 +7,8 @@ async function getCurrentUserAuthentication() {
   const response = await apiFetch<ApiResponse<{ 
     isAuthenticated: boolean 
     userId: string,
-    userRole: Role
+    userRole: Role,
+    userServiceType?: ServiceType
   }>>(`/auth/authenticate`, {
     method: 'GET'
   });
@@ -19,7 +20,8 @@ export function useGetUserAuthenticationRQ(enabled: boolean) {
     return useQuery<ApiResponse<{ 
       isAuthenticated: boolean 
       userId: string,
-      userRole: Role 
+      userRole: Role,
+      userServiceType?: ServiceType
     }>>({
         queryFn: () => getCurrentUserAuthentication(),
         queryKey: ["users", "authenticate"],

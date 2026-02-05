@@ -256,6 +256,8 @@ export default function UserDetailPage() {
                             </div>
                         }
                     </div>
+
+                    <p>Service is <span className="text-xl text-green-300">{userDetail?.serviceType || "N/A"}</span></p>
                     
                     <p>Email Verified&nbsp;&nbsp;<span className="text-xl text-green-300">{userDetail?.emailVerified ? 'Yes' : 'No'}</span></p>
 

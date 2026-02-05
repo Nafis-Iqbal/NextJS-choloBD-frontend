@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LocationApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
-import { createLocationSchema } from "../../validators/locationValidators";
+import { createLocationSchema, updateLocationSchema } from "../../validators/locationValidators";
 import { CustomTextInput, CustomSelectInput } from "../custom-elements/CustomInputElements";
 import { LocationType } from "@/types/enums";
 import { stripNulls, produceValidationErrorMessage } from "@/utilities/utilities";
@@ -77,15 +77,18 @@ export const LocationForm: React.FC<LocationFormProps> = ({
     const onLocationFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const result = createLocationSchema.safeParse(locationFormData);
+        const sanitizedData = stripNulls(locationFormData);
+        sanitizedData.country = "Bangladesh"; // Default country
+        const schema = mode === "create" ? createLocationSchema : updateLocationSchema;
+        const result = schema.safeParse(sanitizedData);
         
         if (!result.success) {
             const message = produceValidationErrorMessage(result);
+            console.log(locationFormData)
             finishWithMessage(`Validation Failed: ${message}. Try Again.`);
             return;
         }
 
-        const sanitizedData = stripNulls(locationFormData);
         showLoadingContent(true);
 
         if(mode === "create")
@@ -117,23 +120,21 @@ export const LocationForm: React.FC<LocationFormProps> = ({
         }
 
         // Map parentLocation field name to parentLocationId
-        const fieldName = name === "parentLocation" ? "parentLocationId" : name;
+        const fieldName = (name === "parentLocationDivision" || name === "parentLocationDistrict") ? "parentLocationId" : name;
 
-        setLocationFormData((prev) => ({
-            ...prev,
-            [fieldName]: parsedValue
-        }));
-        
         const updatedData = { ...locationFormData, [fieldName]: parsedValue };
-        
-        const result = createLocationSchema.safeParse(updatedData);
-        if (!result.success) {
-            const key = name as keyof typeof result.error.formErrors.fieldErrors;
-            const fieldError = result.error.formErrors.fieldErrors[key]?.[0];
 
-            setErrors((prev) => ({ ...prev, [name]: fieldError }));
+        setLocationFormData(updatedData);
+        
+        const schema = mode === "create" ? createLocationSchema : updateLocationSchema;
+        const result = schema.safeParse(updatedData);
+        if (!result.success) {
+            const fieldErrors = result.error.formErrors.fieldErrors;
+            const fieldError = fieldErrors[fieldName as keyof typeof fieldErrors]?.[0];
+
+            setErrors((prev) => ({ ...prev, [fieldName]: fieldError }));
         } else {
-            setErrors((prev) => ({ ...prev, [name]: undefined }));
+            setErrors((prev) => ({ ...prev, [fieldName]: undefined }));
         }
     };
 

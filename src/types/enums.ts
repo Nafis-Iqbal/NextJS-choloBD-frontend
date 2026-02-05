@@ -21,6 +21,15 @@ export enum UserTripStatus {
   CANCELLED = "CANCELLED"
 }
 
+export enum BookingStatus {
+  PENDING = "PENDING",
+  CONFIRMED = "CONFIRMED",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+  REFUNDED = "REFUNDED",
+  NO_SHOW = "NO_SHOW"
+}
+
 // Location and Tourism Enums
 export enum LocationType {
   //COUNTRY = "COUNTRY",
@@ -30,12 +39,6 @@ export enum LocationType {
   CITY = "CITY",
   ISLAND = "ISLAND",
   COUNTRYSIDE = "COUNTRYSIDE"
-}
-
-export enum LocationSubType {
-    CITY = "CITY",
-    COUNTRYSIDE = "COUNTRYSIDE",
-    ISLAND = "ISLAND"
 }
 
 export enum CategoryType {
@@ -52,7 +55,8 @@ export enum TourType {
   CITY_TOUR = "CITY_TOUR",
   NATURE = "NATURE",
   RELIGIOUS = "RELIGIOUS",
-  HISTORICAL = "HISTORICAL"
+  HISTORICAL = "HISTORICAL",
+  MIXED = "MIXED"
 }
 
 export enum ActivityType {
@@ -74,6 +78,29 @@ export enum HotelType {
   HOSTEL = "HOSTEL",
   GUESTHOUSE = "GUESTHOUSE",
   APARTMENT = "APARTMENT"
+}
+
+export enum HotelRoomType {
+  SINGLE = "SINGLE",
+  DOUBLE = "DOUBLE",
+  SUITE = "SUITE",
+  DELUXE = "DELUXE"
+}
+
+// Review and Rating Enums
+export enum ReviewType {
+  HOTEL = "HOTEL",
+  TOUR_SPOT = "TOUR_SPOT",
+  ACTIVITY_SPOT = "ACTIVITY_SPOT"
+}
+
+// Service and Booking Enums
+export enum ServiceType {
+  HOTEL_BOOKING = "HOTEL_BOOKING",
+  TOUR_PACKAGE = "TOUR_PACKAGE",
+  TRANSPORT_SERVICE = "TRANSPORT_SERVICE",
+  ACTIVITY_BOOKING = "ACTIVITY_BOOKING",
+  GUIDE_SERVICE = "GUIDE_SERVICE"
 }
 
 // Transport Enums
@@ -149,31 +176,6 @@ export enum TransactionStatus {
   FAILED = "FAILED",
   CANCELLED = "CANCELLED",
   REVERSED = "REVERSED"
-}
-
-// Service and Booking Enums
-export enum ServiceType {
-  HOTEL_BOOKING = "HOTEL_BOOKING",
-  TOUR_PACKAGE = "TOUR_PACKAGE",
-  TRANSPORT_SERVICE = "TRANSPORT_SERVICE",
-  ACTIVITY_BOOKING = "ACTIVITY_BOOKING",
-  GUIDE_SERVICE = "GUIDE_SERVICE"
-}
-
-export enum BookingStatus {
-  PENDING = "PENDING",
-  CONFIRMED = "CONFIRMED",
-  CANCELLED = "CANCELLED",
-  COMPLETED = "COMPLETED",
-  REFUNDED = "REFUNDED",
-  NO_SHOW = "NO_SHOW"
-}
-
-// Review and Rating Enums
-export enum ReviewType {
-  HOTEL = "HOTEL",
-  TOUR_SPOT = "TOUR_SPOT",
-  ACTIVITY_SPOT = "ACTIVITY_SPOT"
 }
 
 // System and Admin Enums

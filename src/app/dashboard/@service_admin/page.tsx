@@ -3,12 +3,14 @@
 import { AuthApi } from "@/services/api";
 
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
-import { ComplaintManagerModule } from "@/components/modular-components/ComplaintManagerModule"
+import { HotelServiceAdminModule } from "@/components/modular-components/HotelServiceAdminModule";
+import { BusServiceAdminModule } from "@/components/modular-components/BusServiceAdminModule";
 
 export default function AdminDashboard() {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserRole = authResponse?.data?.userRole;
+    const currentUserServiceType = authResponse?.data?.userServiceType;
     
     if(!isAuthenticated || (currentUserRole !== "SERVICE_ADMIN" && currentUserRole !== "MASTER_ADMIN")) return (
         <>
@@ -18,30 +20,15 @@ export default function AdminDashboard() {
     return (
         <section className="flex flex-col p-2 font-sans" id="dashboard_admin">
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="text-green-500">Your Business</h3>
-                <p className="text-green-200">Manage everything at a glance.</p>
+                <h3 className="text-green-500">Service Admin Panel</h3>
+                <p className="text-green-200">Manage your business here.</p>
 
-                <ComplaintManagerModule />
+                {
+                    currentUserServiceType === "HOTEL_BOOKING" ? <HotelServiceAdminModule /> : 
+                    currentUserServiceType === "TRANSPORT_SERVICE" ? <BusServiceAdminModule /> : null
+                }
+                <BusServiceAdminModule />
 
-                <section className="flex flex-col" id="dashboard_store_settings">
-                    <div className="flex items-center space-x-5">
-                        <h3 className="text-green-500 font-bold">Store visibility toggle</h3>
-                        <div className="hidden md:block text-sm px-1 bg-red-400 rounded-md self-center">Feature Not Ready</div>
-                        <div className="md:hidden text-sm px-1 bg-red-400 rounded-md self-center">Not Ready</div>
-                    </div>
-
-                    <div className="flex flex-col space-y-5 mt-5 justify-start mr-5">
-                        <div className="flex items-center space-x-4 justify-between">
-                            <label>Freeze All Product Stocks</label>
-                            <input className="w-6 h-6" type="checkbox"></input>
-                        </div>
-
-                        <div className="flex items-center space-x-4 justify-between">
-                            <label className="text-red-700">Toggle Store Maintenance Mode</label>
-                            <input className="w-6 h-6" type="checkbox"></input>
-                        </div>
-                    </div>
-                </section>
             </div>
 
             <HorizontalDivider className="border-green-500 mt-15 md:mt-20"/>

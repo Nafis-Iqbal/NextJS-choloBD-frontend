@@ -3,24 +3,32 @@
 import {
   Role,
   UserStatus,
-  UserTripStatus,
+
   LocationType,
   TourType,
   ActivityType,
   HotelType,
+  ReviewType,
+
+  UserTripStatus,
+  BookingStatus,
+  
+  ServiceType,
   TransportServiceType,
   BusServiceType,
   FlightServiceType,
   TrainServiceType,
+
+  HotelRoomType,
+
   PaymentStatus,
   RefundStatus,
   WalletStatus,
   WalletTransactionType,
   TransactionStatus,
+  
   CategoryType,
-  ServiceType,
-  BookingStatus,
-  ReviewType,
+  
   Priority,
   SiteStatus,
   HeroSection,
@@ -61,8 +69,9 @@ declare global {
     phoneNumber?: string;
     imageUrl?: string;
     profileImage?: Image;
+
     role: Role;
-    serviceTypeAdmin?: ServiceType;
+    serviceType?: ServiceType;
     serviceAddressId?: string; 
 
     userStatus: UserStatus;
@@ -103,7 +112,7 @@ declare global {
     name: string;
     description?: string;
     locationType: LocationType;
-    //country: string;
+    country: string;
     //state?: string;
     division: string;
     district?: string;
@@ -159,6 +168,8 @@ declare global {
     dayNumber: number;
     tourSpotId: string;
     activitySpotId?: string;
+    tourSpotName?: string;
+    activitySpotName?: string;
     transportOption: TransportServiceType;
     hotelOption: HotelType;
     tourPackage: TourPackage;
@@ -268,6 +279,18 @@ declare global {
     location: Location;
     reviews?: Review[];
     images?: Image[];
+  }
+
+  interface HotelRoom {
+    id: string;
+    hotelId: string;
+    roomType: HotelRoomType;
+    singleBedCount: number;
+    doubleBedCount: number;
+    pricePerNight: number;
+    isAvailable: boolean;
+    createdAt: Date;
+    hotel: Hotel;
   }
 
   interface HotelCategory {
