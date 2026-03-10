@@ -11,17 +11,9 @@ import DivGap from "@/components/custom-elements/UIUtilities";
 import React, { use, useEffect } from "react";
 
 export default function DashboardLayout({
-    children, 
-    user,
-    employee,
-    service_admin, 
-    master_admin
+    children
 } : {
-    children: React.ReactNode, 
-    user: React.ReactNode,
-    employee: React.ReactNode,
-    service_admin: React.ReactNode, 
-    master_admin: React.ReactNode
+    children: React.ReactNode
 }){
     const router = useRouter();
     const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);

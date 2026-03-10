@@ -7,6 +7,9 @@ import { HotelType, TourType, TransportServiceType } from "@/types/enums";
 import { LocationApi, TourSpotApi, ActivitySpotApi, TourBuilderApi } from "@/services/api";
 import { CustomSelectInput, CustomTextInput, CustomTextAreaInput } from "@/components/custom-elements/CustomInputElements";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
+import { queryClient } from "@/services/apiInstance";
+
+type TourFormMode = "create" | "edit";
 
 type TourDaySegmentFormRow = {
 	id: string;
@@ -29,29 +32,64 @@ type TourPackageFormState = {
 	daySegments: TourDaySegmentFormRow[];
 };
 
-export const TourPackageForm = ({className} : {className?: string}) => {
+interface TourPackageFormProps {
+	mode: TourFormMode;
+	tourPlan_id?: string;
+	onCancel: () => void;
+	className?: string;
+}
+
+export const TourPackageForm: React.FC<TourPackageFormProps> = ({
+	mode,
+	tourPlan_id,
+	onCancel,
+	className,
+}) => {
 	const {openNotificationPopUpMessage, showLoadingContent} = useGlobalUI();
 
+	// Fetch tour data for edit mode
+	const {data: tourPlanData} = TourBuilderApi.useGetTourPlanDetailsRQ(tourPlan_id || "");
+
 	const {data: locationsListData} = LocationApi.useGetAllLocationsRQ();
-    const divisionList = locationsListData?.data?.filter((location) => location.locationType === 'DIVISION') || [];
+    const divisionList = useMemo(
+        () => locationsListData?.data?.filter((location) => location.locationType === 'DIVISION') || [],
+        [locationsListData?.data]
+    );
 
 	const {data: tourSpotsListData} = TourSpotApi.useGetAllTourSpotsRQ();
 	const {data: activitySpotsListData} = ActivitySpotApi.useGetAllActivitySpotsRQ();
 
+	// Create mutation
 	const {mutate: createTourPackageMutate} = TourBuilderApi.useCreateTourPlanRQ(
 		(responseData) => {
 			if (responseData.status === "success") {
-				showLoadingContent(false);
-				openNotificationPopUpMessage("Tour package created successfully.");
+				finishWithMessage("Tour package created successfully.");
+				queryClient.invalidateQueries({ queryKey: ["tour-plans"] });
+				onCancel();
 			}
 			else{
-				showLoadingContent(false);
-				openNotificationPopUpMessage(`Failed to create tour package. ${responseData.message || ''}`);
+				finishWithMessage(`Failed to create tour package. ${responseData.message || ''}`);
 			}
 		},
 		() => {
-			showLoadingContent(false);
-			openNotificationPopUpMessage("Failed to create tour package. An error occurred on the server.");
+			finishWithMessage("Failed to create tour package. An error occurred on the server.");
+		}
+	);
+
+	// Update mutation
+	const {mutate: updateTourPackageMutate} = TourBuilderApi.useUpdateTourPlanRQ(
+		(responseData) => {
+			if (responseData.status === "success") {
+				finishWithMessage("Tour package updated successfully.");
+				queryClient.invalidateQueries({ queryKey: ["tour-plans"] });
+				onCancel();
+			}
+			else{
+				finishWithMessage(`Failed to update tour package. ${responseData.message || ''}`);
+			}
+		},
+		() => {
+			finishWithMessage("Failed to update tour package. An error occurred on the server.");
 		}
 	);
 
@@ -106,6 +144,33 @@ export const TourPackageForm = ({className} : {className?: string}) => {
 	});
 
 	const [draftSegment, setDraftSegment] = useState<TourDaySegmentFormRow | null>(null);
+
+	// Populate form data on edit mode
+	useEffect(() => {
+		if (tourPlanData && mode === "edit") {
+			const tour = tourPlanData.data;
+			if (tour) {
+				setFormData({
+					packageName: tour.packageName || "",
+					totalBudget: tour.totalBudget || 0,
+					division: tour.location?.name || "",
+					divisionLocationId: tour.locationId || "",
+					tourType: tour.tourType || "",
+					duration: tour.duration || 0,
+					shortDescription: tour.shortDescription || "",
+					daySegments: tour.daySegments?.map((segment) => ({
+						id: segment.id,
+						dayNumber: segment.dayNumber,
+						tourSpotId: segment.tourSpotId,
+						activitySpotId: segment.activitySpotId || "",
+						transportOption: (segment.transportOption || "") as TransportServiceType | "",
+						hotelOption: (segment.hotelOption || "") as HotelType | "",
+						notes: "",
+					})) || [],
+				});
+			}
+		}
+	}, [tourPlanData, mode]);
 
 	const setSegmentAt = (index: number, updatedSegment: TourDaySegmentFormRow) => {
 		console.log("setSegmentAt:", index, updatedSegment);
@@ -252,7 +317,22 @@ export const TourPackageForm = ({className} : {className?: string}) => {
 
 		// Show loading and submit
 		showLoadingContent(true);
-		createTourPackageMutate(payloadData as any);
+
+		if (mode === "create") {
+			createTourPackageMutate(payloadData as any);
+		} else {
+			if (tourPlan_id) {
+				updateTourPackageMutate({
+					id: tourPlan_id,
+					...payloadData,
+				} as any);
+			}
+		}
+	};
+
+	const finishWithMessage = (message: string) => {
+		showLoadingContent(false);
+		openNotificationPopUpMessage(message);
 	};
 
 	return (
@@ -474,8 +554,15 @@ export const TourPackageForm = ({className} : {className?: string}) => {
 					disabled:cursor-not-allowed text-white font-semibold"
 					disabled={!canSaveForm}
 				>
-					Save Tour Package
-				</button>
+				{mode === "create" ? "Create Tour Package" : "Save Changes"}
+			</button>
+			<button
+				type="button"
+				className="px-5 py-2 rounded bg-gray-600 hover:bg-gray-500 text-white font-semibold"
+				onClick={onCancel}
+			>
+				Cancel
+			</button>
 				<div className="text-xs text-gray-400">
 					This form builds a TourPackage + {" "}
 					<span className="text-gray-300">TourDaySegment</span> rows.

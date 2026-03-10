@@ -1,66 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { GreenButton } from "@/components/custom-elements/Buttons";
-import { HorizontalDivider } from "@/components/custom-elements/UIUtilities";
+import { useRouter } from "next/navigation";
 
 export default function PaymentConfirmationPage() {
-    // const router = useRouter();
-    // const searchParams = useSearchParams();
-    // const [paymentStatus, setPaymentStatus] = useState<'success' | 'failed' | 'pending'>('pending');
-    
-    // // Mock payment status based on URL params or random for demo
-    // useEffect(() => {
-    //     const status = searchParams.get('status');
-    //     const mockStatus = status || (Math.random() > 0.3 ? 'success' : 'failed');
-    //     setPaymentStatus(mockStatus as 'success' | 'failed' | 'pending');
-    // }, [searchParams]);
-
-    // const getStatusIcon = () => {
-    //     switch (paymentStatus) {
-    //         case 'success': return '✅';
-    //         case 'failed': return '❌';
-    //         case 'pending': return '⏳';
-    //         default: return '🔄';
-    //     }
-    // };
-
-    // const getStatusMessage = () => {
-    //     switch (paymentStatus) {
-    //         case 'success': return 'Payment Successful!';
-    //         case 'failed': return 'Payment Failed';
-    //         case 'pending': return 'Processing Payment...';
-    //         default: return 'Processing...';
-    //     }
-    // };
-
-    // const getStatusColor = () => {
-    //     switch (paymentStatus) {
-    //         case 'success': return 'text-green-400';
-    //         case 'failed': return 'text-red-400';
-    //         case 'pending': return 'text-yellow-400';
-    //         default: return 'text-gray-400';
-    //     }
-    // };
-
-    // const mockTransactionData = {
-    //     transactionId: 'TXN' + Math.random().toString(36).substr(2, 9).toUpperCase(),
-    //     amount: 1500,
-    //     bonus: 150,
-    //     total: 1650,
-    //     paymentMethod: 'Credit Card',
-    //     timestamp: new Date().toLocaleString(),
-    // };
+    const router = useRouter();
 
     return (
-        <div className="flex flex-col p-6 space-y-6 w-full font-sans bg-gray-800 min-h-screen">
-            
+        <div className="flex flex-col min-h-screen bg-gray-900 p-4 md:p-6 font-sans">
+            {/* Main Container */}
+            <div className="flex-1 flex items-center justify-center">
+                <div className="w-full max-w-md">
+                    {/* Success Card */}
+                    <div className="bg-gray-800/80 border border-gray-700 rounded-lg p-8 space-y-6">
+                        {/* Success Icon */}
+                        <div className="flex justify-center">
+                            <div className="w-16 h-16 bg-green-600/20 border border-green-600 rounded-full flex items-center justify-center animate-pulse">
+                                <span className="text-4xl text-green-400">✓</span>
+                            </div>
+                        </div>
+
+                        {/* Status Message */}
+                        <div className="text-center space-y-2">
+                            <h1 className="text-2xl font-bold text-white">Payment Successful</h1>
+                            <p className="text-gray-400 text-sm">Your payment has been processed successfully</p>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="border-t border-gray-700"></div>
+
+                        {/* Action Buttons */}
+                        <div className="space-y-2">
+                            <button
+                                onClick={() => router.push("/dashboard")}
+                                className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                            >
+                                Go to Dashboard
+                            </button>
+                            <button
+                                onClick={() => router.push("/")}
+                                className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+                            >
+                                Back to Home
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             {/* Footer Note */}
-            <div className="max-w-2xl mx-auto w-full text-center text-gray-500 text-sm">
-                <p>📧 A confirmation email has been sent to your registered email address.</p>
-                <p className="mt-2">Need help? Contact our support team at support@cholobd.com</p>
+            <div className="text-center text-gray-500 text-sm mt-8">
+                <p>Need help? Contact our support team at support@cholobd.com</p>
             </div>
         </div>
     );

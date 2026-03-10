@@ -1,9 +1,9 @@
 import { ComplaintStatus } from "@/types/enums"
 
-import TableLayout from "../layout-elements/TableLayout"
-import FilterSectionLayout from "../layout-elements/FilterSectionLayout"
-import { CustomSelectInput, CustomTextInput} from "../custom-elements/CustomInputElements"
-import { HorizontalDivider } from "../custom-elements/UIUtilities"
+import TableLayout from "../../../layout-elements/TableLayout"
+import FilterSectionLayout from "../../../layout-elements/FilterSectionLayout"
+import { CustomSelectInput, CustomTextInput} from "../../../custom-elements/CustomInputElements"
+import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
 
 export const ComplaintManagerModule = () => {
     const complaintStatusOptions = Object.values(ComplaintStatus).map(status => ({
@@ -16,7 +16,7 @@ export const ComplaintManagerModule = () => {
     }
 
     return (
-        <section className="flex flex-col" id="dashboard_complaints">
+        <section className="flex flex-col" id="complain_management">
             <div className="flex space-x-5 mb-2">
                 <h4 className="">Consumer Complaints</h4>
                 <div className="text-sm px-1 mt-1 bg-red-400 rounded-md self-center">Feature Not Ready</div>

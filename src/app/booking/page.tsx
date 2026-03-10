@@ -13,7 +13,7 @@ type BookingOption = {
 const options: BookingOption[] = [
 	{
 		title: "Air Ways",
-		slug: "air-ways",
+		slug: "flight",
 		description: "Flights across Bangladesh and popular international routes.",
 		offer: "Up to 25% off on select airlines",
 		emoji: "✈️",

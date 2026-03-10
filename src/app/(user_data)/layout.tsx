@@ -1,6 +1,7 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { AuthApi } from "@/services/api";
 
 import Navbar from "@/components/structure-components/Navbar";
@@ -15,10 +16,20 @@ export default function UserDataLayout({
 } : {
     children: React.ReactNode,
 }){
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+    const router = useRouter();
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
 
-    if(!isAuthenticated) redirect("/login");
+    useEffect(() => {
+        if (isLoading) return;
+        if (!authResponse || !isAuthenticated) {
+            router.replace("/login");
+        }
+    }, [isLoading, authResponse, isAuthenticated, router]);
+
+    if (isLoading || !authResponse) {
+        return null;
+    }
 
     return (
         <section className="flex flex-col min-h-screen">
@@ -31,14 +42,14 @@ export default function UserDataLayout({
             <DivGap customHeightGap="h-[55px] md:h-[70px]"/>
 
             <div className="flex border min-h-screen">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 shadow-[0_0_20px_#00FF99] font-sans">
+                <aside className="hidden md:block relative z-10 grow w-[15%] border-r-4 shadow-[0_0_20px_#00FF99] font-sans">
                     <SidebarMenu 
                         className="fixed w-[15%] top-17 left-0" 
                         isPopOutSidebar={false}
                     />
                 </aside>
 
-                <div className="flex flex-col flex-grow w-[85%] border-r-4">
+                <div className="flex flex-col grow w-[85%] border-r-4">
                     {children}
                 </div>
             </div>

@@ -5,12 +5,12 @@ import { CategoryType } from "@/types/enums";
 import { CategoryApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
-import TableLayout from "../layout-elements/TableLayout";
-import CategoryUpdateModal from "../modals/CategoryUpdateModal";
-import ConfirmationModal from "../modals/ConfirmationModal";
-import { CategoryViewListTableRow } from "../data-elements/DataTableRowElements";
-import { NoContentTableRow } from "../placeholder-components/NoContentTableRow";
-import { HorizontalDivider } from "../custom-elements/UIUtilities";
+import TableLayout from "../../../layout-elements/TableLayout";
+import CategoryUpdateModal from "../../../modals/CategoryUpdateModal";
+import ConfirmationModal from "../../../modals/ConfirmationModal";
+import { CategoryViewListTableRow } from "../../../data-elements/DataTableRowElements";
+import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow";
+import { HorizontalDivider } from "../../../custom-elements/UIUtilities";
 
 const CategoryManagerModule = () => {
     const {showLoadingContent, openNotificationPopUpMessage} = useGlobalUI();
@@ -66,7 +66,7 @@ const CategoryManagerModule = () => {
     }
 
     return (
-        <div className="flex flex-col space-y-2 mt-4">
+        <div className="flex flex-col space-y-2 mt-4" id="category_management">
             <CategoryUpdateModal
                 isVisible={isCategoryModalOpen}
                 mode = {mode}

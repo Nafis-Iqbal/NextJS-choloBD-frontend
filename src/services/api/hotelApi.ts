@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HotelType } from "@/types/enums";
+import { HotelType, HotelRoomCategory } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
@@ -274,4 +274,5 @@ export type {
     UpdateHotelCoreData,
 };
 
+export { getAllHotels, getPopularHotels };
 export default getAllHotels;

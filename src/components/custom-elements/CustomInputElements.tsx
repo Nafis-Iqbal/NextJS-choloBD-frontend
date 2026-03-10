@@ -69,6 +69,46 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
 CustomTextInput.displayName = "CustomTextInput";
 
 
+export const CustomDateInput = forwardRef<HTMLInputElement, CustomInputProps>((props, ref) => {
+    const {
+      className,
+      label,
+      labelStyle,
+      error,
+      ...rest
+    } = props;
+
+    return (
+      <div className="relative flex flex-col space-y-1 group">
+        {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
+        
+        <style>{`
+          input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.8);
+            cursor: pointer;
+          }
+        `}</style>
+        
+        <input 
+          type="date"
+          className={`p-1 bg-gray-700 border border-gray-600 placeholder-gray-400 text-white rounded-sm
+              focus:outline-none focus:ring-2 focus:ring-green-500 ${className}`}
+          ref={ref}
+          { ...rest }
+        />
+
+        {error && (
+          <div className="absolute right-0 mt-1 text-xs text-white bg-red-500 p-1 rounded shadow z-10">
+            {error}
+          </div>
+        )}
+      </div>
+    )
+})
+
+CustomDateInput.displayName = "CustomDateInput";
+
+
 type CustomTextAreaProps = {
   className?: string;
   placeholderText?: string;

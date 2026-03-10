@@ -20,6 +20,8 @@ import {
   TrainServiceType,
 
   HotelRoomType,
+  HotelRoomCategory,
+  HotelRoomStatus,
 
   PaymentStatus,
   RefundStatus,
@@ -72,6 +74,8 @@ declare global {
 
     role: Role;
     serviceType?: ServiceType;
+    serviceEntityId?: string;
+    serviceEntityName?: string;
     serviceAddressId?: string; 
 
     userStatus: UserStatus;
@@ -216,6 +220,50 @@ declare global {
     basedOnSegment?: TourDaySegment;
   }
 
+  interface HotelRoomBooking {
+    id: string;
+    hotelId: string;
+    userId: string;
+
+    checkInDate: Date;
+    checkOutDate: Date;
+    totalPrice: number;
+    confirmationCode: string;
+    status: BookingStatus;
+    paymentStatus: PaymentStatus;
+    paymentMethod?: string; // "wallet", "sslcommerz", "cash"
+    specialRequests?: string;
+
+    guestName?: string;
+    guestEmail?: string;
+    guestPhoneNumber?: string;
+
+    bookedAt: Date;
+    confirmedAt?: Date;
+    cancelledAt?: Date;
+    cancellationReason?: string;
+
+    hotel: Hotel;
+    user: User;
+    roomDetails?: HotelRoomBookingDetail[];
+    userTripSegments?: UserTripSegment[];
+  }
+
+  interface HotelRoomBookingDetail {
+    id: string;
+    hotelRoomBookingId: string;
+    hotelRoomId: string;
+
+    // Snapshot pricing per room at booking time
+    pricePerNight: number;
+    subtotal: number;
+
+    createdAt: Date;
+
+    hotelRoomBooking: HotelRoomBooking;
+    hotelRoom: HotelRoom;
+  }
+
   // Tourism Spots and Activities
   interface TourSpot {
     id: string;
@@ -279,18 +327,37 @@ declare global {
     location: Location;
     reviews?: Review[];
     images?: Image[];
+    rooms?: HotelRoom[];
+    roomTypes?: HotelRoomType[];
+  }
+
+  interface HotelRoomType {
+    id: string;
+    hotelId: string;
+    roomType: HotelRoomCategory;
+    singleBedCount: number;
+    doubleBedCount: number;
+    pricePerNight: number;
+    totalCount: number;
+    availableCount: number;
+    createdAt: Date;
+    hotel: Hotel;
+    images?: Image[];
+    rooms?: HotelRoom[];
+    bookingDetails?: HotelRoomBookingDetail[];
   }
 
   interface HotelRoom {
     id: string;
     hotelId: string;
-    roomType: HotelRoomType;
-    singleBedCount: number;
-    doubleBedCount: number;
-    pricePerNight: number;
-    isAvailable: boolean;
+    roomNumber: string;
+    roomType: HotelRoomCategory;
+    roomStatus: HotelRoomStatus;
     createdAt: Date;
     hotel: Hotel;
+    hotelRoomType?: HotelRoomType;
+    hotelRoomTypeId?: string;
+    bookingDetails?: HotelRoomBookingDetail[];
   }
 
   interface HotelCategory {

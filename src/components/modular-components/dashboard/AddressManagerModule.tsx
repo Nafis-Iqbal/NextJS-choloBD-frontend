@@ -7,10 +7,10 @@ import { AddressApi, UserApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
 
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
-import AddressUpdateModal from "../modals/AddressUpdateModal";
-import ConfirmationModal from "../modals/ConfirmationModal";
-import { AddressDataBlock } from "../data-elements/DataTableRowElements";
-import AddressSelectionModal from "../modals/AddressSelectionModal";
+import AddressUpdateModal from "../../modals/AddressUpdateModal";
+import ConfirmationModal from "../../modals/ConfirmationModal";
+import { AddressDataBlock } from "../../data-elements/DataTableRowElements";
+import AddressSelectionModal from "../../modals/AddressSelectionModal";
 
 const MAX_ADDRESSES = 5;
 

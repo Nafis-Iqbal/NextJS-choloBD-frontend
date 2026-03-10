@@ -1,4 +1,4 @@
-import { ConfigApi } from "@/services/api";
+import { ConfigApi, TourBuilderApi } from "@/services/api";
 import { HeroSection } from "@/types/enums";
 import { HeroSectionImageViewer } from "../structure-components/HeroSectionImageViewer";
 import { FeatureGrid, TourSuggestions, BuildTourCTA, HotelDeals, TransportTickets, 
@@ -13,13 +13,22 @@ export const HomepageContent = async () => {
         configData = { data: null };
     }
 
+    // Fetch tour data from API
+    let tourPackagesTour: TourPackage[] = [];
+    try {
+        const tourResponse = await TourBuilderApi.getAllTourPlans();
+        tourPackagesTour = tourResponse?.data || [];
+    } catch (error) {
+        console.error("Failed to fetch tours. Error:", error);
+        tourPackagesTour = [];
+    }
+
     type HeroImage = { url: string; altText?: string; section: HeroSection };
     const siteHeroSectionImages = (configData?.data?.heroImages as HeroImage[]) || [];
     const topHeroSectionImages = siteHeroSectionImages.filter((image) => image.section === HeroSection.TOP);
     const middleHeroSectionImages = siteHeroSectionImages.filter((image) => image.section === HeroSection.MIDDLE);
     const bottomHeroSectionImages = siteHeroSectionImages.filter((image) => image.section === HeroSection.BOTTOM);
 
-    // Fake data for homepage modules (no external packages)
     const features = [
         { title: "Smart Tours", desc: "Auto plan, quick tweaks" },
         { title: "Hotel Book", desc: "Trusted stays, easy pay" },
@@ -29,19 +38,16 @@ export const HomepageContent = async () => {
         { title: "Local Guides", desc: "Tips from pros" },
     ];
 
-    const suggestedTours = [
-        { id: "t1", name: "Mystic Hills", place: "Sylhet", days: 3, price: 12999, rating: 4.6 },
-        { id: "t2", name: "Sea Breeze", place: "Cox’s Bazar", days: 2, price: 9999, rating: 4.4 },
-        { id: "t3", name: "River Glow", place: "Sundarbans", days: 4, price: 17999, rating: 4.7 },
-        { id: "t4", name: "Heritage Walk", place: "Sonargaon", days: 1, price: 3999, rating: 4.2 },
-    ];
-
-    const hotels = [
-        { id: "h1", name: "Sky Nest", city: "Dhaka", price: 3499, rating: 4.3 },
-        { id: "h2", name: "Blue Bay", city: "Cox’s Bazar", price: 5499, rating: 4.6 },
-        { id: "h3", name: "Tea Leaf", city: "Sylhet", price: 2899, rating: 4.1 },
-        { id: "h4", name: "Forest Den", city: "Khulna", price: 3199, rating: 4.0 },
-    ];
+    // Format tour data for display
+    type Tour = { id: string; name: string; place: string; days: number; price: number; rating: number };
+    const suggestedTours: Tour[] = tourPackagesTour.map((tour) => ({
+        id: tour.id,
+        name: tour.packageName,
+        place: tour.location?.name || "N/A",
+        days: tour.duration || 0,
+        price: tour.totalBudget || 0,
+        rating: tour.rating || 0,
+    }));
 
     const tickets = [
         { id: "r1", type: "Bus", route: "Dhaka → Cox’s Bazar", price: 1400 },
@@ -74,14 +80,14 @@ export const HomepageContent = async () => {
             {/* Key features */}
             <FeatureGrid features={features} />
 
-            {/* Suggested tours */}
+            {/* Suggested tours from API */}
             <TourSuggestions tours={suggestedTours} />
 
             {/* Build your tour CTA */}
             <BuildTourCTA />
 
             {/* Hotel deals */}
-            <HotelDeals hotels={hotels} />
+            <HotelDeals />
 
             {/* Transport tickets */}
             <TransportTickets tickets={tickets} />

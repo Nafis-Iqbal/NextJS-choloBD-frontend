@@ -88,11 +88,11 @@ function TourPackageListingsPage() {
                                 <p className="w-[12%]">Division</p>
                                 <p className="w-[10%]">Tour Type</p>
                                 <p className="w-[8%]">Duration</p>
-                                <p className="w-[25%] text-left">Day Segments</p>
+                                <p className="w-[25%]">Day Segments</p>
                                 <p className="w-[10%]">Package ID</p>
                                 <p className="w-[10%]">Actions</p>
                             </div>
-                            <div className="flex flex-col border-1 border-green-800">
+                            <div className="flex flex-col border-1 border-green-800 text-center">
                                 {
                                     isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1} />) :
                                         isFetchError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1} />) :

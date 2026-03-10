@@ -27,6 +27,7 @@ export function useGetUserAuthenticationRQ(enabled: boolean) {
         queryKey: ["users", "authenticate"],
         staleTime: 0,
         gcTime: 30 * 1000,
+        retry: false,
         enabled
     });
 }

@@ -9,7 +9,7 @@ export const TransportTickets: React.FC<{ tickets: Ticket[] }> = ({ tickets }) =
     const lowerType = type.toLowerCase();
     if (lowerType.includes("bus")) return "/booking/bus";
     if (lowerType.includes("railway") || lowerType.includes("train")) return "/booking/railway";
-    if (lowerType.includes("flight") || lowerType.includes("air")) return "/booking/air-ways";
+    if (lowerType.includes("flight") || lowerType.includes("air")) return "/booking/flight";
     return "/booking";
   };
 

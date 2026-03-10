@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { AddressApi, UserApi, AuthApi } from "@/services/api";
 import { Role } from "@/types/enums";
-import { AddressManagerModule } from "@/components/modular-components/AddressManagerModule";
+import { AddressManagerModule } from "@/components/modular-components/dashboard/AddressManagerModule";
 
 export default function UserAddressListPage() {
     const router = useRouter();

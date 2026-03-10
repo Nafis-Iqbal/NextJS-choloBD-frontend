@@ -5,15 +5,15 @@ import { ConfigApi, AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 
 import DivGap, { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
-import { UserManagerModule } from "@/components/modular-components/UserManagerModule";
-import { WalletManagerModule } from "@/components/modular-components/WalletManagerModule";
-import { ComplaintManagerModule } from "@/components/modular-components/ComplaintManagerModule";
+import { UserManagerModule } from "@/components/modular-components/dashboard/master-admin/UserManagerModule";
+import { WalletManagerModule } from "@/components/modular-components/dashboard/master-admin/WalletManagerModule";
+import { ComplaintManagerModule } from "@/components/modular-components/dashboard/master-admin/ComplaintManagerModule";
 import { ImageUploadModule } from "@/components/modular-components/ImageUploadModule";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
 import { HeroSection } from "@/types/enums";
-import { LocationManagerModule } from "@/components/modular-components/LocationManagerModule";
-import CategoryManagerModule from "@/components/modular-components/CategoryManagerModule";
+import { LocationManagerModule } from "@/components/modular-components/dashboard/master-admin/LocationManagerModule";
+import CategoryManagerModule from "@/components/modular-components/dashboard/master-admin/CategoryManagerModule";
 
 export default function MasterAdminDashboard() {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
@@ -94,7 +94,7 @@ export default function MasterAdminDashboard() {
                 <h2 className="text-green-500">Master Admin Panel</h2>
                 <p className="text-green-200">Site management functions here.</p>
 
-                <div className="flex flex-col space-y-6 my-10">
+                <div className="flex flex-col space-y-6 my-10" id="enity_management">
                     <h3 className="text-green-500 font-semibold mr-5">Manage Site Content</h3>
 
                     <div className="flex flex-col w-full md:w-[40%] space-y-3">
@@ -134,7 +134,7 @@ export default function MasterAdminDashboard() {
 
                 <ComplaintManagerModule/>
 
-                <section className="ml-2 flex flex-col space-y-3" id="dashboard_site_settings">
+                <section className="ml-2 flex flex-col space-y-3" id="site_settings_management">
                     <div className="flex items-center space-x-5">
                         <h3 className="text-green-500 font-bold">Site Config Features</h3>
                         <p className="text-gray-400">(Hero Images take 500 seconds to take effect)</p>

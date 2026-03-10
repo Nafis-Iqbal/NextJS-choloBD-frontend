@@ -11,32 +11,24 @@ import DivGap from "@/components/custom-elements/UIUtilities";
 import React, { use, useEffect } from "react";
 
 export default function DashboardLayout({
-    children, 
-    user,
-    employee,
-    service_admin, 
-    master_admin
+    children
 } : {
-    children: React.ReactNode, 
-    user: React.ReactNode,
-    employee: React.ReactNode,
-    service_admin: React.ReactNode, 
-    master_admin: React.ReactNode
+    children: React.ReactNode
 }){
     const router = useRouter();
     const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated;
     console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isLoading);
     
-    useEffect(() => {
-        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
-            router.replace("/");
-        }
-    }, [isLoading, isAuthenticated, router]);
+    // useEffect(() => {
+    //     if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+    //         router.replace("/");
+    //     }
+    // }, [isLoading, isAuthenticated, router]);
 
-    if (isLoading) {
-        return null; // or <FullPageLoader />
-    }
+    // if (isLoading) {
+    //     return null; // or <FullPageLoader />
+    // }
 
     return (
         <section className="flex flex-col min-h-screen">
@@ -57,7 +49,7 @@ export default function DashboardLayout({
                 </aside>
 
                 <div className="flex flex-col flex-grow w-full md:w-[85%] md:border-r-4">
-                    {[children, master_admin, service_admin, employee, user].map((el, i) => (
+                    {[children].map((el, i) => (
                         <React.Fragment key={i}>
                             {el}
                         </React.Fragment>

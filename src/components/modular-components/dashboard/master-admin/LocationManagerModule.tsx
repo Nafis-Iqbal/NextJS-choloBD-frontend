@@ -2,14 +2,14 @@ import { useState } from "react"
 
 import { LocationType } from "@/types/enums"
 import { LocationApi, WalletApi } from "@/services/api"
-import { LocationListTableRow } from "../data-elements/DataTableRowElements"
-import LocationUpdateModal from "../modals/LocationUpdateModal"
-import WalletRechargeOptionModal from "../modals/WalletRechargeOptionModal"
-import TableLayout from "../layout-elements/TableLayout"
-import FilterSectionLayout from "../layout-elements/FilterSectionLayout"
-import { CustomSelectInput, CustomTextInput} from "../custom-elements/CustomInputElements"
-import { HorizontalDivider } from "../custom-elements/UIUtilities"
-import { NoContentTableRow } from "../placeholder-components/NoContentTableRow"
+import { LocationListTableRow } from "../../../data-elements/DataTableRowElements"
+import LocationUpdateModal from "../../../modals/LocationUpdateModal"
+import WalletRechargeOptionModal from "../../../modals/WalletRechargeOptionModal"
+import TableLayout from "../../../layout-elements/TableLayout"
+import FilterSectionLayout from "../../../layout-elements/FilterSectionLayout"
+import { CustomSelectInput, CustomTextInput} from "../../../custom-elements/CustomInputElements"
+import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
+import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
 
 export const LocationManagerModule = () => {
     const [locationModal, setLocationModal] = useState<{isOpen: boolean, locationId: string, mode: 'create' | 'edit'}>({
@@ -62,7 +62,7 @@ export const LocationManagerModule = () => {
     }
 
     return (
-        <section className="flex flex-col space-y-2 mt-4" id="location_wallet_manager">
+        <section className="flex flex-col space-y-2 mt-4" id="locations_management">
             <LocationUpdateModal
                 isVisible={locationModal.isOpen}
                 location_id={locationModal.locationId}

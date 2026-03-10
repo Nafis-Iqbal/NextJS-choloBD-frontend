@@ -435,7 +435,7 @@ export const TourPackageViewListTableRow = ({
             <p className="w-[5%] text-sm">{id}</p>
             
             <button 
-                className="w-[20%] hover:text-green-500 hover:scale-105 transition-all duration-150 cursor-pointer text-left px-2"
+                className="w-[20%] hover:text-green-500 hover:scale-105 transition-all duration-150 cursor-pointer px-2"
                 onClick={() => onClickNavigate()}
             >
                 <span className="font-semibold">{packageName}</span>
@@ -445,7 +445,7 @@ export const TourPackageViewListTableRow = ({
             <p className="w-[10%] text-sm">{tourType}</p>
             <p className="w-[8%] text-sm font-medium text-green-300">{duration} days</p>
             
-            <div className="w-[25%] text-xs text-left p-2 space-y-1 overflow-hidden">
+            <div className="w-[25%] text-xs p-2 ml-15 space-y-1 overflow-hidden text-left">
                 {daysSummary.map((summary, idx) => (
                     <p key={idx} className="truncate text-gray-200 leading-tight">{summary}</p>
                 ))}

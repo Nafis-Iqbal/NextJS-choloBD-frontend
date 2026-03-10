@@ -3,10 +3,10 @@
 
 import Link from "next/link";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import { AuthApi } from "@/services/api";
+import { AuthApi, WalletApi } from "@/services/api";
 import useLogout from "@/hooks/UtilHooks/logoutHooks";
 
 import { Menu } from "lucide-react";
@@ -25,6 +25,9 @@ const Navbar: React.FC = () => {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
+
+    const { data: walletResponse } = WalletApi.useGetMyWalletRQ();
+    const walletBalance = walletResponse?.data?.balance || 0;
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
@@ -169,6 +172,8 @@ const Navbar: React.FC = () => {
                             <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-gray-800 text-xl md:text-2xl scale-110"/>
                         </Link>
 
+                        {!isAuthenticated ? (<Link className="p-2 transition-all hover:scale-110 text-center" href="/booking/trackers">Booking Tracker</Link>) : <></>}
+
                         {!isAuthenticated ? (<Link className="p-2 hover:scale-110" href="/login">Log In</Link>) : 
                         (
                             <>
@@ -177,7 +182,7 @@ const Navbar: React.FC = () => {
                                 </Link>
 
                                 <div className="flex flex-col items-center justify-center bg-transparent">
-                                    <p className="h-1/2 text-black">$5.00</p>
+                                    {isAuthenticated && (<p className="h-1/2 text-black font-semibold">{walletBalance.toLocaleString()} C</p>)}
                                     <button 
                                         className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-black text-green-900 hover:text-green-400 text-sm text-center rounded-sm"
                                         onClick={() => router.push("wallet/wallet-recharge")}

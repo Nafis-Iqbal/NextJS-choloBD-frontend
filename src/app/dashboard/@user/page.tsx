@@ -7,8 +7,8 @@ import Image from "next/image"
 import { stripLeadingDateFromISO } from "@/utilities/utilities";
 import DivGap from "@/components/custom-elements/UIUtilities"
 import { EditButton } from "@/components/custom-elements/Buttons"
-import { AddressManagerModule } from "@/components/modular-components/AddressManagerModule";
-import { UserActivityHistoryModule } from "@/components/modular-components/UserActivityHistoryModule";
+import { AddressManagerModule } from "@/components/modular-components/dashboard/AddressManagerModule";
+import { UserActivityHistoryModule } from "@/components/modular-components/dashboard/user/UserActivityHistoryModule";
 
 export default function UserProfileInfoDashboard() {
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
@@ -37,12 +37,10 @@ export default function UserProfileInfoDashboard() {
 
                     <EditButton onClick={() => router.push(`/user_profile/${currentUserId}`)}></EditButton>
                 </div>
-
-                <UserActivityHistoryModule/>
                 
                 <p className="text-green-200">Personalize your account info, preferences.</p>
 
-                <div className="flex flex-col mt-8 space-y-5">
+                <div className="flex flex-col my-8 space-y-5">
                     <div className="flex relative w-[180px] h-[180px]">
                         <Image className="bg-gray-100" src={userDetail?.imageUrl || "/NoUserImage.jpeg"}  alt="Profile Picture" fill></Image>
                     </div>
@@ -69,6 +67,8 @@ export default function UserProfileInfoDashboard() {
                         <button className="p-2 bg-green-700 hover:bg-green-600 text-sm md:text-base text-white rounded-sm">Change Password</button>
                     </div>
                 </div>
+
+                <UserActivityHistoryModule userId={currentUserId}/>
             </div>
             
             <DivGap customHeightGap="h-[80px]"/>

@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { WalletStatus } from '@/types/enums';
+import { WalletStatus, ServiceType } from '@/types/enums';
 
 interface WalletRechargeData {
   walletRechargeOptionId: string;
+  userId: string;
+}
+
+interface WalletChargeCreditsData {
+  serviceType: ServiceType;
+  serviceTypeId: string;
+  paymentAmount: number;
 }
 
 interface WalletRefundData {
@@ -52,6 +59,46 @@ export function useGetMyWalletRQ() {
   });
 }
 
+async function createWalletRechargePaymentAndTransaction(rechargeData: WalletRechargeData) {
+  const response = await apiFetch<ApiResponse<WalletTransaction>>('/wallets/recharge-transaction', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(rechargeData),
+  });
+  return response;
+}
+
+export function useCreateWalletRechargePaymentAndTransactionRQ(
+  onSuccessFn: (response: any) => void,
+  onErrorFn: (error: any) => void
+) {
+  return useMutation({
+    mutationFn: createWalletRechargePaymentAndTransaction,
+    onSuccess: (data) => onSuccessFn(data),
+    onError: (error) => onErrorFn(error),
+  });
+}
+
+async function chargeWalletCredits(chargeData: WalletChargeCreditsData) {
+  const response = await apiFetch<ApiResponse<WalletTransaction>>('/wallets/own-wallet/charge-credits', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(chargeData),
+  });
+  return response;
+}
+
+export function useChargeWalletCreditsRQ(
+  onSuccessFn: (response: any) => void,
+  onErrorFn: (error: any) => void
+) {
+  return useMutation({
+    mutationFn: chargeWalletCredits,
+    onSuccess: (data) => onSuccessFn(data),
+    onError: (error) => onErrorFn(error),
+  });
+}
+
 async function getWalletTransactionDetail(transactionId: string) {
   const response = await apiFetch<ApiResponse<WalletTransaction>>(`/wallets/own-wallet/transactions/${transactionId}`, {
     method: 'GET',
@@ -67,26 +114,6 @@ export function useGetWalletTransactionDetailRQ(transactionId: string) {
     enabled: !!transactionId,
     staleTime: 60_000,
     gcTime: 5 * 60 * 1000,
-  });
-}
-
-async function createWalletRechargeTransaction(rechargeData: WalletRechargeData) {
-  const response = await apiFetch<ApiResponse<WalletTransaction>>('/wallets/recharge-transaction', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(rechargeData),
-  });
-  return response;
-}
-
-export function useCreateWalletRechargeTransactionRQ(
-  onSuccessFn: (response: any) => void,
-  onErrorFn: (error: any) => void
-) {
-  return useMutation({
-    mutationFn: createWalletRechargeTransaction,
-    onSuccess: (data) => onSuccessFn(data),
-    onError: (error) => onErrorFn(error),
   });
 }
 

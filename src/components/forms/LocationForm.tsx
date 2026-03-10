@@ -225,7 +225,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                                     className="w-full"
                                     label="Division"
                                     labelStyle="text-green-300"
-                                    name="parentLocation"
+                                    name="parentLocationDivision"
                                     value={locationFormData?.parentLocationId || ""}
                                     onChange={handleChange}
                                     error={errors.parentLocation}
@@ -258,7 +258,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                                         labelStyle="text-green-300"
                                         value={locationFormData?.parentLocationId || ""}
                                         onChange={handleChange}
-                                        name="parentLocation"
+                                        name="parentLocationDistrict"
                                         error={errors.parentLocation}
                                         options={[
                                             { value: "", label: "Select District" },

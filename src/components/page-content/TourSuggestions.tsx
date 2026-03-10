@@ -37,7 +37,7 @@ const TourSuggestionsCard = ({tour} : {tour: Tour}) => {
 
         <Link 
           className="px-2 py-1 mt-4 w-fit rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
-          href={"tour-builder/tours/12"}
+          href={`tour-builder/tours/${tour.id}`}
         >
           View Details
         </Link>

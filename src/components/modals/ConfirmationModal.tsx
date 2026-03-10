@@ -21,7 +21,7 @@ const ConfirmationModal = ({ isVisible, message, onConfirm, onCancel } : Confirm
             onClick={onCancel} // Close modal when clicking outside
         >
             <motion.div
-                className="p-5 rounded-md shadow-lg md:w-120 text-center border-x-2 border-b-4"
+                className="p-5 rounded-md shadow-lg md:w-120 text-center border-x-2 border-b-4 bg-gray-700"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}

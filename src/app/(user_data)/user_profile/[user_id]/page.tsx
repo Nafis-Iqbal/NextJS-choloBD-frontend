@@ -5,15 +5,15 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { UserApi, AuthApi } from "@/services/api";
-import { Role, UserStatus } from "@/types/enums";
+import { UserApi, AuthApi, HotelApi } from "@/services/api";
+import { Role, UserStatus, ServiceType } from "@/types/enums";
 import { queryClient } from "@/services/apiInstance";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import DivGap from "@/components/custom-elements/UIUtilities";
 import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { ImageUploadButton } from "@/components/custom-elements/ImageUploadButton";
 import { EditButton } from "@/components/custom-elements/Buttons";
-import { CustomCheckboxInput, CustomMiniTextInput } from "@/components/custom-elements/CustomInputElements";
+import { CustomCheckboxInput, CustomMiniTextInput, CustomSelectInput } from "@/components/custom-elements/CustomInputElements";
 
 export default function UserDetailPage() {
     const router = useRouter();
@@ -37,11 +37,19 @@ export default function UserDetailPage() {
     const [userStatus, setUserStatus] = useState<string | null>("");
     const [isEditingUserStatus, setIsEditingUserStatus] = useState<boolean>(false);
 
+    const [serviceType, setServiceType] = useState<string | null>("");
+    const [isEditingServiceType, setIsEditingServiceType] = useState<boolean>(false);
+
+    const [serviceEntity, setServiceEntity] = useState<string | null>("");
+    const [serviceEntitySearch, setServiceEntitySearch] = useState<string>("");
+    const [isEditingServiceEntity, setIsEditingServiceEntity] = useState<boolean>(false);
+
     const [isUserUpdateConfirmationVisible, setIsUserUpdateConfirmationVisible] = useState<boolean>(false);
 
     const { data: userDetailData} = UserApi.useGetUserDetailRQ(userId, true);
+    const { data: hotelsData } = HotelApi.useGetAllHotelsRQ(serviceType === "HOTEL_BOOKING" ? "" : undefined);
 
-    const { mutate: updateUserRoleStatus } = UserApi.useUpdateUserRoleStatusRQ(
+    const { mutate: updateUserRoleStatus } = UserApi.useUpdateUserRoleStatusServiceRQ(
         (response) => {
             if (response.status === "success") {
                 queryClient.invalidateQueries({ queryKey: ["users", userId] });
@@ -50,15 +58,19 @@ export default function UserDetailPage() {
                     setIsEditingUserRole(false);
                     openNotificationPopUpMessage("User role updated successfully!");
                 }
-                else {
+                else if(isEditingUserStatus) {
                     setIsEditingUserStatus(false);
                     openNotificationPopUpMessage("User status updated successfully!");
                 }
+                else if(isEditingServiceType) {
+                    setIsEditingServiceType(false);
+                    openNotificationPopUpMessage("Service type assigned successfully!");
+                }
             } 
-            else openNotificationPopUpMessage("Failed to update user role/status. Please try again.");
+            else openNotificationPopUpMessage("Failed to update user. Please try again.");
         },
         () => {
-            openNotificationPopUpMessage("Failed to update user role/status. An error occurred.");
+            openNotificationPopUpMessage("Failed to update user. An error occurred.");
         }
     );
 
@@ -82,6 +94,8 @@ export default function UserDetailPage() {
             setUserName(userDetailData.data.userName || "");
             setUserRole(userDetailData.data.role || "");
             setUserStatus(userDetailData.data.userStatus || "");
+            setServiceType(userDetailData.data.serviceType || "");
+            setServiceEntity(userDetailData.data.serviceAddressId || "");
         }
     }, [userDetailData]);
 
@@ -89,7 +103,7 @@ export default function UserDetailPage() {
         if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined || currentUserRole !== "MASTER_ADMIN")) {
             router.replace("/");
         }
-    }, [isLoading, isAuthenticated, router]);
+    }, [isLoading, isAuthenticated, currentUserRole, router]);
 
     if (isLoading) {
         return null; // or <FullPageLoader />
@@ -121,8 +135,25 @@ export default function UserDetailPage() {
         setUserRole(prev => (prev === role ? null : role));
     };
 
+    const handleServiceTypeChange = (type: ServiceType) => {
+        setServiceType(prev => (prev === type ? null : type));
+    };
+
     const onUpdateUserRoleClicked = () => {
         setIsUserUpdateConfirmationVisible(true);
+    }
+
+    const onUpdateServiceType = () => {
+        updateUserRoleStatus({ userId: userDetail?.id || "", userServiceType: serviceType as ServiceType });
+    }
+
+    const onUpdateServiceEntity = () => {
+        // TODO: Call mutation to update service entity
+        updateUserRoleStatus({ userId: userDetail?.id || "", serviceEntityId: serviceEntity || undefined });
+        setIsEditingServiceEntity(false);
+        setServiceEntitySearch("");
+        setServiceEntity("");
+        openNotificationPopUpMessage("Service entity assigned successfully!");
     }
 
     const onUpdateUserRole = () => {
@@ -143,11 +174,23 @@ export default function UserDetailPage() {
         updateUserRoleStatus({ userId: userDetail?.id || "", userStatus: (userStatus || userDetail?.userStatus) as UserStatus });
     }
 
+    const handleServiceEntitySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setServiceEntitySearch(e.target.value);
+    };
+
+    const filteredEntities = serviceType === "HOTEL_BOOKING" 
+        ? ((hotelsData?.data || []) as Hotel[]).filter((hotel: Hotel) => 
+            hotel.name.toLowerCase().includes(serviceEntitySearch.toLowerCase())
+        )
+        : [];
+
     const cancelUserUpdate = () => {
         if(isEditingUserRole) {
             setIsEditingUserRole(false);
         } else if(isEditingUserStatus) {
             setIsEditingUserStatus(false);
+        } else if(isEditingServiceType) {
+            setIsEditingServiceType(false);
         }
         
         setIsUserUpdateConfirmationVisible(false);
@@ -231,16 +274,16 @@ export default function UserDetailPage() {
                         {isEditingUserRole &&
                             <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row space-x-0 md:space-x-4 p-2 bg-gray-700 border-2 border-gray-600">
                                 <CustomCheckboxInput
-                                    label="Service Admin"
-                                    checked={userRole === "SERVICE_ADMIN"}
-                                    onChange={() => handleCheckboxChange(Role.SERVICE_ADMIN)}
+                                    label="Master Admin"
+                                    checked={userRole === "MASTER_ADMIN"}
+                                    onChange={() => handleCheckboxChange(Role.MASTER_ADMIN)}
                                     className="p-2 rounded-xs"
                                 />
 
                                 <CustomCheckboxInput
-                                    label="Master Admin"
-                                    checked={userRole === "MASTER_ADMIN"}
-                                    onChange={() => handleCheckboxChange(Role.MASTER_ADMIN)}
+                                    label="Service Admin"
+                                    checked={userRole === "SERVICE_ADMIN"}
+                                    onChange={() => handleCheckboxChange(Role.SERVICE_ADMIN)}
                                     className="p-2 rounded-xs"
                                 />
 
@@ -257,8 +300,124 @@ export default function UserDetailPage() {
                         }
                     </div>
 
-                    <p>Service is <span className="text-xl text-green-300">{userDetail?.serviceType || "N/A"}</span></p>
+                    <div className="flex space-x-5 items-end">
+                        <p>Service is <span className="text-xl text-green-300">{userDetail?.serviceType || "N/A"}</span></p>
+                        
+                        {!isEditingServiceType && currentUserRole === "MASTER_ADMIN" && 
+                            <button className="p-2 bg-green-600 hover:bg-green-500 text-white rounded-xs" onClick={() => setIsEditingServiceType(true)}>{userDetail?.serviceType ? "Change Service Type" : "Assign Service Type"}</button>
+                        }
+                    </div>
+
+                    {isEditingServiceType &&
+                        <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row space-x-0 md:space-x-4 p-2 bg-gray-700 border-2 border-gray-600">
+                            <CustomCheckboxInput
+                                label="Hotel Booking"
+                                checked={serviceType === ServiceType.HOTEL_BOOKING}
+                                onChange={() => handleServiceTypeChange(ServiceType.HOTEL_BOOKING)}
+                                className="p-2 rounded-xs"
+                            />
+
+                            <CustomCheckboxInput
+                                label="Transport Service"
+                                checked={serviceType === ServiceType.TRANSPORT_SERVICE}
+                                onChange={() => handleServiceTypeChange(ServiceType.TRANSPORT_SERVICE)}
+                                className="p-2 rounded-xs"
+                            />
+
+                            <CustomCheckboxInput
+                                label="Activity Booking"
+                                checked={serviceType === ServiceType.ACTIVITY_BOOKING}
+                                onChange={() => handleServiceTypeChange(ServiceType.ACTIVITY_BOOKING)}
+                                className="p-2 rounded-xs"
+                            />
+
+                            <CustomCheckboxInput
+                                label="Guide Service"
+                                checked={serviceType === ServiceType.GUIDE_SERVICE}
+                                onChange={() => handleServiceTypeChange(ServiceType.GUIDE_SERVICE)}
+                                className="p-2 rounded-xs"
+                            />
+
+                            <button className="p-2 bg-green-700 hover:bg-green-600" onClick={onUpdateServiceType}>Update</button>
+                            <button className="p-2 bg-red-700 hover:bg-red-600" onClick={() => setIsEditingServiceType(false)}>Cancel</button>
+                        </div>
+                    }
                     
+                    <div className="flex space-x-5 items-end">
+                        <p>Admin of <span className="text-xl text-green-300">{userDetail?.serviceEntityName || "N/A"}</span></p>
+                        
+                        {!isEditingServiceEntity && currentUserRole === "MASTER_ADMIN" && 
+                            <button className="p-2 bg-green-600 hover:bg-green-500 text-white rounded-xs" onClick={() => setIsEditingServiceEntity(true)}>{userDetail?.serviceEntityName ? "Change Service Entity" : "Assign Service Entity"}</button>
+                        }
+                    </div>
+
+                    {isEditingServiceEntity &&
+                        <div className="flex flex-col space-y-4 p-4 bg-gray-700 border-2 border-gray-600 rounded-lg">
+                            <div className="flex flex-col space-y-2">
+                                <label className="text-green-300 font-medium">Search Service Entity</label>
+                                <div className="relative">
+                                    <CustomMiniTextInput
+                                        type="text"
+                                        placeholder="Search by name..."
+                                        value={serviceEntitySearch}
+                                        onChange={handleServiceEntitySearch}
+                                        className="w-full"
+                                    />
+                                    
+                                    {serviceEntitySearch && filteredEntities.length > 0 && (
+                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-500 rounded-sm shadow-lg z-20">
+                                            {filteredEntities.slice(0, 4).map((entity: Hotel) => (
+                                                <div
+                                                    key={entity.id}
+                                                    onClick={() => setServiceEntity(entity.id)}
+                                                    className="px-3 py-2 text-black hover:bg-gray-100 cursor-pointer border-b border-gray-500 last:border-b-0"
+                                                >
+                                                    {entity.name}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col space-y-2">
+                                <CustomSelectInput
+                                    label="Select Service Entity"
+                                    value={serviceEntity || ""}
+                                    onChange={(e) => setServiceEntity(e.target.value || null)}
+                                    options={[
+                                        { label: "-- Select an entity --", value: "" },
+                                        ...(hotelsData?.data || []).map((entity: Hotel) => ({
+                                            label: entity.name,
+                                            value: entity.id
+                                        }))
+                                    ]}
+                                    className="bg-gray-600 text-white"
+                                />
+                            </div>
+
+                            <div className="flex space-x-4">
+                                <button 
+                                    className="p-2 bg-green-700 hover:bg-green-600 text-white rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed"
+                                    disabled={!serviceEntity}
+                                    onClick={() => onUpdateServiceEntity()}
+                                >
+                                    Update
+                                </button>
+                                <button 
+                                    className="p-2 bg-red-700 hover:bg-red-600 text-white rounded-md"
+                                    onClick={() => {
+                                        setIsEditingServiceEntity(false);
+                                        setServiceEntitySearch("");
+                                        setServiceEntity("");
+                                    }}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    }
+
                     <p>Email Verified&nbsp;&nbsp;<span className="text-xl text-green-300">{userDetail?.emailVerified ? 'Yes' : 'No'}</span></p>
 
                     <h4 className="text-green-300">Personal Details</h4>

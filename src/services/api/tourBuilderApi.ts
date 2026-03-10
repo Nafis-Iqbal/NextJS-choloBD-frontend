@@ -40,7 +40,7 @@ interface UpdateTourPlanData {
     }>;
 }
 
-async function getAllTourPlans(queryString?: string) {
+export async function getAllTourPlans(queryString?: string) {
     const response = await apiFetch<ApiResponse<TourPackage[]>>(
         `/tour-builder${queryString ? `?${queryString}` : ""}`,
         {
@@ -161,6 +161,7 @@ export function useDeleteTourPlanRQ(
 
 // Aggregate exports as an object
 export const TourBuilderApi = {
+    getAllTourPlans,
     useGetAllTourPlansRQ,
     useGetTourPlanDetailsRQ,
     useCreateTourPlanRQ,

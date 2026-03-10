@@ -1,12 +1,12 @@
 import { useState } from "react"
 
 import { WalletApi } from "@/services/api"
-import WalletRechargeOptionModal from "../modals/WalletRechargeOptionModal"
-import TableLayout from "../layout-elements/TableLayout"
-import FilterSectionLayout from "../layout-elements/FilterSectionLayout"
-import { CustomTextInput} from "../custom-elements/CustomInputElements"
-import { HorizontalDivider } from "../custom-elements/UIUtilities"
-import { NoContentTableRow } from "../placeholder-components/NoContentTableRow"
+import WalletRechargeOptionModal from "../../../modals/WalletRechargeOptionModal"
+import TableLayout from "../../../layout-elements/TableLayout"
+import FilterSectionLayout from "../../../layout-elements/FilterSectionLayout"
+import { CustomTextInput} from "../../../custom-elements/CustomInputElements"
+import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
+import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
 
 export const WalletManagerModule = () => {
     const [rechargeOptionModal, setRechargeOptionModal] = useState<{isOpen: boolean, rechargeOptionId: string, mode: 'create' | 'edit'}>({
@@ -23,7 +23,7 @@ export const WalletManagerModule = () => {
     }
 
     return (
-        <section className="flex flex-col space-y-2 mt-4" id="location_wallet_manager">
+        <section className="flex flex-col space-y-2 mt-4" id="wallet_management">
             <WalletRechargeOptionModal
                 isVisible={rechargeOptionModal.isOpen}
                 rechargeOption_id={rechargeOptionModal.rechargeOptionId}

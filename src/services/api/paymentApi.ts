@@ -5,7 +5,12 @@ import { PaymentStatus, ServiceType } from '@/types/enums';
 
 interface PaymentInitData {
   serviceType: ServiceType;
-  serviceTypeId: string;
+  serviceTypeId?: string;
+  userId?: string;
+  userName?: string;
+  phone?: string;
+  email?: string;
+  paymentAmount?: number;
 }
 
 interface PaymentValidationData {
@@ -52,7 +57,7 @@ async function initializePayment(paymentData: PaymentInitData) {
     transactionId: string;
     gatewayPageURL: string;
     sessionKey: string;
-  }>>('/payments', {
+  }>>('/payments/initialize', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(paymentData),
@@ -60,6 +65,7 @@ async function initializePayment(paymentData: PaymentInitData) {
   return response;
 }
 
+//USED FOR PAYMENT 
 export function useInitializePaymentRQ(
   onSuccessFn: (response: any) => void, 
   onErrorFn: (error: any) => void

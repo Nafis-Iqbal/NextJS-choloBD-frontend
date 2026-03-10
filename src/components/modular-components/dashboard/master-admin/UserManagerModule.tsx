@@ -5,12 +5,12 @@ import { UserApi } from "@/services/api"
 import { filterUsersSchema } from "@/validators/userValidators"
 import { queryClient } from "@/services/apiInstance"
 
-import TableLayout from "../layout-elements/TableLayout"
-import FilterSectionLayout from "../layout-elements/FilterSectionLayout"
-import { CustomSelectInput } from "../custom-elements/CustomInputElements"
-import { CustomTextInput } from "../custom-elements/CustomInputElements"
-import { HorizontalDivider } from "../custom-elements/UIUtilities"
-import { NoContentTableRow } from "../placeholder-components/NoContentTableRow"
+import TableLayout from "../../../layout-elements/TableLayout"
+import FilterSectionLayout from "../../../layout-elements/FilterSectionLayout"
+import { CustomSelectInput } from "../../../custom-elements/CustomInputElements"
+import { CustomTextInput } from "../../../custom-elements/CustomInputElements"
+import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
+import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
 import { useRouter } from "next/navigation"
 
 type UserFilter = {
@@ -108,7 +108,7 @@ export const UserManagerModule = () => {
     };
 
     return (
-        <section className="flex flex-col mt-5" id="dashboard_users">
+        <section className="flex flex-col mt-5" id="users_management">
             <div className="flex mb-2 space-x-5">
                 <h4 className="">All Users</h4>
                 <button className="text-sm px-1 mt-1 bg-green-700 hover:bg-green-600 rounded-md self-center">View All</button>

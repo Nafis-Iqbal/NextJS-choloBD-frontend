@@ -25,9 +25,10 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(({ className 
     return (
         <div
             ref={ref} // Forward the ref
-            className={`absolute ${className} flex flex-col md:hidden space-y-1 items-center text-white opacity-100 font-sans`}
+            className={`absolute ${className} flex flex-col md:hidden space-y-1 items-center bg-gray-800 text-white opacity-100 font-sans`}
         >
             <Link className="p-2 border-b-1 border-gray-600" href="/dashboard" >Dashboard</Link>
+            <Link className="p-2 border-b-1 border-gray-600" href="/booking/trackers">Tracker</Link>
             <Link className="p-2 border-b-1 border-gray-600" href="/" >Tickets</Link>
             <Link className="p-2 border-b-1 border-gray-600" href="/" >Hotels</Link>
             <Link className="p-2 border-b-1 border-gray-600" href={isAuthenticated ? `/user_profile/${currentUserId}` : "/login"} >{isAuthenticated ? "Profile" : "Log In"}</Link>

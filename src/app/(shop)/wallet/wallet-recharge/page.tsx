@@ -7,7 +7,7 @@ import { GreenButton } from "@/components/custom-elements/Buttons";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities";
 import { queryClient } from "@/services/apiInstance";
-import { RechargeOptionDisplay } from "@/components/data-elements/RechargeOptionDisplay";
+import { RechargeOptionCard } from "@/components/data-elements/RechargeOptionCard";
 
 export default function WalletRechargePage() {
     const router = useRouter();
@@ -16,11 +16,12 @@ export default function WalletRechargePage() {
     
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+    const currentUserId = authResponse?.data?.userId || "";
 
     const {data: walletRechargeOptions, isLoading: isFetchLoading} = WalletApi.useGetWalletRechargeOptionsRQ();
-    const rechargeOptions = walletRechargeOptions?.data || [];
+    const rechargeOptions = (walletRechargeOptions?.data || []).sort((a, b) => Number(a.rechargeAmount) - Number(b.rechargeAmount));
 
-    const {mutate: createWalletRechargeTransactionMutation } = WalletApi.useCreateWalletRechargeTransactionRQ(
+    const {mutate: createWalletRechargePaymentMutation } = WalletApi.useCreateWalletRechargePaymentAndTransactionRQ(
         (responseData) => {
             if(responseData.status === "success")
             {
@@ -44,8 +45,15 @@ export default function WalletRechargePage() {
     };
 
     const handleProceedToPayment = () => {
+        if(currentUserId === "") {
+            openNotificationPopUpMessage("User authentication required. Please log in to proceed.");
+            return;
+        }
         if (selectedRechargeOption) {
-            createWalletRechargeTransactionMutation({walletRechargeOptionId: selectedRechargeOption.id})
+            createWalletRechargePaymentMutation({
+                walletRechargeOptionId: selectedRechargeOption.id,
+                userId: currentUserId,
+            })
         }
     };
 
@@ -59,50 +67,95 @@ export default function WalletRechargePage() {
 
             <HorizontalDivider className="border-green-500" />
 
-            {/* Recharge Options */}
-            <RechargeOptionDisplay
-                rechargeOptions={rechargeOptions}
-                isLoading={isFetchLoading}
-                selectedRechargeOption={selectedRechargeOption}
-                onRechargeOptionSelect={handleRechargeOptionSelect}
-            />
+            <div className="max-w-4xl mx-auto w-full">
+                <h2 className="text-2xl md:text-3xl text-white font-semibold text-center mb-8">Choose Recharge Amount</h2>
+                
+                {isFetchLoading ? (
+                    <div className="text-center text-gray-400 text-lg py-12">
+                        <p>⏳ Loading recharge options...</p>
+                    </div>
+                ) : rechargeOptions.length === 0 ? (
+                    <div className="bg-gray-700 border-2 border-yellow-500 rounded-xl p-8 text-center">
+                        <div className="text-6xl mb-4">⚠️</div>
+                        <h3 className="text-2xl font-semibold text-yellow-400 mb-4">No Recharge Options Available</h3>
+                        <p className="text-gray-300 text-lg mb-6">
+                            We're currently updating our recharge options. Please try again later or contact support if this issue persists.
+                        </p>
+                        
+                        <GreenButton
+                            onClick={() => window.location.reload()}
+                            extraStyle="px-6 py-3 rounded-lg border border-green-500 hover:border-green-400"
+                        >
+                            🔄 Refresh Page
+                        </GreenButton>
+                    </div>
+                ) : (
+                    <div className="flex flex-col md:flex-row space-y-4 md:space-x-4 md:space-y-0 justify-center">
+                        {rechargeOptions.map((option) => (
+                            <RechargeOptionCard
+                                key={option.id}
+                                rechargeOption={option}
+                                isLoading={isFetchLoading}
+                                selectedRechargeOption={selectedRechargeOption}
+                                onRechargeOptionSelect={handleRechargeOptionSelect}
+                            />  
+                        ))}
+                    </div>
+                )}
+                
+                {/* Helper text when no option selected */}
+                {!selectedRechargeOption && rechargeOptions.length > 0 && (
+                    <div className="text-center text-gray-400 text-lg mt-8">
+                        <p>👆 Select a recharge amount above to continue</p>
+                    </div>
+                )}
+            </div>
 
-            {/* Payment Method Preview */}
+            {/* Recharge Summary Card */}
             {selectedRechargeOption && (
-                <div className="bg-gray-700 border border-green-500 rounded-lg p-6 max-w-2xl mx-auto w-full">
-                    <h3 className="text-xl font-semibold text-white mb-4 text-center">Recharge Summary</h3>
+                <div className="bg-linear-to-br from-gray-750 to-gray-800 border border-green-600 rounded-xl p-8 max-w-2xl mx-auto w-full shadow-2xl shadow-green-900/20">
+                    {/* Header */}
+                    <h3 className="text-2xl font-bold text-white mb-1 text-center">Recharge Summary</h3>
+                    <p className="text-green-300 text-sm text-center mb-6">Review your recharge details</p>
                     
-                    <div className="space-y-3 text-gray-300">
-                        <div className="flex justify-between">
-                            <span>Recharge Amount:</span>
-                            <span className="text-green-400 font-semibold">৳{selectedRechargeOption.rechargeAmount.toLocaleString()}</span>
+                    {/* Summary Items */}
+                    <div className="space-y-4 mb-6">
+                        {/* Recharge Amount */}
+                        <div className="bg-gray-800/60 border border-green-700/40 rounded-lg p-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-300 font-medium">Recharge Amount</span>
+                                <span className="text-green-300 font-bold text-lg">৳{selectedRechargeOption.rechargeAmount.toLocaleString()}</span>
+                            </div>
                         </div>
                         
+                        {/* Bonus Amount */}
                         {selectedRechargeOption.bonusAmount && selectedRechargeOption.bonusAmount > 0 && (
-                            <div className="flex justify-between">
-                                <span>Bonus:</span>
-                                <span className="text-green-400 font-semibold">
-                                    +৳{selectedRechargeOption.bonusAmount.toLocaleString()}
-                                </span>
+                            <div className="bg-gray-800/60 border border-green-700/40 rounded-lg p-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-300 font-medium">🎁 Bonus Credits</span>
+                                    <span className="text-green-300 font-bold text-lg">+{selectedRechargeOption.bonusAmount.toLocaleString()}</span>
+                                </div>
                             </div>
                         )}
-                        
-                        <HorizontalDivider className="border-gray-600 my-2" />
-                        
-                        <div className="flex justify-between text-lg font-semibold">
-                            <span>Total Amount:</span>
-                            <span className="text-green-400">
-                                ৳{(
+                    </div>
+                    
+                    {/* Total */}
+                    <div className="bg-linear-to-r from-green-700/30 to-teal-700/30 border-2 border-green-500 rounded-lg p-5 mb-6">
+                        <div className="flex justify-between items-center">
+                            <span className="text-white font-semibold text-lg">Total Amount</span>
+                            <div className="text-right">
+                                <span className="text-green-200 font-bold text-2xl block">৳{(
                                     selectedRechargeOption.rechargeAmount + (selectedRechargeOption.bonusAmount || 0)
-                                ).toLocaleString()}
-                            </span>
+                                ).toLocaleString()}</span>
+                            </div>
                         </div>
                     </div>
                     
-                    <div className="mt-6">
+                    {/* Button */}
+                    <div className="mt-8">
                         <GreenButton
                             onClick={handleProceedToPayment}
-                            extraStyle="w-full py-4 text-xl font-semibold rounded-lg border-2 border-green-400 hover:shadow-[0_0_15px_#00FF99] transition-all duration-300"
+                            extraStyle="w-full py-4 text-lg font-semibold rounded-lg border-2 border-green-400 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all duration-300"
                         >
                             💳 Proceed to Payment
                         </GreenButton>

@@ -349,30 +349,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 setSelectedCategories={setHotelPolicies}
                 className=""
             />
-            
-            <CustomTextInput
-                type="number"
-                className="w-full px-2 md:px-0 md:w-[250px]"
-                placeholderText="Enter total number of rooms"
-                label="Total Rooms"
-                labelStyle="text-green-300"
-                name="totalRooms"
-                value={hotelFormData?.totalRooms || ""}
-                onChange={handleChange}
-                error={errors.totalRooms}
-            />
-
-            <CustomTextInput
-                type="number"
-                className="w-full px-2 md:px-0 md:w-[250px]"
-                placeholderText="Enter available rooms"
-                label="Available Rooms"
-                labelStyle="text-green-300"
-                name="availableRooms"
-                value={hotelFormData?.availableRooms || ""}
-                onChange={handleChange}
-                error={errors.availableRooms}
-            />
 
             <CustomTextInput
                 type="text"

@@ -80,11 +80,18 @@ export enum HotelType {
   APARTMENT = "APARTMENT"
 }
 
-export enum HotelRoomType {
+export enum HotelRoomCategory {
   SINGLE = "SINGLE",
   DOUBLE = "DOUBLE",
   SUITE = "SUITE",
   DELUXE = "DELUXE"
+}
+
+export enum HotelRoomStatus {
+  AVAILABLE = "AVAILABLE",
+  BOOKED = "BOOKED",
+  MAINTENANCE = "MAINTENANCE",
+  OUT_OF_SERVICE = "OUT_OF_SERVICE"
 }
 
 // Review and Rating Enums
@@ -97,10 +104,11 @@ export enum ReviewType {
 // Service and Booking Enums
 export enum ServiceType {
   HOTEL_BOOKING = "HOTEL_BOOKING",
-  TOUR_PACKAGE = "TOUR_PACKAGE",
+  TRIP_PACKAGE = "TRIP_PACKAGE",
   TRANSPORT_SERVICE = "TRANSPORT_SERVICE",
   ACTIVITY_BOOKING = "ACTIVITY_BOOKING",
-  GUIDE_SERVICE = "GUIDE_SERVICE"
+  GUIDE_SERVICE = "GUIDE_SERVICE",
+  WALLET_TOP_UP = "WALLET_TOP_UP"
 }
 
 // Transport Enums

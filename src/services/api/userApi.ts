@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Role, UserStatus } from "@/types/enums";
+import { Role, ServiceType, UserStatus } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
 
@@ -43,18 +43,26 @@ export function useUpdateUserRQ(onSuccessFn: (ApiResponse: any) => void, onError
     });
 }
 
-export async function updateUserRoleStatus(userId: string, role?: string, userStatus?: UserStatus) {
+export async function updateUserRoleStatusService(
+  userId: string, 
+  role?: string, 
+  userStatus?: UserStatus, 
+  userServiceType?: ServiceType,
+  serviceEntityId?: string
+) {
   const response = await apiFetch<ApiResponse<User>>(`/users/${userId}/role`, {
     method: 'PUT',
-    body: JSON.stringify({ role, userStatus }),
+    body: JSON.stringify({ role, userStatus, userServiceType, serviceEntityId }),
   });
 
   return response;
 }
 
-export function useUpdateUserRoleStatusRQ(onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) {
+export function useUpdateUserRoleStatusServiceRQ(onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) {
     return useMutation({
-        mutationFn: ({userId, role, userStatus} : {userId: string, role?: string, userStatus?: UserStatus}) => updateUserRoleStatus(userId, role, userStatus),
+        mutationFn: ({userId, role, userStatus, userServiceType, serviceEntityId} : 
+          {userId: string, role?: string, userStatus?: UserStatus, userServiceType?: ServiceType, serviceEntityId?: string}) => 
+            updateUserRoleStatusService(userId, role, userStatus, userServiceType, serviceEntityId),
         onSuccess: (data) => {
             onSuccessFn(data);
         },

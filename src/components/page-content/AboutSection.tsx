@@ -1,10 +1,19 @@
-import { Github, Linkedin } from "lucide-react"
+import { Github, Linkedin, X } from "lucide-react"
 import { NextImage } from "../custom-elements/UIUtilities"
 
-export const AboutSection = ({className} : {className?: string}) => {
+export const AboutSection = ({className, onClose, compact = false} : {className?: string, onClose?: () => void, compact?: boolean}) => {
     return (
-        <div className="w-full sm:w-[50%] mr-10 bg-inherit px-6 py-8">
-            <div className="max-w-full bg-gray-900 rounded-2xl p-6 shadow-2xl font-sans">
+        <div className={`w-full ${compact ? 'px-0 py-0' : 'sm:w-[50%] mr-10 px-6 py-8'} bg-inherit`}>
+            <div className={`relative max-w-full bg-gray-900 font-sans ${compact ? 'rounded-none p-4' : 'rounded-2xl p-6 shadow-2xl'}`}>
+                {onClose && (
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 text-gray-400 hover:text-[#00FF99] transition-colors"
+                        title="Close"
+                    >
+                        <X size={24} />
+                    </button>
+                )}
                 <div className="flex flex-col rounded-md p-2 lg:flex-row items-center space-y-6 lg:space-y-0 lg:space-x-8">
                     {/* Profile Picture */}
                     <div className="w-24 h-24 lg:w-32 lg:h-32 flex-shrink-0">

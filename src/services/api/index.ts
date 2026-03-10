@@ -5,6 +5,8 @@ import * as CategoryApi from "./categoryApi";
 import * as TourSpotApi from "./tourSpotApi";
 import * as ActivitySpotApi from "./activitySpotApi";
 import * as HotelApi from "./hotelApi";
+import * as HotelRoomApi from "./hotelRoomApi";
+import * as HotelBookingApi from "./hotelBookingApi";
 import * as ReviewApi from "./reviewApi";
 import * as TourBuilderApi from "./tourBuilderApi";
 import * as SearchApi from "./searchApi";
@@ -13,5 +15,5 @@ import * as WalletApi from "./walletApi";
 import * as AddressApi from "./addressApi";
 import * as ConfigApi from "./configApi";
 
-export { AuthApi, UserApi, LocationApi, CategoryApi, TourSpotApi, ActivitySpotApi, HotelApi, ReviewApi, SearchApi, 
-    PaymentApi, WalletApi, AddressApi, ConfigApi, TourBuilderApi };
+export { AuthApi, UserApi, LocationApi, CategoryApi, TourSpotApi, ActivitySpotApi, HotelApi, HotelRoomApi, HotelBookingApi, 
+    ReviewApi, SearchApi, PaymentApi, WalletApi, AddressApi, ConfigApi, TourBuilderApi };

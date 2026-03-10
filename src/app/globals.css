@@ -7,8 +7,9 @@
     }
 
     .green-underline-button {
+        @apply bg-inherit;
         @apply text-white;
-        @apply hover:text-emerald-500 hover:cursor-pointer;
+        @apply hover:text-emerald-500 hover:underline hover:cursor-pointer;
     }
 
     .bg-section{

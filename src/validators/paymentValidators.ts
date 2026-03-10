@@ -1,9 +1,36 @@
 import { z } from "zod";
 
-// Payment initialization schema - simplified to only require orderId
+// Payment initialization schema
 export const initializePaymentSchema = z.object({
-    serviceTypeId: z.string().min(1, "Service Type ID is required")
-});
+    serviceType: z.enum(['HOTEL_BOOKING', 'TRIP_PACKAGE', 'TRANSPORT_SERVICE', 'ACTIVITY_BOOKING', 'GUIDE_SERVICE', 'WALLET_TOP_UP'], {
+        required_error: "Service type is required",
+        invalid_type_error: "Service type must be one of: HOTEL_BOOKING, TRIP_PACKAGE, TRANSPORT_SERVICE, ACTIVITY_BOOKING, GUIDE_SERVICE, WALLET_TOP_UP"
+    }),
+    serviceTypeId: z.string().optional(),
+    userId: z.string().optional(),
+    userName: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email().optional(),
+    paymentAmount: z.number().optional()
+}).refine(
+    (data) => data.userId || (data.userName && data.phone),
+    {
+        message: "User name and phone are required when userId is not provided",
+        path: ["userName"],
+    }
+).refine(
+    (data) => data.serviceTypeId || data.paymentAmount,
+    {
+        message: "Payment amount is required when serviceTypeId is not provided",
+        path: ["paymentAmount"],
+    }
+).refine(
+    (data) => !data.paymentAmount || data.paymentAmount > 0,
+    {
+        message: "Payment amount must be greater than 0",
+        path: ["paymentAmount"],
+    }
+);
 
 // Payment validation schema
 export const validatePaymentSchema = z.object({

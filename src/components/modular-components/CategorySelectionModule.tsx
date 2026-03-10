@@ -67,13 +67,19 @@ export const CategorySelectionModule = ({
         {selectedCategories?.length > 0 &&
           selectedCategories.map((category) => (
             <div
-              className="relative inline-block w-fit items-center p-1 mx-1 mt-1 text-sm md:text-base text-white rounded-md"
+              className="relative inline-block w-fit items-center p-1 mx-1 mt-1 bg-gray-700 text-sm md:text-base text-white rounded-sm"
               key={category.id}
             >
               <div className="flex">
                 {category.name}
                 <div className="min-w-10"></div>
-                <button className="absolute flex right-0 top-0 h-[25px] w-[25px] items-center justify-center text-center bg-red-500 hover:bg-red-400" type="button" onClick={() => removeCategory(category.id)}>×</button>
+                <button 
+                  className="absolute flex right-0 top-0 h-[25px] w-[25px] items-center justify-center text-center bg-red-500 hover:bg-red-400 rounded-xs" 
+                  type="button" 
+                  onClick={() => removeCategory(category.id)}
+                >
+                  ×
+                </button>
               </div>
             </div>
           ))}
