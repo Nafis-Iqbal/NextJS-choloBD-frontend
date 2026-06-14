@@ -91,11 +91,11 @@ export default function MasterAdminDashboard() {
     return (
         <section className="flex flex-col p-2 font-sans" id="dashboard_master_admin">
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h2 className="text-green-500">Master Admin Panel</h2>
-                <p className="text-green-200">Site management functions here.</p>
+                <h2 className="theme-text-teal">Master Admin Panel</h2>
+                <p className="theme-text-subtle">Site management functions here.</p>
 
                 <div className="flex flex-col space-y-6 my-10" id="enity_management">
-                    <h3 className="text-green-500 font-semibold mr-5">Manage Site Content</h3>
+                    <h3 className="theme-text-teal font-semibold mr-5">Manage Site Content</h3>
 
                     <div className="flex flex-col w-full md:w-[40%] space-y-3">
                         <div className="flex justify-between mx-2">
@@ -137,10 +137,10 @@ export default function MasterAdminDashboard() {
                 <section className="ml-2 flex flex-col space-y-3" id="site_settings_management">
                     <div className="flex items-center space-x-5">
                         <h3 className="text-green-500 font-bold">Site Config Features</h3>
-                        <p className="text-gray-400">(Hero Images take 500 seconds to take effect)</p>
+                            <p className="theme-text-subtle">(Hero Images take 500 seconds to take effect)</p>
                     </div>
 
-                    <h4 className="my-2 text-green-300">Hero Section Branding Images</h4>
+                    <h4 className="my-2 theme-text-teal">Hero Section Branding Images</h4>
 
                     <div className="flex flex-col space-y-2">
                         <div className="flex flex-col space-y-8">
@@ -160,7 +160,11 @@ export default function MasterAdminDashboard() {
                                 />
 
                                 <button 
-                                    className="p-1 bg-green-600 hover:bg-green-500 text-sm rounded-xs max-h-[35px] disabled:cursor-not-allowed disabled:bg-gray-500" 
+                                    className="p-1 text-sm rounded-xs max-h-[35px] disabled:cursor-not-allowed" 
+                                    style={{
+                                        backgroundColor: fileReadyStateTop ? 'var(--theme-teal)' : 'var(--theme-teal-hover)',
+                                        color: 'white',
+                                    }}
                                     onClick={() => setActionTriggerTop(true)}
                                     disabled={!fileReadyStateTop}
                                     title={!fileReadyStateTop ? "Select an image first" : ""}
@@ -185,7 +189,11 @@ export default function MasterAdminDashboard() {
                                 />
 
                                 <button 
-                                    className="p-1 bg-green-600 hover:bg-green-500 text-sm rounded-xs max-h-[35px] disabled:cursor-not-allowed disabled:bg-gray-500" 
+                                    className="p-1 text-sm rounded-xs max-h-[35px] disabled:cursor-not-allowed" 
+                                    style={{
+                                        backgroundColor: fileReadyStateMid ? 'var(--theme-teal)' : 'var(--theme-teal-hover)',
+                                        color: 'white',
+                                    }}
                                     onClick={() => setActionTriggerMid(true)}
                                     disabled={!fileReadyStateMid}
                                     title={!fileReadyStateMid ? "Select an image first" : ""}
@@ -210,7 +218,11 @@ export default function MasterAdminDashboard() {
                                 />
 
                                 <button 
-                                    className="p-1 bg-green-600 hover:bg-green-500 text-sm rounded-xs max-h-[35px] disabled:cursor-not-allowed disabled:bg-gray-500" 
+                                    className="p-1 text-sm rounded-xs max-h-[35px] disabled:cursor-not-allowed" 
+                                    style={{
+                                        backgroundColor: fileReadyStateBottom ? 'var(--theme-teal)' : 'var(--theme-teal-hover)',
+                                        color: 'white',
+                                    }}
                                     onClick={() => setActionTriggerBottom(true)}
                                     disabled={!fileReadyStateBottom}
                                     title={!fileReadyStateBottom ? "Select an image first" : ""}
@@ -227,30 +239,30 @@ export default function MasterAdminDashboard() {
                     </div>
 
                     <div className="flex flex-col w-[90%] md:w-[40%] space-y-5 justify-between">
-                        <div className="flex justify-between items-center p-2 space-x-2 hover:bg-gray-700">
-                            <label>Freeze New Trip Requests</label>
+                        <div className="flex justify-between items-center p-2 space-x-2" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+                            <label className="theme-text">Freeze New Trip Requests</label>
                             <input className="w-6 h-6" type="checkbox"></input>
                         </div>
 
-                        <div className="flex justify-between items-center p-2 space-x-2 hover:bg-gray-700">
-                            <label>Freeze Refund Requests</label>
+                        <div className="flex justify-between items-center p-2 space-x-2" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+                            <label className="theme-text">Freeze Refund Requests</label>
                             <input className="w-6 h-6" type="checkbox"></input>
                         </div>
 
-                        <div className="flex justify-between items-center p-2 space-x-2 hover:bg-gray-700">
-                            <label>Freeze New Complaints</label>
+                        <div className="flex justify-between items-center p-2 space-x-2" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+                            <label className="theme-text">Freeze New Complaints</label>
                             <input className="w-6 h-6" type="checkbox"></input>
                         </div>
 
-                        <div className="flex justify-between items-center p-2 space-x-2 hover:bg-gray-700">
-                            <label className="text-red-500">Toggle Maintenance Mode</label>
+                        <div className="flex justify-between items-center p-2 space-x-2" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+                            <label className="theme-text" style={{color: 'var(--theme-red)'}}>Toggle Maintenance Mode</label>
                             <input className="w-6 h-6" type="checkbox"></input>
                         </div>
                     </div>
                 </section>
             </div>
             
-            <HorizontalDivider className="border-green-500 mt-15 md:mt-20"/>
+            <HorizontalDivider className="mt-15 md:mt-20"/>
         </section>
     )
 }

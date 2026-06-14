@@ -10,9 +10,10 @@ import { HotelApi } from "@/services/api";
 interface HotelDealsProps {
   animationSpeed?: number; // Duration in seconds (default: 30)
   cardWidth?: number; // Card width in pixels (default: 256 which is w-64)
+  className?: string;
 }
 
-export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 256 }) => {
+export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 256, className = '' }) => {
   const { data: hotelsResponse, isLoading, error } = HotelApi.useGetPopularHotelsRQ();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -48,15 +49,15 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
 
   if (isLoading) {
     return (
-      <section className="w-full">
+      <section className={`w-full ${className}`} id="hotels">
         <SectionHeader title="Hotel Deals" subtitle="Comfort stays at friendly prices" className="mb-6" />
         <div className="flex gap-4 md:gap-6 font-sans overflow-hidden">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-64 rounded-xl bg-gray-800/70 border border-gray-700 p-4 animate-pulse">
-              <div className="h-24 rounded-lg bg-teal-700/30 mb-3" />
-              <div className="h-4 bg-gray-700 rounded mb-2" />
-              <div className="h-3 bg-gray-700 rounded w-3/4 mb-2" />
-              <div className="h-8 bg-teal-600/30 rounded mt-3" />
+            <div key={i} className="flex-shrink-0 w-64 rounded-xl theme-card p-4 animate-pulse">
+              <div className="h-24 rounded-lg theme-placeholder opacity-30 mb-3" />
+              <div className="h-4 theme-section rounded mb-2" />
+              <div className="h-3 theme-section rounded w-3/4 mb-2" />
+              <div className="h-8 theme-placeholder opacity-20 rounded mt-3" />
             </div>
           ))}
         </div>
@@ -66,22 +67,22 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
 
   if (error || formattedHotels.length === 0) {
     return (
-      <section className="w-full">
+      <section className={`w-full ${className}`} id="hotels">
         <SectionHeader title="Hotel Deals" subtitle="Comfort stays at friendly prices" className="mb-6" />
-        <p className="text-gray-400 text-center py-8">No hotels available at the moment.</p>
+        <p className="theme-text-muted text-center py-8">No hotels available at the moment.</p>
       </section>
     );
   }
 
   return (
-    <section className="w-full">
+    <section className={`w-full ${className}`} id="hotels">
       <SectionHeader title="Hotel Deals" subtitle="Comfort stays at friendly prices" className="mb-6" />
       
       <div className="relative w-full">
         {/* Left Arrow Button */}
         <button
           onClick={handleScrollLeft}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-teal-600 hover:bg-teal-700 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors shadow-lg"
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 theme-btn-teal rounded-full w-10 h-10 flex items-center justify-center transition-colors shadow-lg"
           aria-label="Scroll left"
         >
           ←
@@ -101,8 +102,8 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
           >
             {/* Duplicate hotels for seamless loop */}
             {[...formattedHotels, ...formattedHotels].map((h, idx) => (
-              <div key={`${h.id}-${idx}`} className="flex-shrink-0 w-full md:w-100 rounded-xl bg-gray-800/70 border border-gray-700 p-4">
-                <div className="h-35 rounded-lg bg-teal-700 mb-3 overflow-hidden relative">
+              <div key={`${h.id}-${idx}`} className="flex-shrink-0 w-full md:w-100 rounded-xl theme-card p-4">
+                <div className="h-35 rounded-lg theme-placeholder mb-3 overflow-hidden relative">
                   {h.imageUrl ? (
                     <Image 
                       src={h.imageUrl} 
@@ -112,16 +113,16 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                   ) : (
-                    <div className="w-full h-full bg-teal-700" />
+                    <div className="w-full h-full theme-placeholder" />
                   )}
                 </div>
-                <div className="text-white font-medium truncate">{h.name}</div>
-                <div className="text-gray-300 text-sm truncate">{h.city}</div>
+                <div className="theme-text font-medium truncate">{h.name}</div>
+                <div className="theme-text-muted text-sm truncate">{h.city}</div>
                 <div className="mt-2 flex items-center justify-between">
-                  <span className="text-yellow-400 text-sm">{"★".repeat(Math.round(h.rating))}</span>
+                  <span className="theme-star text-sm">{"★".repeat(Math.round(h.rating))}</span>
                 </div>
                 
-                <Link href={`/hotels/${h.id}`} className="mt-3 w-full rounded-lg bg-teal-600 hover:bg-teal-700 text-white py-2 text-sm block text-center transition-colors">View Details</Link>
+                <Link href={`/hotels/${h.id}`} className="mt-3 w-full rounded-lg py-2 text-sm block text-center transition-colors theme-btn-teal">View Details</Link>
               </div>
             ))}
           </motion.div>
@@ -130,7 +131,7 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
         {/* Right Arrow Button */}
         <button
           onClick={handleScrollRight}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-teal-600 hover:bg-teal-700 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors shadow-lg"
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 theme-btn-teal rounded-full w-10 h-10 flex items-center justify-center transition-colors shadow-lg"
           aria-label="Scroll right"
         >
           →

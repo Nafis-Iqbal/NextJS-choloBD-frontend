@@ -299,12 +299,12 @@ const StatCard: React.FC<{
   icon: string;
   color: string;
 }> = ({ label, value, unit, icon, color }) => (
-  <div className={`${color} rounded-lg p-4 text-white`}>
+  <div className="rounded-lg p-4" style={{backgroundColor: 'var(--theme-card-bg)', color: 'var(--theme-text)'}}>
     <div className="flex items-start justify-between">
       <div>
-        <div className="text-2xl font-bold">{value}</div>
-        {unit && <div className="text-xs text-gray-200 mt-1">{unit}</div>}
-        <div className="text-xs text-gray-300 mt-2">{label}</div>
+        <div className="text-2xl font-bold" style={{color: 'var(--theme-teal)'}}>{value}</div>
+        {unit && <div className="text-xs mt-1" style={{color: 'var(--theme-text-muted)'}}>{unit}</div>}
+        <div className="text-xs mt-2" style={{color: 'var(--theme-text-subtle)'}}>{label}</div>
       </div>
       <div className="text-3xl">{icon}</div>
     </div>
@@ -314,54 +314,54 @@ const StatCard: React.FC<{
 // Admin Stats Dashboard
 const AdminStatsDashboard: React.FC<{ stats: AdminStats }> = ({ stats }) => (
   <section className="mb-8">
-    <h2 className="text-2xl font-bold text-white mb-6">Bus Service Statistics</h2>
+    <h2 className="text-2xl font-bold mb-6" style={{color: 'var(--theme-text)'}}>Bus Service Statistics</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
         label="Total Buses"
         value={stats.totalBuses}
         unit={`${stats.activeBuses} active`}
         icon="🚌"
-        color="bg-gradient-to-br from-blue-600 to-blue-700"
+        color=""
       />
       <StatCard
         label="Total Rides"
         value={stats.totalRides}
         unit={`${stats.completedRides} completed`}
         icon="🛣️"
-        color="bg-gradient-to-br from-green-600 to-green-700"
+        color=""
       />
       <StatCard
         label="Tickets Sold"
         value={stats.totalTicketsSold}
         unit="This month"
         icon="🎫"
-        color="bg-gradient-to-br from-purple-600 to-purple-700"
+        color=""
       />
       <StatCard
         label="Total Revenue"
         value={`৳ ${(stats.totalRevenue / 1000).toFixed(0)}K`}
         icon="💰"
-        color="bg-gradient-to-br from-teal-600 to-teal-700"
+        color=""
       />
       <StatCard
         label="Avg Ticket Price"
         value={`৳ ${stats.averageTicketPrice}`}
         icon="💳"
-        color="bg-gradient-to-br from-orange-600 to-orange-700"
+        color=""
       />
       <StatCard
         label="Occupancy Rate"
         value={stats.occupancyRate.toFixed(1)}
         unit="%"
         icon="📊"
-        color="bg-gradient-to-br from-yellow-600 to-yellow-700"
+        color=""
       />
       <StatCard
         label="Cancellation Rate"
         value={stats.cancellationRate.toFixed(1)}
         unit="%"
         icon="⚠️"
-        color="bg-gradient-to-br from-red-600 to-red-700"
+        color=""
       />
     </div>
   </section>
@@ -375,25 +375,27 @@ const BusManagementSection: React.FC<{ buses: Bus[] }> = ({ buses }) => {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">Bus Management</h2>
+        <h2 className="text-2xl font-bold" style={{color: 'var(--theme-text)'}}>Bus Management</h2>
         <button
           onClick={() => setIsAddingBus(!isAddingBus)}
-          className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium"
+          className="px-4 py-2 rounded-lg font-medium"
+          style={{backgroundColor: 'var(--theme-teal)', color: 'white'}}
         >
           {isAddingBus ? "Cancel" : "+ Add Bus"}
         </button>
       </div>
 
       {isAddingBus && (
-        <div className="bg-gray-800/70 border border-teal-600 rounded-xl p-6 mb-6">
-          <h3 className="text-white font-semibold mb-4">Add New Bus</h3>
+        <div className="rounded-xl p-6 mb-6" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <h3 className="font-semibold mb-4" style={{color: 'var(--theme-text)'}}>Add New Bus</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="Bus Number (e.g., BD-02-1006)"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
-            <select className="px-4 py-2 rounded-lg bg-gray-700 text-white">
+            <select className="px-4 py-2 rounded-lg theme-input" style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}>
               <option>Select Bus Type</option>
               <option>AC</option>
               <option>Non-AC</option>
@@ -404,20 +406,23 @@ const BusManagementSection: React.FC<{ buses: Bus[] }> = ({ buses }) => {
             <input
               type="number"
               placeholder="Total Seats"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
             <input
               type="text"
               placeholder="Operator Name"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
             <input
               type="text"
               placeholder="Registration Number"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
           </div>
-          <button className="mt-4 w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
+          <button className="mt-4 w-full py-2 rounded-lg font-medium" style={{backgroundColor: 'var(--theme-teal)', color: 'white'}}>
             Add Bus
           </button>
         </div>
@@ -427,31 +432,30 @@ const BusManagementSection: React.FC<{ buses: Bus[] }> = ({ buses }) => {
         {buses.map((bus) => (
           <div
             key={bus.id}
-            className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+            className="rounded-lg p-4 transition-colors"
+            style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
-                <h3 className="text-white font-semibold">
+                <h3 className="font-semibold" style={{color: 'var(--theme-text)'}}>
                   {bus.busNumber} - {bus.busType}
                 </h3>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-sm mt-1" style={{color: 'var(--theme-text-muted)'}}>
                   Operator: {bus.operatorName} • Seats: {bus.totalSeats}
                 </p>
-                <p className="text-gray-500 text-xs mt-1">Reg: {bus.registrationNumber}</p>
+                <p className="text-xs mt-1" style={{color: 'var(--theme-text-subtle)'}}>Reg: {bus.registrationNumber}</p>
               </div>
               <div className="mt-3 md:mt-0 flex items-center gap-2">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    bus.isActive
-                      ? "bg-green-600/30 text-green-300"
-                      : "bg-red-600/30 text-red-300"
-                  }`}
+                  className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{backgroundColor: bus.isActive ? 'rgba(42, 157, 143, 0.3)' : 'rgba(220, 53, 69, 0.3)', color: bus.isActive ? 'var(--theme-teal)' : 'var(--theme-red)'}}
                 >
                   {bus.isActive ? "✓ Active" : "✗ Inactive"}
                 </span>
                 <button
                   onClick={() => setExpandedBus(expandedBus === bus.id ? null : bus.id)}
-                  className="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{backgroundColor: 'var(--theme-section-bg)', color: 'var(--theme-text)'}}
                 >
                   {expandedBus === bus.id ? "Hide" : "Manage"}
                 </button>
@@ -459,12 +463,12 @@ const BusManagementSection: React.FC<{ buses: Bus[] }> = ({ buses }) => {
             </div>
 
             {expandedBus === bus.id && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="mt-4 pt-4" style={{borderTopColor: 'var(--theme-deep-green)', borderTopWidth: '1px'}}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <button className="px-4 py-2 rounded-lg bg-blue-600/50 hover:bg-blue-600/70 text-blue-200 font-medium">
+                  <button className="px-4 py-2 rounded-lg font-medium" style={{backgroundColor: 'rgba(0, 123, 255, 0.3)', color: 'var(--theme-teal)'}}>
                     ✎ Edit Details
                   </button>
-                  <button className="px-4 py-2 rounded-lg bg-orange-600/50 hover:bg-orange-600/70 text-orange-200 font-medium">
+                  <button className="px-4 py-2 rounded-lg font-medium" style={{backgroundColor: 'rgba(255, 193, 7, 0.3)', color: 'var(--theme-text)'}}>
                     {bus.isActive ? "🔴 Deactivate" : "🟢 Activate"}
                   </button>
                 </div>
@@ -484,15 +488,26 @@ const RideManagementSection: React.FC<{ rides: BusRide[] }> = ({ rides }) => {
   const [isAddingRide, setIsAddingRide] = useState(false);
 
   const getStatusColor = (status: BusRide["status"]) => {
+    const baseStyle = {
+      paddingLeft: '0.75rem',
+      paddingRight: '0.75rem',
+      paddingTop: '0.25rem',
+      paddingBottom: '0.25rem',
+      borderRadius: '9999px',
+      fontSize: '0.75rem',
+      fontWeight: '500',
+      whiteSpace: 'nowrap' as const,
+      border: `1px solid`,
+    };
     switch (status) {
       case "scheduled":
-        return "bg-blue-600/30 text-blue-300 border border-blue-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(0, 123, 255, 0.3)', color: 'rgb(0, 123, 255)', borderColor: 'rgba(0, 123, 255, 0.5)' };
       case "ongoing":
-        return "bg-orange-600/30 text-orange-300 border border-orange-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(255, 165, 0, 0.3)', color: 'rgb(255, 165, 0)', borderColor: 'rgba(255, 165, 0, 0.5)' };
       case "completed":
-        return "bg-green-600/30 text-green-300 border border-green-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(40, 167, 69, 0.3)', color: 'rgb(40, 167, 69)', borderColor: 'rgba(40, 167, 69, 0.5)' };
       case "cancelled":
-        return "bg-red-600/30 text-red-300 border border-red-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(220, 53, 69, 0.3)', color: 'rgb(220, 53, 69)', borderColor: 'rgba(220, 53, 69, 0.5)' };
     }
   };
 
@@ -503,20 +518,21 @@ const RideManagementSection: React.FC<{ rides: BusRide[] }> = ({ rides }) => {
   return (
     <section className="mb-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-white">Ride Management</h2>
+        <h2 className="text-2xl font-bold" style={{color: 'var(--theme-text)'}}>Ride Management</h2>
         <button
           onClick={() => setIsAddingRide(!isAddingRide)}
-          className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium"
+          className="px-4 py-2 rounded-lg font-medium"
+          style={{backgroundColor: 'var(--theme-teal)', color: 'white'}}
         >
           {isAddingRide ? "Cancel" : "+ Create Ride"}
         </button>
       </div>
 
       {isAddingRide && (
-        <div className="bg-gray-800/70 border border-teal-600 rounded-xl p-6 mb-6">
-          <h3 className="text-white font-semibold mb-4">Create New Ride</h3>
+        <div className="rounded-xl p-6 mb-6" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <h3 className="font-semibold mb-4" style={{color: 'var(--theme-text)'}}>Create New Ride</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select className="px-4 py-2 rounded-lg bg-gray-700 text-white">
+            <select className="px-4 py-2 rounded-lg theme-input" style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}>
               <option>Select Bus</option>
               {FAKE_BUSES.map((bus) => (
                 <option key={bus.id}>{bus.busNumber}</option>
@@ -525,25 +541,29 @@ const RideManagementSection: React.FC<{ rides: BusRide[] }> = ({ rides }) => {
             <input
               type="text"
               placeholder="Route (e.g., Dhaka → Chittagong)"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
             <input
               type="datetime-local"
               placeholder="Departure Time"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
             <input
               type="datetime-local"
               placeholder="Arrival Time"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
             <input
               type="number"
               placeholder="Ticket Price"
-              className="px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400"
+              className="px-4 py-2 rounded-lg theme-input"
+              style={{backgroundColor: 'var(--theme-input-bg)', color: 'var(--theme-text)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             />
           </div>
-          <button className="mt-4 w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium">
+          <button className="mt-4 w-full py-2 rounded-lg font-medium" style={{backgroundColor: 'var(--theme-teal)', color: 'white'}}>
             Create Ride
           </button>
         </div>
@@ -555,79 +575,81 @@ const RideManagementSection: React.FC<{ rides: BusRide[] }> = ({ rides }) => {
           return (
             <div
               key={ride.id}
-              className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+              className="rounded-lg p-4 transition-colors"
+              style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
             >
               <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                 <div className="flex-1">
                   <div className="flex items-start gap-3">
                     <div className="flex-1">
-                      <p className="text-white font-semibold">{ride.route}</p>
-                      <p className="text-gray-400 text-sm mt-1">
+                      <p className="font-semibold" style={{color: 'var(--theme-text)'}}>{ride.route}</p>
+                      <p className="text-sm mt-1" style={{color: 'var(--theme-text-muted)'}}>
                         {ride.busNumber} • {ride.departureDate} - {ride.departureTime} to{" "}
                         {ride.arrivalTime}
                       </p>
                       <div className="mt-2 flex items-center gap-4">
                         <div>
-                          <p className="text-gray-400 text-xs">Occupancy</p>
-                          <div className="w-24 h-2 bg-gray-700 rounded-full overflow-hidden mt-1">
+                          <p className="text-xs" style={{color: 'var(--theme-text-muted)'}}>Occupancy</p>
+                          <div className="w-24 h-2 rounded-full overflow-hidden mt-1" style={{backgroundColor: 'var(--theme-section-bg)'}}>
                             <div
-                              className="h-full bg-teal-500"
-                              style={{ width: `${occupancyPercent}%` }}
+                              className="h-full"
+                              style={{backgroundColor: 'var(--theme-teal)', width: `${occupancyPercent}%`}}
                             />
                           </div>
-                          <p className="text-teal-400 text-xs mt-1">
+                          <p className="text-xs mt-1" style={{color: 'var(--theme-teal)'}}>
                             {ride.bookedSeats}/{ride.totalSeats} (
                             {occupancyPercent.toFixed(0)}%)
                           </p>
                         </div>
                         <div>
-                          <p className="text-white font-semibold">৳ {ride.price}</p>
-                          <p className="text-gray-400 text-xs">per seat</p>
+                          <p className="font-semibold" style={{color: 'var(--theme-text)'}}>৳ {ride.price}</p>
+                          <p className="text-xs" style={{color: 'var(--theme-text-muted)'}}>per seat</p>
                         </div>
                       </div>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(rideStatus[ride.id] || ride.status)}`}>
+                    <span style={getStatusColor(rideStatus[ride.id] || ride.status)}>
                       {(rideStatus[ride.id] || ride.status).toUpperCase()}
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={() => setExpandedRide(expandedRide === ride.id ? null : ride.id)}
-                  className="mt-3 md:mt-0 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                  className="mt-3 md:mt-0 px-4 py-2 rounded-lg text-sm"
+                  style={{backgroundColor: 'var(--theme-section-bg)', color: 'var(--theme-text)'}}
                 >
                   {expandedRide === ride.id ? "Hide" : "Manage"}
                 </button>
               </div>
 
               {expandedRide === ride.id && (
-                <div className="mt-4 pt-4 border-t border-gray-700">
-                  <p className="text-gray-300 text-sm mb-3">Update Ride Status:</p>
+                <div className="mt-4 pt-4" style={{borderTopColor: 'var(--theme-deep-green)', borderTopWidth: '1px'}}>
+                  <p className="text-sm mb-3" style={{color: 'var(--theme-text-muted)'}}>Update Ride Status:</p>
                   <div className="flex gap-2 flex-wrap mb-4">
                     {(["scheduled", "ongoing", "completed", "cancelled"] as BusRide["status"][]).map((status) => (
                       <button
                         key={status}
                         onClick={() => handleStatusUpdate(ride.id, status)}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          (rideStatus[ride.id] || ride.status) === status
-                            ? "bg-teal-600 text-white"
-                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        }`}
+                        className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                        style={{
+                          backgroundColor: (rideStatus[ride.id] || ride.status) === status ? 'var(--theme-teal)' : 'var(--theme-section-bg)',
+                          color: (rideStatus[ride.id] || ride.status) === status ? 'white' : 'var(--theme-text-muted)'
+                        }}
                       >
                         {status.charAt(0).toUpperCase() + status.slice(1)}
                       </button>
                     ))}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <button className="px-4 py-2 rounded-lg bg-orange-600/50 hover:bg-orange-600/70 text-orange-200 font-medium">
+                    <button className="px-4 py-2 rounded-lg font-medium" style={{backgroundColor: 'rgba(255, 165, 0, 0.3)', color: 'var(--theme-text)'}}>
                       ✎ Edit Ride
                     </button>
                     {(rideStatus[ride.id] || ride.status) !== "cancelled" && (
-                      <button className="px-4 py-2 rounded-lg bg-red-600/50 hover:bg-red-600/70 text-red-200 font-medium">
+                      <button className="px-4 py-2 rounded-lg font-medium" style={{backgroundColor: 'rgba(220, 53, 69, 0.3)', color: 'var(--theme-text)'}}>
                         ❌ Cancel Ride
                       </button>
                     )}
                   </div>
-                  <button className="mt-3 w-full py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium">
+                  <button className="mt-3 w-full py-2 rounded-lg font-medium" style={{backgroundColor: 'var(--theme-teal)', color: 'white'}}>
                     Save Status Update
                   </button>
                 </div>
@@ -648,20 +670,20 @@ const TicketManagementSection: React.FC<{ tickets: Ticket[] }> = ({ tickets }) =
 
   return (
     <section className="mb-8">
-      <h2 className="text-2xl font-bold text-white mb-6">Ticket Management</h2>
+      <h2 className="text-2xl font-bold mb-6" style={{color: 'var(--theme-text)'}}>Ticket Management</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-green-900/40 to-green-700/20 border border-green-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Total Tickets</p>
-          <p className="text-3xl font-bold text-green-400 mt-2">{tickets.length}</p>
+        <div className="rounded-xl p-4" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <p className="text-sm" style={{color: 'var(--theme-text-muted)'}}>Total Tickets</p>
+          <p className="text-3xl font-bold mt-2" style={{color: 'var(--theme-teal)'}}>{tickets.length}</p>
         </div>
-        <div className="bg-gradient-to-br from-blue-900/40 to-blue-700/20 border border-blue-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Confirmed Tickets</p>
-          <p className="text-3xl font-bold text-blue-400 mt-2">{confirmedTickets.length}</p>
+        <div className="rounded-xl p-4" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <p className="text-sm" style={{color: 'var(--theme-text-muted)'}}>Confirmed Tickets</p>
+          <p className="text-3xl font-bold mt-2" style={{color: 'var(--theme-teal)'}}>{confirmedTickets.length}</p>
         </div>
-        <div className="bg-gradient-to-br from-red-900/40 to-red-700/20 border border-red-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Cancelled Tickets</p>
-          <p className="text-3xl font-bold text-red-400 mt-2">{cancelledTickets.length}</p>
+        <div className="rounded-xl p-4" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-red)', borderWidth: '1px'}}>
+          <p className="text-sm" style={{color: 'var(--theme-text-muted)'}}>Cancelled Tickets</p>
+          <p className="text-3xl font-bold mt-2" style={{color: 'var(--theme-red)'}}>{cancelledTickets.length}</p>
         </div>
       </div>
 
@@ -669,25 +691,26 @@ const TicketManagementSection: React.FC<{ tickets: Ticket[] }> = ({ tickets }) =
         {tickets.map((ticket) => (
           <div
             key={ticket.id}
-            className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+            className="rounded-lg p-4 transition-colors"
+            style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
-                <p className="text-white font-semibold">{ticket.passengerName}</p>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="font-semibold" style={{color: 'var(--theme-text)'}}>{ticket.passengerName}</p>
+                <p className="text-sm mt-1" style={{color: 'var(--theme-text-muted)'}}>
                   Seat: {ticket.seatNumber} • Phone: {ticket.phoneNumber}
                 </p>
-                <p className="text-teal-400 text-sm">
+                <p className="text-sm" style={{color: 'var(--theme-teal)'}}>
                   ৳ {ticket.price} • Booked: {ticket.bookingDate}
                 </p>
               </div>
               <div className="mt-3 md:mt-0 flex items-center gap-3">
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    ticket.status === "confirmed"
-                      ? "bg-green-600/30 text-green-300"
-                      : "bg-red-600/30 text-red-300"
-                  }`}
+                  className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: ticket.status === "confirmed" ? 'rgba(40, 167, 69, 0.3)' : 'rgba(220, 53, 69, 0.3)',
+                    color: ticket.status === "confirmed" ? 'rgb(40, 167, 69)' : 'rgb(220, 53, 69)'
+                  }}
                 >
                   {ticket.status === "confirmed" ? "✓ Confirmed" : "❌ Cancelled"}
                 </span>
@@ -696,7 +719,8 @@ const TicketManagementSection: React.FC<{ tickets: Ticket[] }> = ({ tickets }) =
                     onClick={() =>
                       setSelectedTicket(selectedTicket === ticket.id ? null : ticket.id)
                     }
-                    className="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                    className="px-3 py-2 rounded-lg text-sm"
+                    style={{backgroundColor: 'var(--theme-section-bg)', color: 'var(--theme-text)'}}
                   >
                     {selectedTicket === ticket.id ? "Hide" : "Actions"}
                   </button>
@@ -705,8 +729,8 @@ const TicketManagementSection: React.FC<{ tickets: Ticket[] }> = ({ tickets }) =
             </div>
 
             {selectedTicket === ticket.id && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <button className="w-full px-4 py-2 rounded-lg bg-red-600/50 hover:bg-red-600/70 text-red-200 font-medium">
+              <div className="mt-4 pt-4" style={{borderTopColor: 'var(--theme-deep-green)', borderTopWidth: '1px'}}>
+                <button className="w-full px-4 py-2 rounded-lg font-medium" style={{backgroundColor: 'rgba(220, 53, 69, 0.3)', color: 'var(--theme-text)'}}>
                   Cancel Ticket & Refund
                 </button>
               </div>
@@ -726,54 +750,54 @@ const SalesReportSection: React.FC<{ reports: SalesReport[] }> = ({ reports }) =
 
   return (
     <section className="mb-8">
-      <h2 className="text-2xl font-bold text-white mb-6">Sales Report</h2>
+      <h2 className="text-2xl font-bold mb-6" style={{color: 'var(--theme-text)'}}>Sales Report</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-green-900/40 to-green-700/20 border border-green-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Total Revenue</p>
-          <p className="text-3xl font-bold text-green-400 mt-2">
+        <div className="rounded-xl p-4" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <p className="text-sm" style={{color: 'var(--theme-text-muted)'}}>Total Revenue</p>
+          <p className="text-3xl font-bold mt-2" style={{color: 'var(--theme-teal)'}}>
             ৳ {(totalRevenue / 1000).toFixed(0)}K
           </p>
         </div>
-        <div className="bg-gradient-to-br from-blue-900/40 to-blue-700/20 border border-blue-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Total Tickets Sold</p>
-          <p className="text-3xl font-bold text-blue-400 mt-2">{totalTickets}</p>
+        <div className="rounded-xl p-4" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <p className="text-sm" style={{color: 'var(--theme-text-muted)'}}>Total Tickets Sold</p>
+          <p className="text-3xl font-bold mt-2" style={{color: 'var(--theme-teal)'}}>{totalTickets}</p>
         </div>
-        <div className="bg-gradient-to-br from-teal-900/40 to-teal-700/20 border border-teal-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Avg Occupancy</p>
-          <p className="text-3xl font-bold text-teal-400 mt-2">{avgOccupancy}%</p>
+        <div className="rounded-xl p-4" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-teal)', borderWidth: '1px'}}>
+          <p className="text-sm" style={{color: 'var(--theme-text-muted)'}}>Avg Occupancy</p>
+          <p className="text-3xl font-bold mt-2" style={{color: 'var(--theme-teal)'}}>{avgOccupancy}%</p>
         </div>
       </div>
 
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
+      <div className="rounded-xl overflow-hidden" style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-700/70 border-b border-gray-600">
+            <thead style={{backgroundColor: 'var(--theme-section-bg)', borderBottomColor: 'var(--theme-deep-green)', borderBottomWidth: '1px'}}>
               <tr>
-                <th className="px-6 py-3 text-left text-white font-semibold">Date</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Total Rides</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Completed</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Tickets Sold</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Revenue</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Occupancy</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Cancellations</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Date</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Total Rides</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Completed</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Tickets Sold</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Revenue</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Occupancy</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{color: 'var(--theme-text)'}}>Cancellations</th>
               </tr>
             </thead>
             <tbody>
               {reports.map((report, idx) => (
                 <tr
                   key={idx}
-                  className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors"
+                  style={{borderBottomColor: 'var(--theme-deep-green)', borderBottomWidth: '1px'}}
                 >
-                  <td className="px-6 py-3 text-white">{report.date}</td>
-                  <td className="px-6 py-3 text-gray-300">{report.totalRides}</td>
-                  <td className="px-6 py-3 text-green-400">{report.completedRides}</td>
-                  <td className="px-6 py-3 text-teal-400">{report.totalTicketsSold}</td>
-                  <td className="px-6 py-3 text-white font-semibold">
+                  <td className="px-6 py-3" style={{color: 'var(--theme-text)'}}>{report.date}</td>
+                  <td className="px-6 py-3" style={{color: 'var(--theme-text-muted)'}}>{report.totalRides}</td>
+                  <td className="px-6 py-3" style={{color: 'var(--theme-teal)'}}>{report.completedRides}</td>
+                  <td className="px-6 py-3" style={{color: 'var(--theme-teal)'}}>{report.totalTicketsSold}</td>
+                  <td className="px-6 py-3 font-semibold" style={{color: 'var(--theme-text)'}}>
                     ৳ {report.totalRevenue.toLocaleString()}
                   </td>
-                  <td className="px-6 py-3 text-yellow-400">{report.averageOccupancy.toFixed(1)}%</td>
-                  <td className="px-6 py-3 text-red-400">{report.cancellations}</td>
+                  <td className="px-6 py-3" style={{color: 'var(--theme-teal)'}}>{report.averageOccupancy.toFixed(1)}%</td>
+                  <td className="px-6 py-3" style={{color: 'var(--theme-text-muted)'}}>{report.cancellations}</td>
                 </tr>
               ))}
             </tbody>
@@ -787,14 +811,12 @@ const SalesReportSection: React.FC<{ reports: SalesReport[] }> = ({ reports }) =
 // Main Module Component
 export const BusServiceAdminModule = () => {
   return (
-    <section className="flex flex-col space-y-2 mt-4 w-full bg-gray-900 text-white min-h-screen p-6" id="bus_service_admin_module">
+    <section className="flex flex-col space-y-2 mt-4 w-full min-h-screen p-6" id="bus_service_admin_module" style={{backgroundColor: 'var(--theme-bg)', color: 'var(--theme-text)'}}>
       <div className="max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-white">Bus Service Admin Dashboard</h1>
-          <p className="text-gray-400 mt-2">
-            Manage buses, rides, tickets, and generate sales reports
-          </p>
+          <h1 className="text-4xl font-bold" style={{color: 'var(--theme-text)'}}>Bus Service Admin Dashboard</h1>
+          <p className="mt-2" style={{color: 'var(--theme-text-muted)'}}>Manage buses, rides, tickets, and generate sales reports</p>
         </div>
 
         {/* Admin Statistics */}

@@ -25,14 +25,14 @@ export const UserViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[120px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[120px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{user_name}</button>
-            <NextImage className="w-[15%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={userImageURL || '/image-not-found.png'} alt={user_name}/>
+            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{user_name}</button>
+            <NextImage className="w-[15%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={userImageURL || '/image-not-found.png'} alt={user_name}/>
             <p className="w-[20%]">{email}</p>
             <p className="w-[10%]">{role}</p>
             <p className="w-[10%]">{totalSpent}</p>
-            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{user_id}</button>
+            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{user_id}</button>
         </div>
     )
 }
@@ -58,17 +58,16 @@ export const CategoryViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[100px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[100px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <p className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer">{categoryName}</p>
+            <p className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{categoryName}</p>
             <p className="w-[10%]">{categoryType}</p>
             <p className="w-[15%]">{slug}</p>
             <p className="w-[10%]">{isActive !== null ? ((isActive === true) ? "Yes" : "No") : "N/A"}</p>
-            <p className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer">{category_id}</p>
+            <p className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{category_id}</p>
             <div className="w-[20%] flex items-center justify-center space-x-2">
                 <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 bg-red-500 rounded hover:bg-red-400 hover:scale-110">
-                    <FaTrash className="text-black cursor-pointer"/>
+                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
                 </button>
             </div>
         </div>
@@ -87,14 +86,14 @@ export const LocationListTableRow = ({
     const locationDisplay = "Bangladesh";
     
     return (
-        <div className="flex p-2 w-full border-green-900 hover:bg-gray-600 text-center justify-center" onClick={() => navigateOnClick()}>
+        <div className="flex p-2 w-full text-center justify-center" style={{borderColor: 'var(--theme-deep-green)'}} onClick={() => navigateOnClick()}>
             <p className="w-[10%]">{id}</p>
             <p className="w-[30%] hover:cursor-pointer px-2">{name}</p>
             <p className="w-[25%]">{locationType}</p>
             <p className="w-[25%] px-2">{locationDisplay}</p>
             <p className="w-[15%]">
                 <button 
-                    className="text-blue-400 hover:text-blue-300 bg-inherit text-sm"
+                    className="text-sm" style={{color: 'var(--theme-teal)', backgroundColor: 'inherit'}}
                     onClick={() => onEditClick()}
                 >
                     Edit
@@ -131,21 +130,20 @@ export const TourSpotViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <button className="w-[15%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpotName}</button>
+            <button className="w-[15%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpotName}</button>
             <p className="w-[15%]">{tourSpotLocation}</p>
-            <NextImage className="w-[20%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={tourSpotImageURL || '/image-not-found.png'} alt={tourSpotName}/>
+            <NextImage className="w-[20%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={tourSpotImageURL || '/image-not-found.png'} alt={tourSpotName}/>
             <p className="w-[10%]">{tourType}</p>
             <div className="w-[5%]">
                 {rating ? <StarRating rating={rating} /> : <span>N/A</span>}
             </div>
             <p className="w-[10%]">{isPopular !== null ? ((isPopular === true) ? "Yes" : "No") : "N/A"}</p>
-            <button className="w-[10%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpot_id}</button>
+            <button className="w-[10%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpot_id}</button>
             <div className="w-[10%] flex items-center justify-center space-x-2">
                 <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 bg-red-500 rounded hover:bg-red-400 hover:scale-110">
-                    <FaTrash className="text-black cursor-pointer"/>
+                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
                 </button>
             </div>
         </div>
@@ -177,20 +175,19 @@ export const ActivitySpotViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpotName}</button>
-            <NextImage className="w-[20%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={activitySpotImageURL || '/image-not-found.png'} alt={activitySpotName}/>
+            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpotName}</button>
+            <NextImage className="w-[20%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={activitySpotImageURL || '/image-not-found.png'} alt={activitySpotName}/>
             <p className="w-[15%]">{activityType}</p>
             <div className="w-[10%]">
                 {rating ? <StarRating rating={rating} /> : <span>N/A</span>}
             </div>
             <p className="w-[10%]">{entryCost ?? "N/A"}</p>
-            <button className="w-[10%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpot_id}</button>
+            <button className="w-[10%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpot_id}</button>
             <div className="w-[10%] flex items-center justify-center space-x-2">
                 <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 bg-red-500 rounded hover:bg-red-400 hover:scale-110">
-                    <FaTrash className="text-black cursor-pointer"/>
+                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
                 </button>
             </div>
         </div>
@@ -224,21 +221,20 @@ export const HotelViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotelName}</button>
+            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotelName}</button>
             <p className="w-[10%]">{hotelLocation}</p>
-            <NextImage className="w-[20%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={hotelImageURL || '/image-not-found.png'} alt={hotelName}/>
+            <NextImage className="w-[20%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={hotelImageURL || '/image-not-found.png'} alt={hotelName}/>
             <p className="w-[10%]">{hotelType}</p>
             <div className="w-[10%]">
                 <StarRating rating={rating} />
             </div>
             <p className="w-[5%]">{totalRooms ?? "N/A"}</p>
-            <button className="w-[10%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotel_id}</button>
+            <button className="w-[10%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotel_id}</button>
             <div className="w-[10%] flex items-center justify-center space-x-2">
                 <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 bg-red-500 rounded hover:bg-red-400 hover:scale-110">
-                    <FaTrash className="text-black cursor-pointer"/>
+                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
                 </button>
             </div>
         </div>
@@ -260,14 +256,14 @@ export const ReviewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex flex-col p-2 w-full space-y-5 border-1 border-green-900 bg-gray-700 rounded-md">
-            <div className="flex space-x-5 bg-inherit">
+        <div className="flex flex-col p-2 w-full space-y-5 rounded-md" style={{border: '1px solid var(--theme-deep-green)', backgroundColor: 'var(--theme-card-bg)'}}>
+            <div className="flex space-x-5" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                 <NextImage className="w-[40px] h-[40px] overflow-hidden rounded-full" src={reviewUserImage} alt="user_image"></NextImage>
 
-                <Link className="px-1 self-center hover:outline-1 bg-inherit" href={`/user_profile/${reviewUserId}`}>{reviewUserName}</Link>
+                <Link className="px-1 self-center" style={{backgroundColor: 'var(--theme-card-bg)'}} href={`/user_profile/${reviewUserId}`}>{reviewUserName}</Link>
             </div>
 
-            <StarRating rating={rating} className="bg-gray-700"/>
+            <StarRating rating={rating} className=""/>
             <p className="mb-5">{reviewDescription}</p>
         </div>
     )
@@ -365,13 +361,13 @@ export const ProductViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{productName}</button>
-            <NextImage className="w-[35%] h-full cursor-pointer bg-gray-600" nextImageClassName="object-contain" src={productImageURL} alt={productName}/>
+            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{productName}</button>
+            <NextImage className="w-[35%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={productImageURL} alt={productName}/>
             <p className="w-[15%]">{productCategoryType}</p>
             <p className="w-[10%]">{price}</p>
-            <button className="w-[15%] hover:text-green-500 hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{product_id}</button>
+            <button className="w-[15%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{product_id}</button>
         </div>
     )
 }
@@ -431,31 +427,32 @@ export const TourPackageViewListTableRow = ({
         });
 
     return (
-        <div className="flex items-center p-2 w-full h-[150px] border-b-1 border-green-900 text-center">
+        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%] text-sm">{id}</p>
             
             <button 
-                className="w-[20%] hover:text-green-500 hover:scale-105 transition-all duration-150 cursor-pointer px-2"
+                className="w-[20%] hover:theme-text-teal hover:scale-105 transition-all duration-150 cursor-pointer px-2"
                 onClick={() => onClickNavigate()}
             >
                 <span className="font-semibold">{packageName}</span>
             </button>
             
-            <p className="w-[12%] text-sm text-gray-300">{division}</p>
+            <p className="w-[12%] text-sm" style={{color: 'var(--theme-text-muted)'}}>{division}</p>
             <p className="w-[10%] text-sm">{tourType}</p>
-            <p className="w-[8%] text-sm font-medium text-green-300">{duration} days</p>
+            <p className="w-[8%] text-sm font-medium" style={{color: 'var(--theme-text-teal)'}}>{duration} days</p>
             
             <div className="w-[25%] text-xs p-2 ml-15 space-y-1 overflow-hidden text-left">
                 {daysSummary.map((summary, idx) => (
-                    <p key={idx} className="truncate text-gray-200 leading-tight">{summary}</p>
+                    <p key={idx} className="truncate leading-tight" style={{color: 'var(--theme-text-subtle)'}}>{summary}</p>
                 ))}
                 {Object.keys(groupedSegments).length === 0 && 
-                    <p className="text-gray-400 italic">No segments added</p>
+                    <p className="italic" style={{color: 'var(--theme-text-subtle)'}}>No segments added</p>
                 }
             </div>
             
             <button 
-                className="w-[10%] hover:text-green-500 hover:scale-105 transition-all duration-150 cursor-pointer text-xs text-gray-400"
+                className="w-[10%] hover:theme-text-teal hover:scale-105 transition-all duration-150 cursor-pointer text-xs"
+                style={{color: 'var(--theme-text-subtle)'}}
                 onClick={() => onClickNavigate()}
             >
                 {tourPackage_id}
@@ -463,8 +460,8 @@ export const TourPackageViewListTableRow = ({
             
             <div className="w-[10%] flex items-center justify-center space-x-2">
                 <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 bg-red-500 rounded hover:bg-red-400 hover:scale-110">
-                    <FaTrash className="text-black cursor-pointer"/>
+                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>
+                    <FaTrash className="cursor-pointer"/>
                 </button>
             </div>
         </div>

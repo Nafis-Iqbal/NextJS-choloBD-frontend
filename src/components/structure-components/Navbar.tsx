@@ -18,7 +18,20 @@ import BasicButton from "../custom-elements/Buttons";
 import { SearchInputBar } from "./SearchInputBar";
 
 
-const Navbar: React.FC = () => {
+const THEMES = ['forest', 'dusk', 'crimson', 'violet', 'amber', 'iceBlue', 'rose'] as const;
+type Theme = typeof THEMES[number];
+
+const THEME_LABELS: Record<Theme, string> = {
+    forest: '🌿 Forest',
+    dusk:   '🌇 Dusk',
+    crimson: '🩸 Crimson',
+    violet: '🍇 Violet',
+    amber: '🍂 Amber',
+    iceBlue: '🧊 Ice Blue',
+    rose: '🌹 Rose',
+};
+
+const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) => {
     const router = useRouter();
     const logout = useLogout();
     
@@ -32,6 +45,36 @@ const Navbar: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
     const [isSideBarMenuOpen, setIsSideBarMenuOpen] = useState(false);
+    const [currentTheme, setCurrentTheme] = useState<Theme>('forest');
+    const [navOpacity, setNavOpacity] = useState(0);
+
+    // Load persisted theme on mount
+    useEffect(() => {
+        const saved = (localStorage.getItem('cholobd-theme') ?? 'forest') as Theme;
+        const valid = THEMES.includes(saved) ? saved : 'forest';
+        document.documentElement.setAttribute('data-theme', valid);
+        setCurrentTheme(valid);
+    }, []);
+
+    // Handle scroll opacity
+    useEffect(() => {
+        const handleScroll = () => {
+            const scrollY = window.scrollY;
+            // Starts transparent, becomes opaque after ~300px of scrolling
+            const opacity = Math.min(scrollY / 300, 1);
+            setNavOpacity(opacity);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const cycleTheme = () => {
+        const nextTheme = THEMES[(THEMES.indexOf(currentTheme) + 1) % THEMES.length];
+        document.documentElement.setAttribute('data-theme', nextTheme);
+        localStorage.setItem('cholobd-theme', nextTheme);
+        setCurrentTheme(nextTheme);
+    };
 
     const onMenuToggle = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -58,20 +101,49 @@ const Navbar: React.FC = () => {
     const onLogoClick = () => {
         router.push("/");
     }
+
+    // Helper to convert hex color to RGB object
+    const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result
+            ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16),
+            }
+            : { r: 0, g: 0, b: 0 };
+    };
+
+    // Helper to read CSS variable value from current theme
+    const getCSSVariableValue = (varName: string): string => {
+        if (typeof window === 'undefined') return '#000000';
+        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+    };
+
+    // Dynamically get nav color from CSS variables (updated whenever currentTheme changes)
+    const navColor = hexToRgb(getCSSVariableValue('--theme-teal'));
     
     return (
-        <div className="fixed top-0 z-100 md:flex items-center p-1 w-[100%] h-[55px] md:h-[70px] bg-[#00FF99]">
-            <div className="relative flex justify-between items-center w-[100%] h-full bg-inherit">
+        <div 
+            className="fixed top-0 z-100 md:flex items-center p-1 w-[100%] h-[55px] md:h-[70px]"
+            style={{
+                backgroundColor: `rgba(${navColor.r}, ${navColor.g}, ${navColor.b}, ${affectOpacity ? navOpacity : 1.0})`
+            }}
+        >
+            <div className="relative flex justify-between items-center w-[100%] h-full bg-transparent">
                 {/* Start Section */}
-                <div className="relative flex space-x-2 md:space-x-0 md:justify-between items-center w-[40%] md:w-[65%] bg-inherit">
+                <div className="relative flex space-x-2 md:space-x-0 md:justify-between items-center w-[40%] md:w-[65%] bg-transparent">
                     {/* Small Screen Menu*/}
                     <BasicButton
-                        buttonColor="bg-black"
+                        buttonColor="bg-white/20"
+                        buttonHoverColor="hover:bg-white/35"
                         buttonTextColor="text-white"
+                        padding="p-2"
+                        margin="m-0"
                         onClick={() => onSideBarMenuToggle()}
-                        extraStyle="md:hidden border border-white"
+                        extraStyle="md:hidden rounded-full"
                     >
-                        <Menu className="text-[#00FF99]" />
+                        <Menu className="text-white text-xl" />
                     </BasicButton>
 
                     {/* absolutely positioned Small Screen Dropdown Menu, animated, button activated */}
@@ -94,8 +166,8 @@ const Navbar: React.FC = () => {
                     </AnimatePresence>
 
                     <button 
-                        className="hidden md:block w-[20%] ml-5 p-2 text-center bg-[#0F0F0F] md:text-xl lg:text-2xl text-[#00FF99] font-satisfy
-                        rounded-sm transition-all duration-150 hover:scale-110 hover:brightness-130 hover:backdrop-blur-sm"
+                        className="hidden md:block w-[20%] ml-5 p-2 text-center bg-[#D32B3A] md:text-xl lg:text-2xl text-white font-satisfy
+                        rounded-sm transition-all duration-150 hover:scale-110 hover:brightness-125 hover:backdrop-blur-sm"
                         onClick={() => onLogoClick()}
                     >
                         Cholo BD!
@@ -110,9 +182,9 @@ const Navbar: React.FC = () => {
                 
                 {/* Mid Section */}
                 {/* Homepage Button */}
-                <div className="flex w-[20%] md:hidden justify-center bg-inherit">
+                <div className="flex w-[20%] md:hidden justify-center bg-transparent">
                     <button 
-                        className="self-center block md:hidden p-2 text-center bg-black text-[#00FF99] rounded-full"
+                        className="self-center block md:hidden p-2 text-center bg-[var(--theme-red)] text-white rounded-full shadow-sm"
                         onClick={() => router.push("/")}
                     >
                         <FaBlackTie className="inline-block text-2xl" />
@@ -120,25 +192,31 @@ const Navbar: React.FC = () => {
                 </div>
 
                 {/* End Section */}
-                <div className="flex justify-end h-full w-[40%] md:w-auto space-x-2 bg-inherit">
+                <div className="flex justify-end h-full w-[40%] md:w-auto space-x-2 bg-transparent">
                     {/* Search Bar Button */}
                     <BasicButton
-                        buttonColor="bg-black"
+                        buttonColor="bg-white/20"
+                        buttonHoverColor="hover:bg-white/35"
                         buttonTextColor="text-white"
+                        padding="p-2"
+                        margin="m-0"
                         onClick={() => onSearchBarToggle()}
-                        extraStyle="md:hidden border border-white"
+                        extraStyle="md:hidden rounded-full"
                     >
-                        <FaSearch className="text-2xl text-[#00FF99]" />
+                        <FaSearch className="text-xl text-white" />
                     </BasicButton>
 
                     {/* Small Screen Menu, relatively positioned */}
                     <BasicButton
-                        buttonColor="bg-black"
+                        buttonColor="bg-white/20"
+                        buttonHoverColor="hover:bg-white/35"
                         buttonTextColor="text-white"
+                        padding="p-2"
+                        margin="m-0"
                         onClick={() => onMenuToggle()}
-                        extraStyle="md:hidden border border-white"
+                        extraStyle="md:hidden rounded-full"
                     >
-                        <FaCaretDown className="text-2xl text-[#00FF99]" />
+                        <FaCaretDown className="text-xl text-white" />
                     </BasicButton>
 
                     {/* absolutely positioned Small Screen Dropdown Menu, animated, button activated */}
@@ -159,32 +237,40 @@ const Navbar: React.FC = () => {
                     </AnimatePresence>
 
                     {/* Big Screen Menu, hidden in small screens */}
-                    <div className="hidden md:flex justify-end max-h-[100%] w-full mr-2 md:mr-4 lg:mr-8 space-x-6 items-center md:text-lg lg:text-xl text-green-800 font-sans font-semibold bg-inherit">
-                        <a className="p-2 " href="#experience">
-                            <FaGlobe className="md:text-2xl text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130"/>
-                        </a>
+                    <div className="hidden md:flex justify-end max-h-[100%] w-full mr-2 md:mr-4 lg:mr-8 space-x-6 items-center md:text-lg lg:text-xl text-white font-sans font-semibold bg-transparent">
+                        <button
+                            className="relative p-2 group transition-all duration-150 hover:scale-120"
+                            onClick={cycleTheme}
+                            title={`Theme: ${THEME_LABELS[currentTheme]} — click to cycle`}
+                        >
+                            <FaGlobe className="md:text-2xl text-white"/>
+                            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-sans font-normal
+                                text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                {THEME_LABELS[currentTheme]}
+                            </span>
+                        </button>
 
-                        <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href="/dashboard">
-                            <IconWithBadge Icon={FaGift} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
+                        <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href="/dashboard">
+                            <IconWithBadge Icon={FaGift} badgeValue={2} iconClassName="text-white md:text-2xl"/>
                         </Link>
 
-                        <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href="/dashboard">
-                            <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-gray-800 text-xl md:text-2xl scale-110"/>
+                        <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href="/dashboard">
+                            <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
                         </Link>
 
-                        {!isAuthenticated ? (<Link className="p-2 transition-all hover:scale-110 text-center" href="/booking/trackers">Booking Tracker</Link>) : <></>}
+                        {!isAuthenticated ? (<Link className="p-2 transition-all hover:scale-110 text-center text-white" href="/booking/trackers">Booking Tracker</Link>) : <></>}
 
-                        {!isAuthenticated ? (<Link className="p-2 hover:scale-110" href="/login">Log In</Link>) : 
+                        {!isAuthenticated ? (<Link className="p-2 hover:scale-110 text-white" href="/login">Log In</Link>) : 
                         (
                             <>
-                                <Link className="p-2 text-gray-800 transition-all duration-150 hover:scale-120 hover:brightness-130" href={`/user_profile/${currentUserId}`}>
-                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-gray-800 md:text-2xl"/>
+                                <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
+                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white md:text-2xl"/>
                                 </Link>
 
                                 <div className="flex flex-col items-center justify-center bg-transparent">
-                                    {isAuthenticated && (<p className="h-1/2 text-black font-semibold">{walletBalance.toLocaleString()} C</p>)}
+                                    {isAuthenticated && (<p className="h-1/2 text-white font-semibold">{walletBalance.toLocaleString()} C</p>)}
                                     <button 
-                                        className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-black text-green-900 hover:text-green-400 text-sm text-center rounded-sm"
+                                        className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-gray-300/30 text-white text-sm text-center rounded-sm"
                                         onClick={() => router.push("wallet/wallet-recharge")}
                                     >
                                         Get Credits!
@@ -193,7 +279,7 @@ const Navbar: React.FC = () => {
                             </>
                         )}
 
-                        {isAuthenticated && <FaSignOutAlt className="text-3xl text-gray-800 hover:scale-120 cursor-pointer" onClick={onLogOutClick} />}
+                        {isAuthenticated && <FaSignOutAlt className="text-3xl text-white hover:scale-120 cursor-pointer" onClick={onLogOutClick} />}
                     </div>
                 </div>
                 <SearchInputBar 

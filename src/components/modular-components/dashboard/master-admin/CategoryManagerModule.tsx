@@ -81,12 +81,12 @@ const CategoryManagerModule = () => {
                 message="Are you sure you want to delete this category? This action cannot be undone."
             />
             
-            <h4 className="">Category Manager</h4>
+            <h4 className="theme-text">Category Manager</h4>
 
             <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[900px]">
-                        <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
+                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                             <p className="w-[5%]">Sr. No.</p>
                             <p className="w-[20%]">Category Name</p>
                             <p className="w-[10%]">Type</p>
@@ -95,7 +95,7 @@ const CategoryManagerModule = () => {
                             <p className="w-[20%]">Category ID</p>
                             <p className="w-[20%]">Actions</p>
                         </div>
-                        <div className="flex flex-col border-1 border-green-800 h-[80vh] md:h-[50vh] overflow-y-auto">
+                        <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto\">
                             {
                                 isLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
                                 isError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
@@ -125,10 +125,11 @@ const CategoryManagerModule = () => {
             
             <div className="flex flex-col space-y-4">
                 <div className="flex space-x-2 items-center">
-                    <p className="text-lg">Show categories: </p>
+                    <p className="text-lg theme-text">Show categories: </p>
                     
                     <select
-                        className="bg-gray-700 text-white p-1 rounded"
+                        className="text-sm rounded p-1"
+                        style={{backgroundColor: 'var(--theme-card-bg)', color: 'var(--theme-text)'}}
                         value={showCategoryType}
                         onChange={(e) => setShowCategoryType(e.target.value)}
                     >

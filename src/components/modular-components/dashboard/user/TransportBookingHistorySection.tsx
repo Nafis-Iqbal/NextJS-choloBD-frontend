@@ -14,10 +14,10 @@ export const TransportBookingHistorySection: React.FC<{
   if (!bookings || bookings.length === 0) {
     return (
       <section className={`mb-8 ${className || ''}`}>
-        <h2 className="text-2xl font-bold text-white mb-4">
+        <h2 className="text-2xl font-bold theme-text mb-4">
           Transport Booking History
         </h2>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-center text-gray-400">
+        <div className="theme-card rounded-xl p-6 text-center theme-text-subtle">
           No transport bookings found
         </div>
       </section>
@@ -30,7 +30,7 @@ export const TransportBookingHistorySection: React.FC<{
 
   return (
     <section className={`mb-8 ${className || ''}`}>
-      <h2 className="text-2xl font-bold text-white mb-4">
+      <h2 className="text-2xl font-bold theme-text mb-4">
         Transport Booking History
       </h2>
 
@@ -40,27 +40,40 @@ export const TransportBookingHistorySection: React.FC<{
         {paginatedData.map((booking) => (
           <div
             key={booking.id}
-            className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+            className="theme-card rounded-lg p-4 transition-colors"
+            style={{ borderColor: `var(--theme-deep-green)` }}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = `var(--theme-teal)`}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = `var(--theme-deep-green)`}
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
-                <p className="text-white font-semibold">{booking.transportType}</p>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="theme-text font-semibold">{booking.transportType}</p>
+                <p className="theme-text-muted text-sm mt-1">
                   {booking.route} • {booking.departureDate}
                 </p>
               </div>
               <div className="mt-3 md:mt-0 flex items-center gap-4">
                 <div className="text-right">
-                  <p className="text-white font-semibold">৳ {booking.price.toLocaleString()}</p>
+                  <p className="theme-text font-semibold">৳ {booking.price.toLocaleString()}</p>
                 </div>
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    booking.status === "completed"
-                      ? "bg-gray-600/30 text-gray-300"
-                      : booking.status === "ongoing"
-                      ? "bg-orange-600/30 text-orange-300"
-                      : "bg-blue-600/30 text-blue-300"
-                  }`}
+                  className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{
+                    backgroundColor: `${
+                      booking.status === "completed"
+                        ? "rgba(127, 155, 142, 0.2)"
+                        : booking.status === "ongoing"
+                        ? "rgba(212, 160, 23, 0.2)"
+                        : "rgba(42, 157, 143, 0.2)"
+                    }`,
+                    color: `${
+                      booking.status === "completed"
+                        ? "var(--theme-text-muted)"
+                        : booking.status === "ongoing"
+                        ? "var(--theme-star)"
+                        : "var(--theme-teal)"
+                    }`,
+                  }}
                 >
                   {booking.status}
                 </span>

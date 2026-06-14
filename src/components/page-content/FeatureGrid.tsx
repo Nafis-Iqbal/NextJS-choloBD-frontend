@@ -1,11 +1,11 @@
 import React from "react";
 import { SectionHeader } from "./SectionHeader";
 
-type Feature = { title: string; desc: string };
+type Feature = { title: string; desc: string; link: string };
 
-export const FeatureGrid: React.FC<{ features: Feature[] }> = ({ features }) => {
+export const FeatureGrid: React.FC<{ features: Feature[]; className?: string}> = ({ features, className }) => {
   return (
-    <section className="w-full">
+    <section className={`w-full ${className ?? ""}`}>
       <SectionHeader
         title="Everything For Your Next Trip"
         subtitle="Suggest tours, build custom plans, book stays & rides, and meet buddies"
@@ -13,13 +13,14 @@ export const FeatureGrid: React.FC<{ features: Feature[] }> = ({ features }) => 
       />
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 font-sans">
         {features.map((f, idx) => (
-          <div
+          <a
             key={idx}
-            className="rounded-xl bg-gray-800/70 border border-gray-700 p-4 md:p-6 hover:bg-gray-800 transition"
+            href={`/#${f.link}`}
+            className="rounded-xl theme-card p-4 md:p-6 hover:brightness-95 transition cursor-pointer block"
           >
-            <div className="text-lg md:text-xl font-medium text-white">{f.title}</div>
-            <div className="mt-1 text-sm text-gray-300">{f.desc}</div>
-          </div>
+            <div className="text-lg md:text-xl font-medium theme-text">{f.title}</div>
+            <div className="mt-1 text-sm theme-text-muted">{f.desc}</div>
+          </a>
         ))}
       </div>
     </section>

@@ -20,17 +20,17 @@ const MetricCard: React.FC<{
   icon: string;
   color: string;
 }> = ({ label, value, unit, icon, color }) => (
-  <div className={`${color} rounded-lg p-4 text-white`}>
+  <div className="rounded-lg p-4" style={{backgroundColor: 'var(--theme-card-bg)', color: 'var(--theme-text)'}}>
     <div className="text-3xl mb-2">{icon}</div>
-    <div className="text-2xl font-bold">{value}</div>
-    {unit && <div className="text-sm text-gray-200">{unit}</div>}
-    <div className="text-xs text-gray-300 mt-1">{label}</div>
+    <div className="text-2xl font-bold" style={{color: 'var(--theme-teal)'}}>{value}</div>
+    {unit && <div className="text-sm" style={{color: 'var(--theme-text-muted)'}}>{unit}</div>}
+    <div className="text-xs mt-1" style={{color: 'var(--theme-text-subtle)'}}>{label}</div>
   </div>
 );
 
 export const HotelMetricsDashboard: React.FC<{ metrics: HotelMetrics; isReady?: boolean; className?: string }> = ({ metrics, isReady = false, className }) => (
   <section className={`mb-8 ${className}`}>
-    <h2 className="text-2xl font-bold text-white mb-6">Hotel Metrics Overview</h2>
+    <h2 className="text-2xl font-bold mb-6" style={{color: 'var(--theme-text)'}}>Hotel Metrics Overview</h2>
 
     {isReady === false ? (
       <FeatureUnderDevelopment moduleName="Hotel Metrics Dashboard"/>
@@ -41,45 +41,45 @@ export const HotelMetricsDashboard: React.FC<{ metrics: HotelMetrics; isReady?: 
           value={metrics.occupancyRate.toFixed(1)}
           unit="%"
           icon="📊"
-          color="bg-linear-to-br from-blue-600 to-blue-700"
+          color=""
         />
         <MetricCard
           label="Available Rooms"
           value={metrics.availableRooms}
           unit={`/ ${metrics.totalRooms}`}
           icon="🛏️"
-          color="bg-linear-to-br from-green-600 to-green-700"
+          color=""
         />
         <MetricCard
           label="Check-ins Today"
           value={metrics.checkInsToday}
           icon="📥"
-          color="bg-linear-to-br from-teal-600 to-teal-700"
+          color=""
         />
         <MetricCard
           label="Check-outs Today"
           value={metrics.checkOutsToday}
           icon="📤"
-          color="bg-linear-to-br from-purple-600 to-purple-700"
+          color=""
         />
         <MetricCard
           label="Pending Complaints"
           value={metrics.pendingComplaints}
           icon="⚠️"
-          color="bg-linear-to-br from-orange-600 to-orange-700"
+          color=""
         />
         <MetricCard
           label="Maintenance Tasks"
           value={metrics.maintenanceTasksPending}
           icon="🔧"
-          color="bg-linear-to-br from-red-600 to-red-700"
+          color=""
         />
         <MetricCard
           label="Average Rating"
           value={metrics.averageRating}
           unit="/ 5"
           icon="⭐"
-          color="bg-linear-to-br from-yellow-600 to-yellow-700"
+          color=""
         />
       </div>
     )}

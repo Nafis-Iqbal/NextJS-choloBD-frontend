@@ -25,15 +25,15 @@ const DropdownMenu = forwardRef<HTMLDivElement, DropdownMenuProps>(({ className 
     return (
         <div
             ref={ref} // Forward the ref
-            className={`absolute ${className} flex flex-col md:hidden space-y-1 items-center bg-gray-800 text-white opacity-100 font-sans`}
+            className={`absolute ${className} flex flex-col md:hidden space-y-1 items-center theme-dropdown opacity-100 font-sans`}
         >
-            <Link className="p-2 border-b-1 border-gray-600" href="/dashboard" >Dashboard</Link>
-            <Link className="p-2 border-b-1 border-gray-600" href="/booking/trackers">Tracker</Link>
-            <Link className="p-2 border-b-1 border-gray-600" href="/" >Tickets</Link>
-            <Link className="p-2 border-b-1 border-gray-600" href="/" >Hotels</Link>
-            <Link className="p-2 border-b-1 border-gray-600" href={isAuthenticated ? `/user_profile/${currentUserId}` : "/login"} >{isAuthenticated ? "Profile" : "Log In"}</Link>
+            <Link className="p-2 border-b-1 border-[var(--theme-border-subtle)] theme-text" href="/dashboard" >Dashboard</Link>
+            <Link className="p-2 border-b-1 border-[var(--theme-border-subtle)] theme-text" href="/booking/trackers">Tracker</Link>
+            <Link className="p-2 border-b-1 border-[var(--theme-border-subtle)] theme-text" href="/" >Tickets</Link>
+            <Link className="p-2 border-b-1 border-[var(--theme-border-subtle)] theme-text" href="/" >Hotels</Link>
+            <Link className="p-2 border-b-1 border-[var(--theme-border-subtle)] theme-text" href={isAuthenticated ? `/user_profile/${currentUserId}` : "/login"} >{isAuthenticated ? "Profile" : "Log In"}</Link>
             {isAuthenticated && 
-            <div className="p-2 border-b-1 border-gray-600" onClick={onLogOutClick} >Log Out</div>
+            <div className="p-2 border-b-1 border-[var(--theme-border-subtle)] text-[var(--theme-red)] cursor-pointer" onClick={onLogOutClick} >Log Out</div>
             }
         </div>
     );

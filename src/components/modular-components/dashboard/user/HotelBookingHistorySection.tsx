@@ -164,8 +164,8 @@ export const HotelBookingHistorySection: React.FC<{
   if (isLoading) {
     return (
       <section className={`mb-8 ${className || ''}`}>
-        <h2 className="text-2xl font-bold text-white mb-4">Hotel Booking History</h2>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-center text-gray-400">
+        <h2 className="text-2xl font-bold theme-text mb-4">Hotel Booking History</h2>
+        <div className="theme-card rounded-xl p-6 text-center theme-text-subtle">
           Loading bookings...
         </div>
       </section>
@@ -175,8 +175,8 @@ export const HotelBookingHistorySection: React.FC<{
   if (!bookings || bookings.length === 0) {
     return (
       <section className={`mb-8 ${className || ''}`}>
-        <h2 className="text-2xl font-bold text-white mb-4">Hotel Booking History</h2>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-center text-gray-400">
+        <h2 className="text-2xl font-bold theme-text mb-4">Hotel Booking History</h2>
+        <div className="theme-card rounded-xl p-6 text-center theme-text-subtle">
           No hotel bookings found
         </div>
       </section>
@@ -189,12 +189,13 @@ export const HotelBookingHistorySection: React.FC<{
 
   return (
     <section className={`mb-8 ${className || ''}`}>
-      <h2 className="text-2xl font-bold text-white mb-4">Hotel Booking History</h2>
+      <h2 className="text-2xl font-bold theme-text mb-4">Hotel Booking History</h2>
       <div className="space-y-3">
         {paginatedData.map((booking) => (
           <div
             key={booking.id}
-            className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+            className="theme-card rounded-lg p-4 hover:border-opacity-100 transition-colors"
+            style={{ borderColor: 'var(--theme-teal)' }}
           >
             <BookingInfoCard
               booking={booking}
@@ -259,7 +260,12 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
 
     if (booking.paymentStatus === PaymentStatus.PAID) {
       return (
-        <span className="px-3 py-1 bg-green-600/30 text-green-400 text-xs rounded font-medium">
+        <span className="px-3 py-1 text-xs rounded font-medium"
+          style={{ 
+            backgroundColor: 'var(--theme-teal)',
+            color: 'white'
+          }}
+        >
           ✓ Paid
         </span>
       );
@@ -269,7 +275,7 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
       return (
         <button
           disabled={booking.status === BookingStatus.COMPLETED}
-          className="px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+          className="px-3 py-1 text-white text-xs rounded font-medium transition-colors theme-btn-teal disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => {
             setSelectedBookingId(selectedBookingId === booking.id ? null : booking.id);
             setPaymentMethod(null);
@@ -281,7 +287,11 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
     }
 
     return (
-      <span className="px-3 py-1 bg-gray-600/30 text-gray-400 text-xs rounded font-medium">
+      <span className="px-3 py-1 text-xs rounded font-medium theme-text-subtle"
+        style={{ 
+          backgroundColor: 'var(--theme-card-bg)',
+        }}
+      >
         {booking.paymentStatus || "Unknown"}
       </span>
     );
@@ -290,8 +300,8 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
       <div className="flex-1">
-        <p className="text-white font-semibold">{booking.hotel?.name || "Unknown Hotel"}</p>
-        <p className="text-gray-400 text-sm mt-1">
+        <p className="font-semibold theme-text">{booking.hotel?.name || "Unknown Hotel"}</p>
+        <p className="theme-text-subtle text-sm mt-1">
           📍 {booking.hotel?.location?.name || "Unknown City"} • {new Date(booking.checkInDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })} to {new Date(booking.checkOutDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })}
         </p>
       </div>
@@ -300,34 +310,40 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
           {booking.paymentStatus === PaymentStatus.UNPAID && (
             <div className="flex items-center gap-2">
               <div className="text-right">
-                <p className="text-white font-semibold">৳ {booking.totalPrice.toLocaleString()}</p>
-                <p className="text-gray-500 text-xs">Cash</p>
+                <p className="font-semibold theme-text">৳ {booking.totalPrice.toLocaleString()}</p>
+                <p className="theme-text-subtle text-xs">Cash</p>
               </div>
               <div className="text-center">
-                <span className="inline-block px-2 py-1 bg-blue-600/30 text-blue-400 text-xs font-bold rounded border border-blue-600">OR</span>
+                <span className="inline-block px-2 py-1 text-xs font-bold rounded border" 
+                  style={{ 
+                    backgroundColor: 'var(--theme-section-bg)',
+                    color: 'var(--theme-teal)',
+                    borderColor: 'var(--theme-teal)'
+                  }}
+                >OR</span>
               </div>
               <div className="text-right">
-                <p className="text-white font-semibold">💳 {Math.floor(booking.totalPrice * 0.8)}</p>
-                <p className="text-gray-500 text-xs">Credits</p>
+                <p className="font-semibold theme-text">💳 {Math.floor(booking.totalPrice * 0.8)}</p>
+                <p className="theme-text-subtle text-xs">Credits</p>
               </div>
             </div>
           )}
 
-          <p className="text-gray-400 text-xs mt-1">
+          <p className="theme-text-subtle text-xs mt-1">
             Status: {booking.status === BookingStatus.CONFIRMED ? (
-              <span className="text-blue-400 font-medium">✓ Confirmed</span>
+              <span className="theme-text font-medium">✓ Confirmed</span>
             ) : booking.status === BookingStatus.PENDING ? (
-              <span className="text-yellow-400 font-medium">⏳ Pending</span>
+              <span className="font-medium" style={{ color: 'var(--theme-star)' }}>⏳ Pending</span>
             ) : booking.status === BookingStatus.COMPLETED ? (
-              <span className="text-green-400 font-medium">✓ Completed</span>
+              <span className="font-medium" style={{ color: 'var(--theme-teal)' }}>✓ Completed</span>
             ) : booking.status === BookingStatus.CANCELLED ? (
-              <span className="text-red-400 font-medium">✗ Cancelled</span>
+              <span className="font-medium" style={{ color: 'var(--theme-red)' }}>✗ Cancelled</span>
             ) : booking.status === BookingStatus.REFUNDED ? (
-              <span className="text-purple-400 font-medium">↩ Refunded</span>
+              <span className="font-medium theme-text-muted">↩ Refunded</span>
             ) : booking.status === BookingStatus.NO_SHOW ? (
-              <span className="text-gray-400 font-medium">⊘ No Show</span>
+              <span className="theme-text-subtle font-medium">⊘ No Show</span>
             ) : (
-              <span className="text-gray-400 font-medium">{booking.status}</span>
+              <span className="theme-text-subtle font-medium">{booking.status}</span>
             )}
           </p>
 
@@ -342,11 +358,12 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
                     ? onCancelAndRefundClicked(booking.id)
                     : onBookingCancelledClicked(booking.id)
                 }
-                className={`px-3 py-1 text-white text-xs rounded font-medium transition-colors ${
-                  booking.paymentStatus === PaymentStatus.PAID
-                    ? "bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                    : "bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
-                }`}
+                className="px-3 py-1 text-white text-xs rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: booking.paymentStatus === PaymentStatus.PAID 
+                    ? 'var(--theme-teal)' 
+                    : 'var(--theme-red, #dc2626)'
+                }}
               >
                 {cancellingBookingId === booking.id ? "Processing..." : 
                   booking.paymentStatus === PaymentStatus.PAID ? "Cancel & Refund" : "Cancel Booking"}
@@ -357,10 +374,12 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
           
           {/* Payment method selection and processing */}
           {selectedBookingId === booking.id && (
-            <div className="mt-3 p-3 bg-gray-700/50 border border-gray-600 rounded-lg">
-              <p className="text-gray-200 text-xs font-semibold mb-3">Select Payment Method</p>
+            <div className="mt-3 p-3 theme-card rounded-lg">
+              <p className="theme-text text-xs font-semibold mb-3">Select Payment Method</p>
               <div className="space-y-2">
-                <label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+                <label className="flex items-center gap-3 p-2 theme-input rounded cursor-pointer transition-colors"
+                  style={{ borderColor: 'var(--theme-teal)' }}
+                >
                   <input
                     type="radio"
                     name={`history-payment-${booking.id}`}
@@ -370,12 +389,14 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
                     className="w-4 h-4"
                   />
                   <div className="flex-1">
-                    <p className="text-white text-xs font-medium">💰 Wallet</p>
-                    <p className="text-gray-400 text-xs">Pay using your wallet balance</p>
+                    <p className="theme-text text-xs font-medium">💰 Wallet</p>
+                    <p className="theme-text-subtle text-xs">Pay using your wallet balance</p>
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+                <label className="flex items-center gap-3 p-2 theme-input rounded cursor-pointer transition-colors"
+                  style={{ borderColor: 'var(--theme-teal)' }}
+                >
                   <input
                     type="radio"
                     name={`history-payment-${booking.id}`}
@@ -385,8 +406,8 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
                     className="w-4 h-4"
                   />
                   <div className="flex-1">
-                    <p className="text-white text-xs font-medium">💳 Card</p>
-                    <p className="text-gray-400 text-xs">Pay using credit or debit card</p>
+                    <p className="theme-text text-xs font-medium">💳 Card</p>
+                    <p className="theme-text-subtle text-xs">Pay using credit or debit card</p>
                   </div>
                 </label>
               </div>
@@ -395,7 +416,7 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
                 <button
                   disabled={!paymentMethod || isProcessingPayment}
                   onClick={() => onProceedPaymentClicked(booking)}
-                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+                  className="flex-1 px-3 py-2 theme-btn-teal text-white text-xs rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isProcessingPayment ? "Processing..." : "Proceed Payment"}
                 </button>
@@ -406,7 +427,11 @@ const BookingInfoCard: React.FC<BookingInfoCardProps> = ({
                     setPaymentMethod(null);
                   }}
                   disabled={isProcessingPayment}
-                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+                  className="px-3 py-2 text-xs rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-text"
+                  style={{ 
+                    backgroundColor: 'var(--theme-card-bg)',
+                    borderColor: 'var(--theme-deep-green)'
+                  }}
                 >
                   Close
                 </button>

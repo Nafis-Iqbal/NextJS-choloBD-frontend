@@ -39,10 +39,10 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
     <>
       <section className={`mb-8 ${className}`}>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Room Types Management</h2>
+          <h2 className="text-2xl font-bold theme-text">Room Types Management</h2>
           <button
             onClick={handleAddRoom}
-            className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium"
+            className="px-4 py-2 rounded-lg theme-btn-teal font-medium"
           >
             + Add Room Type
           </button>
@@ -53,14 +53,15 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
             roomTypes.map((roomType: HotelRoomType) => (
               <div
                 key={roomType.id}
-                className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+                className="theme-card rounded-lg p-4 transition-colors"
+                style={{ borderColor: 'var(--theme-teal)' }}
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                   <div className="flex-1">
-                    <h3 className="text-white font-semibold">
+                    <h3 className="theme-text font-semibold">
                       {roomType.roomType} Room
                     </h3>
-                    <p className="text-gray-400 text-sm mt-1">
+                    <p className="theme-text-subtle text-sm mt-1">
                       {roomType.singleBedCount > 0 && `${roomType.singleBedCount} Single Bed${roomType.singleBedCount > 1 ? 's' : ''}`}
                       {roomType.singleBedCount > 0 && roomType.doubleBedCount > 0 && ' • '}
                       {roomType.doubleBedCount > 0 && `${roomType.doubleBedCount} Double Bed${roomType.doubleBedCount > 1 ? 's' : ''}`}
@@ -70,14 +71,15 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
                   </div>
                   <div className="mt-3 md:mt-0 flex items-center gap-2">
                     <div className="text-right">
-                      <p className="text-gray-300 text-sm font-semibold">{roomType.availableCount}/{roomType.totalCount}</p>
-                      <p className="text-gray-500 text-xs">available</p>
+                      <p className="theme-text-muted text-sm font-semibold">{roomType.availableCount}/{roomType.totalCount}</p>
+                      <p className="theme-text-subtle text-xs">available</p>
                     </div>
                     <button
                       onClick={() =>
                         setExpandedRoom(expandedRoom === roomType.id ? null : roomType.id)
                       }
-                      className="px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                      className="px-3 py-2 rounded-lg theme-text text-sm"
+                      style={{ backgroundColor: 'var(--theme-card-bg)' }}
                     >
                       {expandedRoom === roomType.id ? "Hide" : "Details"}
                     </button>
@@ -85,43 +87,43 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
                 </div>
 
                 {expandedRoom === roomType.id && (
-                  <div className="mt-4 pt-4 border-t border-gray-700">
+                  <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--theme-deep-green)' }}>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
                       {/* Bed Configuration */}
-                      <div className="bg-linear-to-br from-gray-700 to-gray-800 rounded-lg p-4 border border-gray-600">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Bed Configuration</p>
-                        <p className="text-white text-lg font-semibold">{roomType.singleBedCount} Single</p>
-                        <p className="text-white text-lg font-semibold">{roomType.doubleBedCount} Double</p>
+                      <div className="theme-card rounded-lg p-4">
+                        <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Bed Configuration</p>
+                        <p className="theme-text text-lg font-semibold">{roomType.singleBedCount} Single</p>
+                        <p className="theme-text text-lg font-semibold">{roomType.doubleBedCount} Double</p>
                       </div>
 
                       {/* Price Per Night */}
-                      <div className="bg-linear-to-br from-yellow-900/30 to-gray-800 rounded-lg p-4 border border-yellow-700/50">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Price Per Night</p>
-                        <p className="text-yellow-400 text-2xl font-bold">৳ {roomType.pricePerNight.toLocaleString()}</p>
+                      <div className="theme-card rounded-lg p-4">
+                        <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Price Per Night</p>
+                        <p style={{ color: 'var(--theme-star)' }} className="text-2xl font-bold">৳ {roomType.pricePerNight.toLocaleString()}</p>
                       </div>
 
                       {/* Total Rooms */}
-                      <div className="bg-linear-to-br from-blue-900/30 to-gray-800 rounded-lg p-4 border border-blue-700/50">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Total Rooms</p>
-                        <p className="text-blue-400 text-2xl font-bold">{roomType.totalCount}</p>
+                      <div className="theme-card rounded-lg p-4">
+                        <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Total Rooms</p>
+                        <p className="theme-text-teal text-2xl font-bold">{roomType.totalCount}</p>
                       </div>
 
                       {/* Available Rooms */}
-                      <div className="bg-linear-to-br from-green-900/30 to-gray-800 rounded-lg p-4 border border-green-700/50">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Available Rooms</p>
-                        <p className="text-green-400 text-2xl font-bold">{roomType.availableCount}</p>
+                      <div className="theme-card rounded-lg p-4">
+                        <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Available Rooms</p>
+                        <p className="theme-text-teal text-2xl font-bold">{roomType.availableCount}</p>
                       </div>
 
                       {/* Occupied Rooms */}
-                      <div className="bg-linear-to-br from-red-900/30 to-gray-800 rounded-lg p-4 border border-red-700/50">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Occupied Rooms</p>
-                        <p className="text-red-400 text-2xl font-bold">{roomType.totalCount - roomType.availableCount}</p>
+                      <div className="theme-card rounded-lg p-4">
+                        <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Occupied Rooms</p>
+                        <p className="theme-text text-2xl font-bold">{roomType.totalCount - roomType.availableCount}</p>
                       </div>
 
                       {/* Occupancy Rate */}
-                      <div className="bg-linear-to-br from-purple-900/30 to-gray-800 rounded-lg p-4 border border-purple-700/50">
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Occupancy Rate</p>
-                        <p className="text-purple-400 text-2xl font-bold">
+                      <div className="theme-card rounded-lg p-4">
+                        <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Occupancy Rate</p>
+                        <p className="theme-text-teal text-2xl font-bold">
                           {roomType.totalCount > 0
                             ? Math.round(((roomType.totalCount - roomType.availableCount) / roomType.totalCount) * 100)
                             : 0}%
@@ -130,9 +132,9 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
                     </div>
 
                     {/* Created Date */}
-                    <div className="mb-6 bg-linear-to-br from-gray-700 to-gray-800 rounded-lg p-4 border border-gray-600">
-                      <p className="text-gray-400 text-xs font-bold uppercase tracking-wide mb-2">Created On</p>
-                      <p className="text-white text-base">
+                    <div className="mb-6 theme-card rounded-lg p-4">
+                      <p className="theme-text-subtle text-xs font-bold uppercase tracking-wide mb-2">Created On</p>
+                      <p className="theme-text text-base">
                         {new Date(roomType.createdAt).toLocaleDateString("en-US", {
                           year: "numeric",
                           month: "long",
@@ -147,7 +149,7 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleEditRoom(roomType.id)}
-                        className="px-4 py-3 rounded-lg bg-linear-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold transition-all shadow-lg"
+                        className="px-4 py-3 rounded-lg theme-btn-teal font-semibold transition-all shadow-lg"
                       >
                         ✎ Edit Room Type
                       </button>
@@ -157,8 +159,8 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
               </div>
             ))
           ) : (
-            <div className="bg-gray-800/70 border border-gray-700 rounded-lg p-6 text-center">
-              <p className="text-gray-400">No room types available. Click "Add Room Type" to create one.</p>
+            <div className="theme-card rounded-lg p-6 text-center">
+              <p className="theme-text-subtle">No room types available. Click "Add Room Type" to create one.</p>
             </div>
           )}
         </div>

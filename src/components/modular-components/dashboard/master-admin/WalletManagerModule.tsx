@@ -33,14 +33,14 @@ export const WalletManagerModule = () => {
 
             {/* Wallet Recharge Options Section */}
             <div className="flex space-x-5 mb-2 items-center">
-                <h4 className="">Wallet Recharge Options</h4>
-                <p className="text-gray-400">Will be moved to config files content</p>
+                <h4 className="theme-text">Wallet Recharge Options</h4>
+                <p className="theme-text-subtle">Will be moved to config files content</p>
             </div>
 
             <TableLayout className="mr-5">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[900px]">
-                        <div className="flex border border-green-800 p-2 bg-gray-600 text-center">
+                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                             <p className="w-[5%]">Sr.</p>
                             <p className="w-[25%]">Title</p>
                             <p className="w-[30%]">Description</p>
@@ -49,7 +49,7 @@ export const WalletManagerModule = () => {
                             <p className="w-[10%]">Bonus (৳)</p>
                             <p className="w-[6%]">Actions</p>
                         </div>
-                        <div className="flex flex-col border-1 border-green-800">
+                        <div className="flex flex-col theme-outline">
                             {
                                 isWalletOptionsLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
                                 !walletRechargeOptions ? (<NoContentTableRow displayMessage="An error occurred"  tdColSpan={1}/>) :

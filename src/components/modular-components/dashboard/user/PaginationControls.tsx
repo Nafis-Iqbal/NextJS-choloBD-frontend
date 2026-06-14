@@ -11,17 +11,47 @@ export const PaginationControls: React.FC<{
     <button
       onClick={() => onPageChange(currentPage - 1)}
       disabled={currentPage === 1}
-      className="px-3 py-1 rounded-lg bg-gray-700 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600"
+      style={{
+        backgroundColor: currentPage === 1 ? 'var(--theme-border-subtle)' : 'var(--theme-teal)',
+        color: currentPage === 1 ? 'var(--theme-text-subtle)' : 'white',
+        cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+      }}
+      className="px-3 py-1 rounded-lg transition-colors duration-150"
+      onMouseEnter={(e) => {
+        if (currentPage > 1) {
+          e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (currentPage > 1) {
+          e.currentTarget.style.backgroundColor = 'var(--theme-teal)';
+        }
+      }}
     >
       Previous
     </button>
-    <span className="text-sm text-gray-300">
+    <span className="text-sm theme-text-subtle">
       Page {currentPage} of {totalPages}
     </span>
     <button
       onClick={() => onPageChange(currentPage + 1)}
       disabled={currentPage === totalPages}
-      className="px-3 py-1 rounded-lg bg-gray-700 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-600"
+      style={{
+        backgroundColor: currentPage === totalPages ? 'var(--theme-border-subtle)' : 'var(--theme-teal)',
+        color: currentPage === totalPages ? 'var(--theme-text-subtle)' : 'white',
+        cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+      }}
+      className="px-3 py-1 rounded-lg transition-colors duration-150"
+      onMouseEnter={(e) => {
+        if (currentPage < totalPages) {
+          e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (currentPage < totalPages) {
+          e.currentTarget.style.backgroundColor = 'var(--theme-teal)';
+        }
+      }}
     >
       Next
     </button>

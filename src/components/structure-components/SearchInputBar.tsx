@@ -53,7 +53,7 @@ export const SearchInputBar = ({
                     value={searchTerm}
                     onChange={handleChange}
                     className="w-full bg-white border border-gray-300 rounded-md px-4 py-2 font-sans placeholder-gray-400 text-gray-800 
-                        focus:outline-none focus:ring-2 focus:ring-green-600"
+                        focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)]"
                 />
 
                 {/* Search Results */}

@@ -209,14 +209,14 @@ export const AddressManagerModule = ({
     return (
         <div className={`flex flex-col space-y-3 ${className}`}>
             <div className="flex items-baseline space-x-3">
-                <h4 className="text-green-300">Shipping Address</h4>
+                <h4 className="theme-text">Shipping Address</h4>
 
                 {!showFullList && !selectOnlyMode && !infoOnlyMode &&
-                    <button className="px-2 py-1 bg-green-700 hover:bg-green-600 rounded-xs" onClick={() => router.push(`/addresses/${userId}`)}> View All </button>
+                    <button className="green-button text-sm md:text-base" onClick={() => router.push(`/addresses/${userId}`)}> View All </button>
                 }
 
                 {selectOnlyMode && !infoOnlyMode &&
-                    <button className="px-2 py-1 bg-green-700 hover:bg-green-600 rounded-xs" onClick={() => setIsAddressSelectionModalOpen(true)}> Choose Another </button>
+                    <button className="green-button text-sm md:text-base" onClick={() => setIsAddressSelectionModalOpen(true)}> Choose Another </button>
                 }
             </div>
 
@@ -252,11 +252,11 @@ export const AddressManagerModule = ({
 
             {addresses.length === 0 ? (
                 <div className="flex flex-col space-y-2">
-                    <p className="text-gray-400">No addresses found.</p>
+                    <p className="theme-text-subtle">No addresses found.</p>
                     {!infoOnlyMode &&
                         <button
                             onClick={handleAddAddress}
-                            className="w-fit px-2 py-1 bg-green-600 hover:bg-green-500 text-sm md:text-base text-white rounded-sm"
+                            className="green-button w-fit text-sm md:text-base"
                         >
                             Add First Address
                         </button>
@@ -280,7 +280,7 @@ export const AddressManagerModule = ({
 
                     {!showFullList && remainingCount > 0 && !infoOnlyMode && (
                         <button 
-                            className="w-fit text-white hover:text-green-500 hover:underline" 
+                            className="green-underline-button w-fit" 
                             onClick={() => router.push("/addresses")}
                         >
                             and {remainingCount} others...
@@ -290,7 +290,7 @@ export const AddressManagerModule = ({
                     {showFullList && addresses.length < MAX_ADDRESSES && !infoOnlyMode && (
                         <button
                             onClick={handleAddAddress}
-                            className="w-fit p-2 bg-green-600 hover:bg-green-500 text-white rounded-sm mt-3"
+                            className="green-button w-fit mt-3"
                         >
                             Add New Address
                         </button>

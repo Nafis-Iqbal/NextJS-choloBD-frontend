@@ -59,12 +59,12 @@ export const UserActivityHistoryModule: React.FC<UserActivityHistoryModuleProps>
   // Use prop bookings if provided, otherwise use fetched bookings
   const finalBookedHotels = bookedHotels || fetchedHotelBookings;
   return (
-    <div className="w-full bg-gray-900 text-white min-h-screen p-6" id="activity_history">
+    <div className="w-full bg-white theme-text min-h-screen p-6" id="activity_history">
       <div className="max-w-7xl w-full">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-white">My Activity & History</h1>
-          <p className="text-gray-400 mt-2">
+          <h1 className="text-4xl font-bold theme-text">My Activity & History</h1>
+          <p className="theme-text-muted mt-2">
             View your trips, bookings, and activity overview
           </p>
         </div>

@@ -20,11 +20,19 @@ export const CustomMiniTextInput = forwardRef<HTMLInputElement, CustomInputProps
     } = props;
 
     return (
-      <input className={`p-1 bg-gray-700 border border-gray-600 placeholder-gray-400 text-white rounded-sm
-          focus:outline-none focus:ring-2 focus:ring-green-500 ${className}`} placeholder={placeholderText}
-          style={{ textIndent: '6px' }}
-          ref={ref}
-          { ...rest }
+      <input 
+        className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`} 
+        placeholder={placeholderText}
+        style={{ 
+          textIndent: '6px',
+          backgroundColor: 'var(--theme-input-bg)',
+          color: 'var(--theme-text)',
+          borderWidth: '1px',
+          borderColor: 'var(--theme-deep-green)',
+          '--theme-focus-color': 'var(--theme-teal)',
+        } as React.CSSProperties & { '--theme-focus-color': string }}
+        ref={ref}
+        { ...rest }
       />
     )
 })
@@ -46,19 +54,33 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
     return (
       <div className="relative flex flex-col space-y-1 group">
         <div className="flex items-center space-x-2">
-          {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
-          {secondaryLabel && <span className="text-gray-400 text-sm">{secondaryLabel}</span>}
+          {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
+          {secondaryLabel && <span style={{ color: 'var(--theme-text-subtle)' }} className="text-sm">{secondaryLabel}</span>}
         </div>
         
-        <input className={`p-1 bg-gray-700 border border-gray-600 placeholder-gray-400 text-white rounded-sm
-            focus:outline-none focus:ring-2 focus:ring-green-500 ${className}`} placeholder={placeholderText}
-            style={{ textIndent: '6px' }}
-            ref={ref}
-            { ...rest }
+        <input 
+          className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`} 
+          placeholder={placeholderText}
+          style={{
+            textIndent: '6px',
+            backgroundColor: 'var(--theme-input-bg)',
+            color: 'var(--theme-text)',
+            borderWidth: '1px',
+            borderColor: 'var(--theme-deep-green)',
+            outlineColor: 'var(--theme-teal)',
+          }}
+          ref={ref}
+          { ...rest }
         />
 
         {error && (
-          <div className="absolute right-0 mt-1 text-xs text-white bg-red-500 p-1 rounded shadow z-10">
+          <div 
+            className="absolute right-0 mt-1 text-xs p-1 rounded shadow z-10"
+            style={{
+              backgroundColor: '#DC2626',
+              color: 'white'
+            }}
+          >
             {error}
           </div>
         )}
@@ -80,7 +102,7 @@ export const CustomDateInput = forwardRef<HTMLInputElement, CustomInputProps>((p
 
     return (
       <div className="relative flex flex-col space-y-1 group">
-        {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
+        {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
         
         <style>{`
           input[type="date"]::-webkit-calendar-picker-indicator {
@@ -91,14 +113,26 @@ export const CustomDateInput = forwardRef<HTMLInputElement, CustomInputProps>((p
         
         <input 
           type="date"
-          className={`p-1 bg-gray-700 border border-gray-600 placeholder-gray-400 text-white rounded-sm
-              focus:outline-none focus:ring-2 focus:ring-green-500 ${className}`}
+          className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
+          style={{
+            backgroundColor: 'var(--theme-input-bg)',
+            color: 'var(--theme-text)',
+            borderWidth: '1px',
+            borderColor: 'var(--theme-deep-green)',
+            outlineColor: 'var(--theme-teal)',
+          }}
           ref={ref}
           { ...rest }
         />
 
         {error && (
-          <div className="absolute right-0 mt-1 text-xs text-white bg-red-500 p-1 rounded shadow z-10">
+          <div 
+            className="absolute right-0 mt-1 text-xs p-1 rounded shadow z-10"
+            style={{
+              backgroundColor: '#DC2626',
+              color: 'white'
+            }}
+          >
             {error}
           </div>
         )}
@@ -129,17 +163,31 @@ export const CustomTextAreaInput = forwardRef<HTMLTextAreaElement, CustomTextAre
 
     return (
       <div className="relative flex flex-col space-y-1 group">
-        {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
+        {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
 
-        <textarea className={`p-1 bg-gray-700 border border-gray-600 placeholder-gray-400 text-white rounded-sm
-            focus:outline-none focus:ring-2 focus:ring-green-600 ${className}`} placeholder={placeholderText}
-            style={{ textIndent: '6px' }}
-            ref={ref}
-            { ...rest }
+        <textarea 
+          className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`} 
+          placeholder={placeholderText}
+          style={{
+            textIndent: '6px',
+            backgroundColor: 'var(--theme-input-bg)',
+            color: 'var(--theme-text)',
+            borderWidth: '1px',
+            borderColor: 'var(--theme-deep-green)',
+            outlineColor: 'var(--theme-teal)',
+          }}
+          ref={ref}
+          { ...rest }
         />
         
         {error && (
-          <div className="absolute right-0 mt-1 text-xs text-white bg-red-500 p-1 rounded shadow z-10">
+          <div 
+            className="absolute right-0 mt-1 text-xs p-1 rounded shadow z-10"
+            style={{
+              backgroundColor: '#DC2626',
+              color: 'white'
+            }}
+          >
             {error}
           </div>
         )}

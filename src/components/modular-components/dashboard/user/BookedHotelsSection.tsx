@@ -93,27 +93,38 @@ export const BookedHotelsSection: React.FC<{
 
   return (
     <section className={`mb-8 ${className || ''}`} id="booked_hotels_section">
-      <h2 className="text-2xl font-bold text-white mb-4">Booked Hotels</h2>
+      <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>Booked Hotels</h2>
       {ongoingHotels.length === 0 && upcomingHotels.length === 0 ? (
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-center text-gray-400">
+        <div 
+          className="border rounded-xl p-6 text-center"
+          style={{
+            backgroundColor: 'var(--theme-card-bg)',
+            borderColor: 'var(--theme-deep-green)',
+            color: 'var(--theme-text-subtle)'
+          }}
+        >
           No booked hotels
         </div>
       ) : (
         <div className="space-y-6">
           {ongoingHotels.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-orange-400 mb-3">
+              <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-teal)' }}>
                 🔴 Current Stay
               </h3>
               <div className="space-y-2">
                 {ongoingHotels.map((hotel) => (
                   <div
                     key={hotel.id}
-                    className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 flex items-center justify-between hover:border-orange-600 transition-colors"
+                    className="border rounded-lg p-4 flex items-center justify-between transition-colors"
+                    style={{
+                      backgroundColor: 'var(--theme-card-bg)',
+                      borderColor: 'var(--theme-deep-green)',
+                    }}
                   >
                     <div>
-                      <p className="text-white font-medium">{hotel.hotel?.name || "Unknown Hotel"}</p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="font-medium" style={{ color: 'var(--theme-text)' }}>{hotel.hotel?.name || "Unknown Hotel"}</p>
+                      <p className="text-sm" style={{ color: 'var(--theme-text-subtle)' }}>
                         {hotel.hotel?.location?.name || "Unknown City"} • {new Date(hotel.checkInDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })} to {new Date(hotel.checkOutDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })}
                       </p>
                     </div>
@@ -121,26 +132,44 @@ export const BookedHotelsSection: React.FC<{
                         {hotel.paymentStatus === PaymentStatus.UNPAID && (
                           <div className="flex items-center gap-2">
                             <div className="text-right">
-                              <p className="text-white font-semibold">৳ {hotel.totalPrice.toLocaleString()}</p>
-                              <p className="text-gray-500 text-xs">Cash</p>
+                              <p className="font-semibold" style={{ color: 'var(--theme-text)' }}>৳ {hotel.totalPrice.toLocaleString()}</p>
+                              <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Cash</p>
                             </div>
                             <div className="text-center">
-                              <span className="inline-block px-2 py-1 bg-blue-600/30 text-blue-400 text-xs font-bold rounded border border-blue-600">OR</span>
+                              <span 
+                                className="inline-block px-2 py-1 text-xs font-bold rounded border"
+                                style={{
+                                  backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                                  color: 'var(--theme-teal)',
+                                  borderColor: 'var(--theme-teal)'
+                                }}
+                              >
+                                OR
+                              </span>
                             </div>
                             <div className="text-right">
-                              <p className="text-white font-semibold">💳 {Math.floor(hotel.totalPrice * 0.8)}</p>
-                              <p className="text-gray-500 text-xs">Credits</p>
+                              <p className="font-semibold" style={{ color: 'var(--theme-text)' }}>💳 {Math.floor(hotel.totalPrice * 0.8)}</p>
+                              <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Credits</p>
                             </div>
                           </div>
                         )}
                         <div className="mt-2 flex gap-2">
                             {hotel.paymentStatus === PaymentStatus.PAID ? (
-                            <span className="px-3 py-1 bg-green-600/30 text-green-400 text-xs rounded font-medium">
+                            <span 
+                              className="px-3 py-1 text-xs rounded font-medium"
+                              style={{
+                                backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                                color: 'var(--theme-teal)'
+                              }}
+                            >
                                 Paid
                             </span>
                             ) : (
                             <button 
-                                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded font-medium transition-colors"
+                                className="px-3 py-1 text-white text-xs rounded font-medium transition-colors hover:cursor-pointer"
+                                style={{ backgroundColor: 'var(--theme-teal)' }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal)'}
                                 onClick={() => {
                                   setPayingId(payingId === hotel.id ? null : hotel.id);
                                   setPaymentMethod(null);
@@ -150,20 +179,47 @@ export const BookedHotelsSection: React.FC<{
                             </button>
                             )}
 
-                            <button className={`px-3 py-1 text-white text-xs rounded font-medium transition-colors ${
-                              hotel.paymentStatus === PaymentStatus.PAID
-                                ? "bg-blue-600 hover:bg-blue-700"
-                                : "bg-red-600 hover:bg-red-700"
-                            }`}>
+                            <button 
+                              className="px-3 py-1 text-white text-xs rounded font-medium transition-colors"
+                              style={{
+                                backgroundColor: hotel.paymentStatus === PaymentStatus.PAID ? 'var(--theme-teal)' : '#DC2626'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (hotel.paymentStatus === PaymentStatus.PAID) {
+                                  e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)';
+                                } else {
+                                  e.currentTarget.style.backgroundColor = '#B91C1C';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (hotel.paymentStatus === PaymentStatus.PAID) {
+                                  e.currentTarget.style.backgroundColor = 'var(--theme-teal)';
+                                } else {
+                                  e.currentTarget.style.backgroundColor = '#DC2626';
+                                }
+                              }}
+                            >
                                 {hotel.paymentStatus === PaymentStatus.PAID ? "Cancel & Refund" : "Cancel Booking"}
                             </button>
                         </div>
 
                         {payingId === hotel.id && (
-                            <div className="mt-3 p-3 bg-gray-700/50 border border-gray-600 rounded-lg">
-                              <p className="text-gray-200 text-xs font-semibold mb-3">Select Payment Method</p>
+                            <div 
+                              className="mt-3 p-3 border rounded-lg"
+                              style={{
+                                backgroundColor: 'var(--theme-section-bg)',
+                                borderColor: 'var(--theme-deep-green)'
+                              }}
+                            >
+                              <p className="text-xs font-semibold mb-3" style={{ color: 'var(--theme-text)' }}>Select Payment Method</p>
                               <div className="space-y-2">
-                                <label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+                                <label 
+                                  className="flex items-center gap-3 p-2 rounded border cursor-pointer transition-colors"
+                                  style={{
+                                    backgroundColor: 'var(--theme-card-bg)',
+                                    borderColor: 'var(--theme-deep-green)'
+                                  }}
+                                >
                                   <input
                                     type="radio"
                                     name={`booked-payment-${hotel.id}`}
@@ -173,12 +229,18 @@ export const BookedHotelsSection: React.FC<{
                                     className="w-4 h-4"
                                   />
                                   <div className="flex-1">
-                                    <p className="text-white text-xs font-medium">💰 Wallet</p>
-                                    <p className="text-gray-400 text-xs">Pay using your wallet balance</p>
+                                    <p className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>💰 Wallet</p>
+                                    <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Pay using your wallet balance</p>
                                   </div>
                                 </label>
 
-                                <label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+                                <label 
+                                  className="flex items-center gap-3 p-2 rounded border cursor-pointer transition-colors"
+                                  style={{
+                                    backgroundColor: 'var(--theme-card-bg)',
+                                    borderColor: 'var(--theme-deep-green)'
+                                  }}
+                                >
                                   <input
                                     type="radio"
                                     name={`booked-payment-${hotel.id}`}
@@ -188,8 +250,8 @@ export const BookedHotelsSection: React.FC<{
                                     className="w-4 h-4"
                                   />
                                   <div className="flex-1">
-                                    <p className="text-white text-xs font-medium">💳 Card</p>
-                                    <p className="text-gray-400 text-xs">Pay using credit or debit card</p>
+                                    <p className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>💳 Card</p>
+                                    <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Pay using credit or debit card</p>
                                   </div>
                                 </label>
                               </div>
@@ -198,7 +260,21 @@ export const BookedHotelsSection: React.FC<{
                                 <button
                                   disabled={!paymentMethod || isProcessingPayment}
                                   onClick={() => onProceedPaymentClicked(hotel)}
-                                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+                                  className="flex-1 px-3 py-2 text-white text-xs rounded font-medium transition-colors disabled:cursor-not-allowed"
+                                  style={{
+                                    backgroundColor: !paymentMethod || isProcessingPayment ? 'var(--theme-text-subtle)' : 'var(--theme-teal)'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!paymentMethod || isProcessingPayment) return;
+                                    e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!paymentMethod || isProcessingPayment) {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-text-subtle)';
+                                    } else {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-teal)';
+                                    }
+                                  }}
                                 >
                                   {isProcessingPayment ? "Processing..." : "Proceed Payment"}
                                 </button>
@@ -208,7 +284,22 @@ export const BookedHotelsSection: React.FC<{
                                     setPaymentMethod(null);
                                   }}
                                   disabled={isProcessingPayment}
-                                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+                                  className="px-3 py-2 text-white text-xs rounded font-medium transition-colors disabled:cursor-not-allowed"
+                                  style={{
+                                    backgroundColor: isProcessingPayment ? 'var(--theme-text-subtle)' : 'var(--theme-deep-green)'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (isProcessingPayment) return;
+                                    e.currentTarget.style.filter = 'brightness(1.2)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (isProcessingPayment) {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-text-subtle)';
+                                    } else {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-deep-green)';
+                                    }
+                                    e.currentTarget.style.filter = 'none';
+                                  }}
                                 >
                                   Close
                                 </button>
@@ -223,18 +314,22 @@ export const BookedHotelsSection: React.FC<{
           )}
           {upcomingHotels.length > 0 && (
             <div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-3">
+              <h3 className="text-lg font-semibold mb-3" style={{ color: 'var(--theme-teal)' }}>
                 📅 Upcoming Stays
               </h3>
               <div className="space-y-2">
                 {upcomingHotels.map((hotel) => (
                   <div
                     key={hotel.id}
-                    className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 flex items-center justify-between hover:border-blue-600 transition-colors"
+                    className="border rounded-lg p-4 flex items-center justify-between transition-colors"
+                    style={{
+                      backgroundColor: 'var(--theme-card-bg)',
+                      borderColor: 'var(--theme-deep-green)'
+                    }}
                   >
                     <div>
-                      <p className="text-white font-medium">{hotel.hotel?.name || "Unknown Hotel"}</p>
-                      <p className="text-gray-400 text-sm">
+                      <p className="font-medium" style={{ color: 'var(--theme-text)' }}>{hotel.hotel?.name || "Unknown Hotel"}</p>
+                      <p className="text-sm" style={{ color: 'var(--theme-text-subtle)' }}>
                         {hotel.hotel?.location?.name || "Unknown City"} • {new Date(hotel.checkInDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })} to {new Date(hotel.checkOutDate).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" })}
                       </p>
                     </div>
@@ -242,26 +337,44 @@ export const BookedHotelsSection: React.FC<{
                         {hotel.paymentStatus === PaymentStatus.UNPAID && (
                           <div className="flex items-center gap-2">
                             <div className="text-right">
-                              <p className="text-white font-semibold">৳ {hotel.totalPrice.toLocaleString()}</p>
-                              <p className="text-gray-500 text-xs">Cash</p>
+                              <p className="font-semibold" style={{ color: 'var(--theme-text)' }}>৳ {hotel.totalPrice.toLocaleString()}</p>
+                              <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Cash</p>
                             </div>
                             <div className="text-center">
-                              <span className="inline-block px-2 py-1 bg-blue-600/30 text-blue-400 text-xs font-bold rounded border border-blue-600">OR</span>
+                              <span 
+                                className="inline-block px-2 py-1 text-xs font-bold rounded border"
+                                style={{
+                                  backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                                  color: 'var(--theme-teal)',
+                                  borderColor: 'var(--theme-teal)'
+                                }}
+                              >
+                                OR
+                              </span>
                             </div>
                             <div className="text-right">
-                              <p className="text-white font-semibold">💳 {Math.floor(hotel.totalPrice * 0.8)}</p>
-                              <p className="text-gray-500 text-xs">Credits</p>
+                              <p className="font-semibold" style={{ color: 'var(--theme-text)' }}>💳 {Math.floor(hotel.totalPrice * 0.8)}</p>
+                              <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Credits</p>
                             </div>
                           </div>
                         )}
                         <div className="mt-2 flex gap-2">
                             {hotel.paymentStatus === PaymentStatus.PAID ? (
-                            <span className="px-3 py-1 bg-green-600/30 text-green-400 text-xs rounded font-medium">
+                            <span 
+                              className="px-3 py-1 text-xs rounded font-medium"
+                              style={{
+                                backgroundColor: 'rgba(42, 157, 143, 0.2)',
+                                color: 'var(--theme-teal)'
+                              }}
+                            >
                                 Paid
                             </span>
                             ) : (
                             <button 
-                                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded font-medium transition-colors"
+                                className="px-3 py-1 text-white text-xs rounded font-medium transition-colors hover:cursor-pointer"
+                                style={{ backgroundColor: 'var(--theme-teal)' }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)'}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal)'}
                                 onClick={() => {
                                   setPayingId(payingId === hotel.id ? null : hotel.id);
                                   setPaymentMethod(null);
@@ -270,20 +383,47 @@ export const BookedHotelsSection: React.FC<{
                                 Pay Now
                             </button>
                             )}
-                            <button className={`px-3 py-1 text-white text-xs rounded font-medium transition-colors ${
-                              hotel.paymentStatus === PaymentStatus.PAID
-                                ? "bg-blue-600 hover:bg-blue-700"
-                                : "bg-red-600 hover:bg-red-700"
-                            }`}>
+                            <button 
+                              className="px-3 py-1 text-white text-xs rounded font-medium transition-colors"
+                              style={{
+                                backgroundColor: hotel.paymentStatus === PaymentStatus.PAID ? 'var(--theme-teal)' : '#DC2626'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (hotel.paymentStatus === PaymentStatus.PAID) {
+                                  e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)';
+                                } else {
+                                  e.currentTarget.style.backgroundColor = '#B91C1C';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (hotel.paymentStatus === PaymentStatus.PAID) {
+                                  e.currentTarget.style.backgroundColor = 'var(--theme-teal)';
+                                } else {
+                                  e.currentTarget.style.backgroundColor = '#DC2626';
+                                }
+                              }}
+                            >
                                 {hotel.paymentStatus === PaymentStatus.PAID ? "Cancel & Refund" : "Cancel Booking"}
                             </button>
                         </div>
                         
                         {payingId === hotel.id && (
-                            <div className="mt-3 p-3 bg-gray-700/50 border border-gray-600 rounded-lg">
-                              <p className="text-gray-200 text-xs font-semibold mb-3">Select Payment Method</p>
+                            <div 
+                              className="mt-3 p-3 border rounded-lg"
+                              style={{
+                                backgroundColor: 'var(--theme-section-bg)',
+                                borderColor: 'var(--theme-deep-green)'
+                              }}
+                            >
+                              <p className="text-xs font-semibold mb-3" style={{ color: 'var(--theme-text)' }}>Select Payment Method</p>
                               <div className="space-y-2">
-                                <label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+                                <label 
+                                  className="flex items-center gap-3 p-2 rounded border cursor-pointer transition-colors"
+                                  style={{
+                                    backgroundColor: 'var(--theme-card-bg)',
+                                    borderColor: 'var(--theme-deep-green)'
+                                  }}
+                                >
                                   <input
                                     type="radio"
                                     name={`booked-payment-${hotel.id}`}
@@ -293,12 +433,18 @@ export const BookedHotelsSection: React.FC<{
                                     className="w-4 h-4"
                                   />
                                   <div className="flex-1">
-                                    <p className="text-white text-xs font-medium">💰 Wallet</p>
-                                    <p className="text-gray-400 text-xs">Pay using your wallet balance</p>
+                                    <p className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>💰 Wallet</p>
+                                    <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Pay using your wallet balance</p>
                                   </div>
                                 </label>
 
-                                <label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+                                <label 
+                                  className="flex items-center gap-3 p-2 rounded border cursor-pointer transition-colors"
+                                  style={{
+                                    backgroundColor: 'var(--theme-card-bg)',
+                                    borderColor: 'var(--theme-deep-green)'
+                                  }}
+                                >
                                   <input
                                     type="radio"
                                     name={`booked-payment-${hotel.id}`}
@@ -308,8 +454,8 @@ export const BookedHotelsSection: React.FC<{
                                     className="w-4 h-4"
                                   />
                                   <div className="flex-1">
-                                    <p className="text-white text-xs font-medium">💳 Card</p>
-                                    <p className="text-gray-400 text-xs">Pay using credit or debit card</p>
+                                    <p className="text-xs font-medium" style={{ color: 'var(--theme-text)' }}>💳 Card</p>
+                                    <p className="text-xs" style={{ color: 'var(--theme-text-subtle)' }}>Pay using credit or debit card</p>
                                   </div>
                                 </label>
                               </div>
@@ -318,7 +464,21 @@ export const BookedHotelsSection: React.FC<{
                                 <button
                                   disabled={!paymentMethod || isProcessingPayment}
                                   onClick={() => onProceedPaymentClicked(hotel)}
-                                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+                                  className="flex-1 px-3 py-2 text-white text-xs rounded font-medium transition-colors disabled:cursor-not-allowed"
+                                  style={{
+                                    backgroundColor: !paymentMethod || isProcessingPayment ? 'var(--theme-text-subtle)' : 'var(--theme-teal)'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (!paymentMethod || isProcessingPayment) return;
+                                    e.currentTarget.style.backgroundColor = 'var(--theme-teal-hover)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (!paymentMethod || isProcessingPayment) {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-text-subtle)';
+                                    } else {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-teal)';
+                                    }
+                                  }}
                                 >
                                   {isProcessingPayment ? "Processing..." : "Proceed Payment"}
                                 </button>
@@ -328,7 +488,22 @@ export const BookedHotelsSection: React.FC<{
                                     setPaymentMethod(null);
                                   }}
                                   disabled={isProcessingPayment}
-                                  className="px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+                                  className="px-3 py-2 text-white text-xs rounded font-medium transition-colors disabled:cursor-not-allowed"
+                                  style={{
+                                    backgroundColor: isProcessingPayment ? 'var(--theme-text-subtle)' : 'var(--theme-deep-green)'
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    if (isProcessingPayment) return;
+                                    e.currentTarget.style.filter = 'brightness(1.2)';
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    if (isProcessingPayment) {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-text-subtle)';
+                                    } else {
+                                      e.currentTarget.style.backgroundColor = 'var(--theme-deep-green)';
+                                    }
+                                    e.currentTarget.style.filter = 'none';
+                                  }}
                                 >
                                   Close
                                 </button>

@@ -13,26 +13,26 @@ const BottomNavbar = () => {
     const currentUserId = authResponse?.data?.userId;
 
     return (
-        <div className="fixed z-100 md:hidden bottom-0 flex items-center p-1 w-[100%] h-[60px] bg-[#00FF99]">
-            <div className="relative flex items-center p-1 w-[100%] h-full bg-inherit text-green-800 font-semibold">
-                <Link className="w-[25%] py-2 text-center border-r-1 border-green-600" href="/dashboard" >
+        <div className="fixed z-100 md:hidden bottom-0 flex items-center p-1 w-[100%] h-[60px] theme-nav">
+            <div className="relative flex items-center p-1 w-[100%] h-full bg-inherit text-white font-semibold">
+                <Link className="w-[25%] py-2 text-center border-r-1 border-white/30" href="/dashboard" >
                     <IconWithBadge
                         Icon={FaCog} 
-                        iconClassName="text-gray-700 text-3xl"
+                        iconClassName="text-white text-3xl"
                     />
                 </Link>
 
-                <Link className="w-[25%] py-2 text-center border-r-1 border-green-600" href="/special-deals" >
+                <Link className="w-[25%] py-2 text-center border-r-1 border-white/30" href="/special-deals" >
                     <IconWithBadge
                         Icon={FaGift} 
-                        iconClassName="text-gray-700 text-3xl"
+                        iconClassName="text-white text-3xl"
                     />
                 </Link>
 
-                <Link className="w-[25%] py-2 text-center border-r-1 border-green-600" href="/">
+                <Link className="w-[25%] py-2 text-center border-r-1 border-white/30" href="/">
                     <IconWithBadge
                         Icon={FaGift} 
-                        iconClassName="text-gray-700 text-3xl"
+                        iconClassName="text-white text-3xl"
                     />
                 </Link>
 
@@ -42,12 +42,12 @@ const BottomNavbar = () => {
                             <IconWithBadge 
                                 Icon={FaUser} 
                                 badgeValue={2} 
-                                iconClassName="text-gray-700 text-3xl"
+                                iconClassName="text-white text-3xl"
                             />
                         </Link>
                     ) : (
                         <Link className="w-[25%] py-2 text-center flex items-center justify-center" href={"/login"} >
-                            <FaSignInAlt className="text-gray-700 text-3xl"/>
+                            <FaSignInAlt className="text-white text-3xl"/>
                         </Link>
                     )
                 }

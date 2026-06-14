@@ -1,8 +1,9 @@
 import { ConfigApi, TourBuilderApi } from "@/services/api";
 import { HeroSection } from "@/types/enums";
-import { HeroSectionImageViewer } from "../structure-components/HeroSectionImageViewer";
-import { FeatureGrid, TourSuggestions, BuildTourCTA, HotelDeals, TransportTickets, 
+import { HeroSectionBookingWidget } from "./HeroSectionBookingWidget";
+import { FeatureGrid, TourSuggestions, HotelDeals, TransportTickets, 
     CommunitySection, Testimonials, NewsletterSection } from "./index";
+import { HorizontalDivider } from "@/components/custom-elements/UIUtilities"
 
 export const HomepageContent = async () => {
     let configData;
@@ -30,12 +31,12 @@ export const HomepageContent = async () => {
     const bottomHeroSectionImages = siteHeroSectionImages.filter((image) => image.section === HeroSection.BOTTOM);
 
     const features = [
-        { title: "Smart Tours", desc: "Auto plan, quick tweaks" },
-        { title: "Hotel Book", desc: "Trusted stays, easy pay" },
-        { title: "Ride Tickets", desc: "Bus, train, air" },
-        { title: "Find Buddies", desc: "Meet travel friends" },
-        { title: "Wallet & Deals", desc: "Cashback and perks" },
-        { title: "Local Guides", desc: "Tips from pros" },
+        { title: "Hotel Book", desc: "Trusted stays, easy pay", link: "hotels" },
+        { title: "Ride Tickets", desc: "Bus, train, air", link: "transport" },
+        { title: "Smart Tours", desc: "Auto plan, quick tweaks", link: "tours" },
+        { title: "Find Buddies", desc: "Meet travel friends", link: "community" },
+        { title: "Local Guides", desc: "Tips from pros", link: "guides" },
+        { title: "Wallet & Deals", desc: "Cashback and perks", link: "deals" },
     ];
 
     // Format tour data for display
@@ -70,44 +71,46 @@ export const HomepageContent = async () => {
     ];
 
     return (
-        <div className="flex flex-col items-center space-y-10 md:space-y-16 w-full mx-auto md:w-[85%]">
-            {/* Hero banners from config (if available) */}
-            <HeroSectionImageViewer
-                className="md:rounded-xl bg-gray-800/60 mt-2 md:mt-8 md:w-[110%]"
-                imageList={topHeroSectionImages.map((image) => ({ imageURL: image.url, imageAlt: image?.altText }))}
+        <div className="flex flex-col items-center space-y-10 md:space-y-16 w-full mx-auto">
+            {/* Hero section with booking widget */}
+            {/* <HeroSectionBookingWidget
+                imageList={topHeroSectionImages ? topHeroSectionImages.map((image) => ({ imageURL: image.url, imageAlt: image?.altText })) : []}
+            /> */}
+
+            <HeroSectionBookingWidget
+                imageList={[]}
             />
 
-            {/* Key features */}
-            <FeatureGrid features={features} />
+            <div className="flex flex-col items-center space-y-10 md:space-y-16 w-full px-1 mx-auto md:w-[85%]">
+                {/* Key features */}
+                <FeatureGrid features={features} className="min-h-[75vh]"/>
+                <HorizontalDivider className="w-full border-gray-600 my-10" />
 
-            {/* Suggested tours from API */}
-            <TourSuggestions tours={suggestedTours} />
+                {/* Hotel deals */}
+                <HotelDeals className="min-h-[75vh]"/>
+                <HorizontalDivider className="w-full border-gray-600 my-10" />
 
-            {/* Build your tour CTA */}
-            <BuildTourCTA />
+                {/* Transport tickets */}
+                <TransportTickets tickets={tickets} className="min-h-[75vh]" />
+                <HorizontalDivider className="w-full border-gray-600 my-10" />
 
-            {/* Hotel deals */}
-            <HotelDeals />
+                {/* Suggested tours from API */}
+                <TourSuggestions tours={suggestedTours} className="min-h-[75vh]"/>
+                <HorizontalDivider className="w-full border-gray-600 my-10" />
 
-            {/* Transport tickets */}
-            <TransportTickets tickets={tickets} />
+                {/* Community: find tour buddies */}
+                <CommunitySection buddies={buddies} className="min-h-[75vh]"/>
+                <HorizontalDivider className="w-full border-gray-600 my-10" />
 
-            {/* Community: find tour buddies */}
-            <CommunitySection buddies={buddies} />
+                {/* SECTIONS ON GUIDES, WALLETS, & DEALS*/}
 
-            {/* Testimonials */}
-            <Testimonials items={testimonials} />
+                {/* Testimonials */}
+                <Testimonials items={testimonials} className="min-h-[75vh]"/>
+                <HorizontalDivider className="w-full border-gray-600 my-10" />
 
-            {/* Newsletter */}
-            <NewsletterSection />
-
-            {/* Optional bottom hero strip if provided */}
-            {bottomHeroSectionImages?.length > 0 && (
-                <HeroSectionImageViewer
-                    className="md:rounded-xl bg-gray-800/60 md:w-[110%]"
-                    imageList={bottomHeroSectionImages.map((image) => ({ imageURL: image.url, imageAlt: image?.altText }))}
-                />
-            )}
+                {/* Newsletter */}
+                <NewsletterSection className="min-h-[50vh]"/>
+            </div>
         </div>
     );
 };

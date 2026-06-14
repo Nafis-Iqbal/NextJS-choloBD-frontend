@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export const Logo = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : {textSize?: string, position?: string}) => {
     return (
-        <div className={`md:w-fit ${position} md:p-4 text-center bg-[#0F0F0F] ${textSize} text-[#00FF99] font-satisfy rounded-sm`}>
+        <div className={`md:w-fit ${position} md:p-4 text-center ${textSize} font-satisfy rounded-sm`} style={{backgroundColor: 'var(--theme-deep-green)', color: 'var(--theme-teal)'}}>
             Cholo BD!
         </div>
     );
@@ -12,12 +12,14 @@ export const Logo = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : 
 
 export const NextImage = ({
     className,
+    style,
     priority = false,
     src,
     alt,
     nextImageClassName = "object-cover"
 }: {
     className?: string;
+    style?: React.CSSProperties;
     priority?: boolean;
     src: string | null;
     alt: string;
@@ -30,13 +32,14 @@ export const NextImage = ({
     );
 
     return (
-        <div className={`relative ${className}`}>
+        <div className={`relative overflow-hidden ${className}`} style={style}>
             <Image
                 className={nextImageClassName}
                 src={imgSrc}
                 alt={alt}
                 fill
                 priority={priority}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 100vw"
                 onError={() => {
                     setImgSrc(FALLBACK_SRC);
                 }}
@@ -47,27 +50,27 @@ export const NextImage = ({
 
 export const HorizontalDivider = ({className} : {className?: string}) => {
     return (
-        <hr className={`border-t border-gray-300 my-4 ${className}`} />
+        <hr className={`border-t my-4 ${className}`} style={{borderColor: 'var(--theme-deep-green)'}} />
     );
 }
 
 export const HorizontalDividerWithText = ({className, children} : {className?: string, children: React.ReactNode}) => {
     return (
         <div className={`flex my-4 items-center ${className}`}>
-            <hr className="flex-grow border-t border-gray-300"/>
-            <span className="mx-4 text-white">{children}</span>
-            <hr className="flex-grow border-t border-gray-300"/>  
+            <hr className="flex-grow border-t" style={{borderColor: 'var(--theme-deep-green)'}}/>
+            <span className="mx-4 theme-text" style={{color: 'var(--theme-text)'}}>{children}</span>
+            <hr className="flex-grow border-t" style={{borderColor: 'var(--theme-deep-green)'}}/>  
         </div> 
     );
 }
 
 export const VerticalDivider = ({ className = "", height = "h-full" }: {className?: string, height?: string}) => (
-  <div className={`border-l border-gray-300 ${height} ${className}`} />
+  <div className={`border-l ${height} ${className}`} style={{borderColor: 'var(--theme-deep-green)'}} />
 );
 
 const DivGap = ({customHeightGap = "h-[50px]"} : {customHeightGap?: string}) => {
     return(
-        <div className={customHeightGap}></div>
+        <div className={`bg-transparent! ${customHeightGap}`}></div>
     );
 }
 

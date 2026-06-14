@@ -25,38 +25,38 @@ export const RoomTypeStatsSection: React.FC<{ roomTypes: HotelRoomType[]; classN
 
   return (
     <section className={`mb-8 ${className}`}>
-      <h2 className="text-2xl font-bold text-white mb-6">Room Type Statistics</h2>
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
+      <h2 className="text-2xl font-bold theme-text mb-6">Room Type Statistics</h2>
+      <div className="theme-card rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-700/70 border-b border-gray-600">
-              <tr className="">
-                <th className="px-6 py-3  text-white font-semibold">Room Type</th>
-                <th className="px-6 py-3  text-white font-semibold">Total</th>
-                <th className="px-6 py-3  text-white font-semibold">Occupied</th>
-                <th className="px-6 py-3  text-white font-semibold">Available</th>
-                <th className="px-6 py-3  text-white font-semibold">Occupancy %</th>
+            <thead className="bg-inherit" style={{ backgroundColor: 'var(--theme-section-bg)', borderBottom: '1px solid var(--theme-deep-green)' }}>
+              <tr>
+                <th className="px-6 py-3 theme-text font-semibold">Room Type</th>
+                <th className="px-6 py-3 theme-text font-semibold">Total</th>
+                <th className="px-6 py-3 theme-text font-semibold">Occupied</th>
+                <th className="px-6 py-3 theme-text font-semibold">Available</th>
+                <th className="px-6 py-3 theme-text font-semibold">Occupancy %</th>
               </tr>
             </thead>
             <tbody>
               {roomTypeStats.map((roomType) => (
                 <tr
                   key={roomType.type}
-                  className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors text-center"
+                  className="text-center" style={{ borderBottom: '1px solid var(--theme-deep-green)' }}
                 >
-                  <td className="px-6 py-3 text-white font-medium">{roomType.type}</td>
-                  <td className="px-6 py-3 text-gray-300">{roomType.count}</td>
-                  <td className="px-6 py-3 text-orange-400">{roomType.occupied}</td>
-                  <td className="px-6 py-3 text-green-400">{roomType.available}</td>
+                  <td className="px-6 py-3 theme-text font-medium">{roomType.type}</td>
+                  <td className="px-6 py-3 theme-text-muted">{roomType.count}</td>
+                  <td className="px-6 py-3 theme-text-teal">{roomType.occupied}</td>
+                  <td className="px-6 py-3 theme-text-teal">{roomType.available}</td>
                   <td className="px-6 py-3">
                     <div className="flex items-center justify-center gap-2">
-                      <div className="w-16 h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div className="w-16 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
                         <div
-                          className="h-full bg-teal-500"
-                          style={{ width: `${roomType.occupancyRate}%` }}
+                          className="h-full"
+                          style={{ width: `${roomType.occupancyRate}%`, backgroundColor: 'var(--theme-teal)' }}
                         />
                       </div>
-                      <span className="text-white text-sm font-medium">
+                      <span className="theme-text text-sm font-medium">
                         {roomType.occupancyRate.toFixed(1)}%
                       </span>
                     </div>

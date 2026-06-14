@@ -11,7 +11,7 @@ export type Stats = {
 // Stats Overview Section
 export const StatsOverview: React.FC<{ stats: Stats; className?: string }> = ({ stats, className }) => (
   <section className={`mb-8 ${className || ''}`}>
-    <h2 className="text-2xl font-bold text-white mb-6">Your Stats</h2>
+    <h2 className="text-2xl font-bold theme-text mb-6">Your Stats</h2>
 
     <PlaceholderFeatureWarning moduleName="User Statistics Overview" />
 
@@ -40,11 +40,19 @@ export const StatsOverview: React.FC<{ stats: Stats; className?: string }> = ({ 
       ].map((stat) => (
         <div
           key={stat.label}
-          className="bg-linear-to-br from-teal-900/40 to-teal-700/20 border border-teal-600/50 rounded-xl p-6 hover:border-teal-500 transition-colors"
+          className="rounded-xl p-6 transition-colors border"
+          style={{
+            backgroundColor: `color-mix(in srgb, var(--theme-card-bg) 60%, var(--theme-teal) 5%)`,
+            borderColor: `var(--theme-deep-green)`,
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = `var(--theme-teal)`)}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = `var(--theme-deep-green)`)}
         >
           <div className="text-4xl mb-2">{stat.icon}</div>
-          <div className="text-3xl font-bold text-teal-400">{stat.value}</div>
-          <div className="text-sm text-gray-300 mt-1">{stat.label}</div>
+          <div className="text-3xl font-bold" style={{ color: `var(--theme-teal)` }}>
+            {stat.value}
+          </div>
+          <div className="text-sm theme-text-subtle mt-1">{stat.label}</div>
         </div>
       ))}
     </div>

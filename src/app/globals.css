@@ -1,112 +1,360 @@
 @import "tailwindcss";
 
 @layer components {
+    /* === Global Buttons — driven by theme variables === */
     .green-button {
-        @apply bg-emerald-600 text-white px-4 py-2 rounded;
-        @apply hover:bg-emerald-500 hover:cursor-pointer;
+        background-color: var(--theme-teal);
+        color: white;
+        @apply px-4 py-2 rounded;
+        transition: background-color 0.15s;
+    }
+    .green-button:hover {
+        background-color: var(--theme-teal-hover);
+        @apply cursor-pointer;
     }
 
     .green-underline-button {
         @apply bg-inherit;
-        @apply text-white;
-        @apply hover:text-emerald-500 hover:underline hover:cursor-pointer;
+        color: var(--theme-teal);
+    }
+    .green-underline-button:hover {
+        color: var(--theme-teal-hover);
+        @apply underline cursor-pointer;
     }
 
-    .bg-section{
-        @apply bg-gray-700; /* or any Tailwind bg utility */
-        @apply border-[#00FF994D];
-        @apply border-1;
+    /* === Theme-aware Input Styles === */
+    input[style*="--theme"], 
+    textarea[style*="--theme"] {
+        transition: background-color 0.15s, color 0.15s, border-color 0.15s;
     }
 
-    .bg-sub-section{
-        @apply bg-gray-800; /* or any Tailwind bg utility */
-        @apply border-[#00FF994D];
+    input[style*="--theme"]:focus, 
+    textarea[style*="--theme"]:focus {
+        outline: 2px solid var(--theme-teal);
+        outline-offset: 1px;
     }
 
-    .bg-title{
-        @apply bg-gray-800; /* or any Tailwind bg utility */
-        @apply border-[#00FF994D];
+    input[style*="--theme"]::placeholder,
+    textarea[style*="--theme"]::placeholder {
+        color: var(--theme-text-subtle);
     }
 
-    .bg-header{
-        @apply bg-gray-800; /* or any Tailwind bg utility */
-        @apply border-[#00FF994D];
+    /* =====================================================
+       THEME UTILITY CLASSES
+       All colors are driven by CSS variables in :root.
+       To restyle the entire site, only edit :root values.
+       ===================================================== */
+
+    /* --- Backgrounds --- */
+    .theme-section {
+        background-color: var(--theme-section-bg);
+        border: 1px solid var(--theme-deep-green);
     }
 
-    .bg-sub-header{
-        @apply bg-gray-800; /* or any Tailwind bg utility */
-        @apply border-[#00FF994D];
+    .theme-card {
+        background-color: var(--theme-card-bg);
+        border: 1px solid var(--theme-deep-green);
+    }
+
+    /* --- Buttons --- */
+    .theme-btn-teal {
+        background-color: var(--theme-teal);
+        color: white;
+        transition: background-color 0.15s;
+    }
+    .theme-btn-teal:hover {
+        background-color: var(--theme-teal-hover);
+        cursor: pointer;
+    }
+
+    /* --- Text --- */
+    .theme-text        { color: var(--theme-text); }
+    .theme-text-muted  { color: var(--theme-text-muted); }
+    .theme-text-subtle { color: var(--theme-text-subtle); }
+    .theme-text-teal   { color: var(--theme-teal); }
+    .theme-star        { color: var(--theme-star); }
+
+    /* --- Borders / Outlines --- */
+    .theme-outline      { border: 1px solid var(--theme-deep-green); }
+    .theme-outline-teal { border: 1px solid var(--theme-teal); }
+
+    /* --- Decorative fills --- */
+    .theme-avatar      { background-color: var(--theme-teal); }
+    .theme-placeholder { background-color: var(--theme-teal); }
+    .theme-red-dot     { background-color: var(--theme-red); }
+
+    /* --- Input fields --- */
+    .theme-input {
+        background-color: var(--theme-input-bg);
+        color: var(--theme-text);
+        border: 1px solid var(--theme-deep-green);
+        border-radius: 0.5rem;
+    }
+    .theme-input::placeholder { color: var(--theme-text-subtle); }
+    .theme-input:focus-visible { outline: 2px solid var(--theme-teal); outline-offset: 1px; }
+
+    /* --- Legacy section class aliases (mapped to theme vars) --- */
+    .bg-section     { background-color: var(--theme-section-bg); border: 1px solid var(--theme-deep-green); }
+    .bg-sub-section { background-color: var(--theme-card-bg);    border: 1px solid var(--theme-deep-green); }
+    .bg-title       { background-color: var(--theme-section-bg); }
+    .bg-header      { background-color: var(--theme-section-bg); }
+    .bg-sub-header  { background-color: var(--theme-card-bg); }
+
+    /* --- Structural / Navigation --- */
+    .theme-nav {
+        background-color: var(--theme-teal);
+        color: white;
+    }
+    .theme-nav-btn {
+        background-color: var(--theme-deep-green);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.25);
+        transition: filter 0.15s;
+    }
+    .theme-nav-btn:hover { filter: brightness(1.2); cursor: pointer; }
+
+    .theme-sidebar-header {
+        background-color: var(--theme-teal);
+        color: white;
+        border-bottom: 1px solid var(--theme-deep-green);
+    }
+    .theme-footer {
+        background-color: var(--theme-teal);
+        border-top: 2px solid var(--theme-deep-green);
+        color: white;
+    }
+    .theme-dropdown {
+        background-color: white;
+        border: 1px solid var(--theme-deep-green);
+        color: var(--theme-text);
     }
 }
 
 @layer base {
   div {
-    @apply bg-inherit; /* or any Tailwind bg utility */
-    @apply border-[#00FF99];
-    @apply text-gray-100;
-  }
-
-  section, button {
-    @apply bg-gray-800; /* or any Tailwind bg utility */
-    @apply border-[#00FF994D]
+    @apply bg-inherit;
+    border-color: var(--theme-deep-green);
+    color: var(--theme-text);
   }
 
   button {
+    background-color: var(--theme-teal);
+    border-color: var(--theme-border-subtle);
     @apply hover:cursor-pointer;
   }
 
   section {
-    scroll-margin-top: 80px; /* Adjust to your navbar height */
+    scroll-margin-top: 80px;
+    border-color: var(--theme-border-subtle);
+    color: var(--theme-text);
   }
 
   aside {
-    @apply bg-gray-800; /* or any Tailwind bg utility */
-    @apply border-[#00FF99];
+    background-color: var(--theme-section-bg);
+    border-color: var(--theme-deep-green);
   }
 
   th {
     @apply text-base font-normal py-1;
   }
 
-  h1 {
-    @apply text-4xl md:text-6xl
-  }
+  h1 { @apply text-4xl md:text-6xl }
+  h2 { @apply text-3xl md:text-4xl }
+  h3 { @apply text-2xl md:text-3xl font-semibold }
+  h4 { @apply text-xl md:text-2xl }
 
-  h2 {
-    @apply text-3xl md:text-4xl
-  }
-
-  h3 {
-    @apply text-2xl md:text-3xl font-semibold
-  }
-
-  h4 {
-    @apply text-xl md:text-2xl
-  }
-
-  textarea {
-    resize: none;
-  }
-
-  pre {
-    font-family: inherit;
-  }
-
-  label {
-    @apply text-lg md:text-xl
-  }
+  textarea { resize: none; }
+  pre      { font-family: inherit; }
+  label    { @apply text-lg md:text-xl }
 }
 
-:root {
-  --background: #0F0F0F;
-  --foreground: #374151;
+/* =====================================================
+   THEME SYSTEM
+   Three named themes — switch by setting data-theme on <html>:
+     "forest"  (default, current look)
+     "ocean"
+     "dusk"
+
+   To switch theme in JS:
+     document.documentElement.setAttribute('data-theme', 'ocean');
+
+   4 dominant colors per theme:
+     1. bg          — dominant white/light background
+     2. primary     — main structural color (navbar, footer, large buttons)
+     3. deep        — outlines, contrast accents, logo buttons
+     4. accent      — small UI pops (arrows, logo badge, small buttons, dots)
+   ===================================================== */
+
+/* ── THEME 1: Forest (default) ─────────────────────── */
+/* White · Teal Green · Deep Green · Brick Red          */
+:root,
+[data-theme="forest"] {
+  --background: #FFFFFF;
+  --foreground: #1C2B25;
+
+  --theme-bg:            #FFFFFF;
+  --theme-section-bg:    #E6F3EE;
+  --theme-card-bg:       #C8E6DC;
+
+  --theme-teal:          #2A9D8F;   /* primary */
+  --theme-teal-hover:    #1F7A6E;
+
+  --theme-deep-green:    #1F4E3C;   /* deep */
+  --theme-border-subtle: rgba(31, 78, 60, 0.25);
+
+  --theme-text:          #1C2B25;
+  --theme-text-muted:    #4D6B5E;
+  --theme-text-subtle:   #7D9B8E;
+
+  --theme-star:          #D4A017;
+  --theme-input-bg:      #EEF7F3;
 }
-/* --foreground: #00FF99; */
+
+/* ── THEME 3: Dusk ──────────────────────────────────── */
+/* White · Black Buttons · Light Green Text · Muted Accents       */
+[data-theme="dusk"] {
+  --background: #FFFFFF;
+  --foreground: #4A7C2C;
+
+  --theme-bg:            #FFFFFF;  /* pure white dominant */
+  --theme-section-bg:    #F0F0F0;  /* light grey sections */
+  --theme-card-bg:       #E0E0E0;  /* medium grey cards */
+
+  --theme-teal:          #000000;   /* primary — black buttons */
+  --theme-teal-hover:    #1A1A1A;
+
+  --theme-deep-green:    #000000;   /* deep — black outlines */
+  --theme-border-subtle: rgba(0, 0, 0, 0.25);
+
+  --theme-text:          #4A7C2C;   /* light green text */
+  --theme-text-muted:    #6B9D3C;   /* muted light green */
+  --theme-text-subtle:   #9BB95C;   /* subtle light green */
+
+  --theme-star:          #D4A017;
+  --theme-input-bg:      #FEF7EC;
+}
+
+[data-theme="crimson"] {
+  --background: #FFFFFF;
+  --foreground: #3A2525;
+
+  --theme-bg:            #FFFFFF;
+  --theme-section-bg:    #FFF8F8;
+  --theme-card-bg:       #FFFCFC;
+
+  --theme-teal:          #E67A7A;
+  --theme-teal-hover:    #D96868;
+
+  --theme-deep-green:    #8A5E5E;
+  --theme-border-subtle: rgba(230, 122, 122, 0.10);
+
+  --theme-text:          #3A2525;
+  --theme-text-muted:    #846B6B;
+  --theme-text-subtle:   #B5A0A0;
+
+  --theme-star:          #E0B84D;
+  --theme-input-bg:      #FFFFFF;
+}
+
+[data-theme="violet"] {
+  --background: #FEFDFF;
+  --foreground: #2D2540;
+
+  --theme-bg:            #FEFDFF;
+  --theme-section-bg:    #F7F3FF;
+  --theme-card-bg:       #FBF9FF;
+
+  --theme-teal:          #9670FF;
+  --theme-teal-hover:    #835AF5;
+
+  --theme-deep-green:    #5F4B8A;
+  --theme-border-subtle: rgba(150, 112, 255, 0.12);
+
+  --theme-text:          #2D2540;
+  --theme-text-muted:    #70668A;
+  --theme-text-subtle:   #A199BA;
+
+  --theme-star:          #F4B942;
+  --theme-input-bg:      #FFFFFF;
+}
+
+[data-theme="amber"] {
+  --background: #FFFDF8;
+  --foreground: #33280F;
+
+  --theme-bg:            #FFFDF8;
+  --theme-section-bg:    #FFF6DE;
+  --theme-card-bg:       #FFF9EA;
+
+  --theme-teal:          #C58B00;
+  --theme-teal-hover:    #A97400;
+
+  --theme-deep-green:    #6A4D00;
+  --theme-border-subtle: rgba(197, 139, 0, 0.15);
+
+  --theme-text:          #33280F;
+  --theme-text-muted:    #66553A;
+  --theme-text-subtle:   #9A896A;
+
+  --theme-star:          #D4A017;
+  --theme-input-bg:      #FFFFFF;
+}
+
+[data-theme="rose"] {
+  --background: #FFF9FB;
+  --foreground: #311D27;
+
+  --theme-bg:            #FFF9FB;
+  --theme-section-bg:    #FFEFF5;
+  --theme-card-bg:       #FFF5F8;
+
+  --theme-teal:          #E05297;
+  --theme-teal-hover:    #C53F82;
+
+  --theme-deep-green:    #7A3D5E;
+  --theme-border-subtle: rgba(224, 82, 151, 0.15);
+
+  --theme-text:          #311D27;
+  --theme-text-muted:    #6B4C5B;
+  --theme-text-subtle:   #A07D8E;
+
+  --theme-star:          #D4A017;
+  --theme-input-bg:      #FFFFFF;
+}
+
+[data-theme="ice-blue"] {
+  --background: #F8FCFF;
+  --foreground: #152635;
+
+  --theme-bg:            #F8FCFF;
+  --theme-section-bg:    #EAF6FF;
+  --theme-card-bg:       #F3FAFF;
+
+  --theme-teal:          #0EA5E9;
+  --theme-teal-hover:    #0284C7;
+
+  --theme-deep-green:    #1E4A66;
+  --theme-border-subtle: rgba(14, 165, 233, 0.15);
+
+  --theme-text:          #152635;
+  --theme-text-muted:    #456278;
+  --theme-text-subtle:   #7B97AD;
+
+  --theme-star:          #F6C344;
+  --theme-input-bg:      #FFFFFF;
+}
 
 html {
   scrollbar-gutter: stable;
   overflow-y: scroll;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-teal) var(--theme-section-bg);
 }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--theme-section-bg); }
+::-webkit-scrollbar-thumb { background: var(--theme-teal); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--theme-teal-hover); }
 
 body {
   background: var(--background);

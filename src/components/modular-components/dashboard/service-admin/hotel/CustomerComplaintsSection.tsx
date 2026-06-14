@@ -85,7 +85,7 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
       case "pending":
         return "bg-red-600/30 text-red-300 border border-red-600/50";
       case "in-progress":
-        return "bg-yellow-600/30 text-yellow-300 border border-yellow-600/50";
+        return "bg-[color:var(--theme-star)] bg-opacity-20 text-[color:var(--theme-star)]" + " " + "border" + " " + "border-[color:var(--theme-star)]/50";
       case "resolved":
         return "bg-green-600/30 text-green-300 border border-green-600/50";
     }
@@ -94,9 +94,9 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
   const getPriorityColor = (priority: Complaint["priority"]) => {
     switch (priority) {
       case "low":
-        return "text-blue-400";
+        return "theme-text-teal";
       case "medium":
-        return "text-yellow-400";
+        return "text-[color:var(--theme-star)]";
       case "high":
         return "text-red-400";
     }
@@ -108,7 +108,7 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
 
   return (
     <section className={`mb-8 ${className}`}>
-      <h2 className="text-2xl font-bold text-white mb-6">Customer Complaints</h2>
+      <h2 className="text-2xl font-bold theme-text mb-6">Customer Complaints</h2>
 
       <PlaceholderFeatureWarning moduleName="Customer Complaints Management" />
 
@@ -116,25 +116,26 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
         {complaints.map((complaint) => (
           <div
             key={complaint.id}
-            className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+            className="theme-card rounded-lg p-4 transition-colors"
+            style={{ borderColor: 'var(--theme-teal)' }}
           >
             <div className="flex flex-col space-x-4 md:flex-row md:items-start md:justify-between">
 
               <div className="flex-1">
                 <div className="flex items-start gap-3">
                   <div className="flex-1">
-                    <p className="text-white font-semibold">{complaint.guestName}</p>
-                    <p className="text-gray-400 text-xs">{complaint.email}</p>
+                    <p className="theme-text font-semibold">{complaint.guestName}</p>
+                    <p className="theme-text-subtle text-xs">{complaint.email}</p>
                     <p className={`text-sm font-medium mt-2 ${getPriorityColor(complaint.priority)}`}>
                       🚨 {complaint.priority.toUpperCase()} - {complaint.complaintType}
                     </p>
-                    <p className="text-gray-400 text-sm mt-2">{complaint.description}</p>
+                    <p className="theme-text-subtle text-sm mt-2">{complaint.description}</p>
                     {complaint.resolution && (
-                      <p className="text-teal-400 text-sm mt-2">
+                      <p className="theme-text-teal text-sm mt-2">
                         ✓ Resolution: {complaint.resolution}
                       </p>
                     )}
-                    <p className="text-gray-500 text-xs mt-2">{complaint.reportedAt}</p>
+                    <p className="theme-text-subtle text-xs mt-2">{complaint.reportedAt}</p>
                   </div>
 
                   <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(complaintStatus[complaint.id] || complaint.status)}`}>
@@ -147,15 +148,16 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
                 onClick={() =>
                   setSelectedComplaint(selectedComplaint === complaint.id ? null : complaint.id)
                 }
-                className="mt-3 md:mt-0 px-4 py-1 rounded-lg bg-gray-700 hover:bg-green-600 text-white text-sm"
+                className="mt-3 md:mt-0 px-4 py-1 rounded-lg theme-text text-sm"
+                style={{ backgroundColor: 'var(--theme-card-bg)', color: 'var(--theme-text)' }}
               >
                 {selectedComplaint === complaint.id ? "Hide" : "Update"}
               </button>
             </div>
 
             {selectedComplaint === complaint.id && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <p className="text-gray-300 text-sm mb-3">Update Status:</p>
+              <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--theme-deep-green)' }}>
+                <p className="theme-text-muted text-sm mb-3">Update Status:</p>
 
                 <div className="flex gap-2 flex-wrap mb-4">
                   {(["pending", "in-progress", "resolved"] as Complaint["status"][]).map((status) => (
@@ -164,9 +166,14 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
                       onClick={() => handleStatusUpdate(complaint.id, status)}
                       className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                         (complaintStatus[complaint.id] || complaint.status) === status
-                          ? "bg-teal-600 text-white"
-                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                          ? "theme-btn-teal"
+                          : "theme-text-muted"
                       }`}
+                      style={{
+                        backgroundColor: (complaintStatus[complaint.id] || complaint.status) === status 
+                          ? 'var(--theme-teal)' 
+                          : 'var(--theme-card-bg)'
+                      }}
                     >
                       {status === "in-progress" ? "In Progress" : status.charAt(0).toUpperCase() + status.slice(1)}
                     </button>
@@ -175,11 +182,11 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
 
                 <textarea
                   placeholder="Add resolution notes..."
-                  className="w-full px-4 py-2 rounded-lg bg-gray-700 text-white placeholder-gray-400 text-sm"
+                  className="w-full px-4 py-2 rounded-lg theme-input text-sm"
                   rows={3}
                 />
 
-                <button className="mt-3 w-full py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-medium">
+                <button className="mt-3 w-full py-2 theme-btn-teal rounded-lg font-medium">
                   Save Update
                 </button>
               </div>

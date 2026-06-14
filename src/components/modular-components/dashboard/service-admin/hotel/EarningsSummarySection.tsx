@@ -32,13 +32,13 @@ export const EarningsSummarySection = ({hotelId, className} : {hotelId: string; 
   const getStatusColor = (status: BookingStatus) => {
     switch (status) {
       case BookingStatus.CONFIRMED:
-        return "bg-green-600/30 text-green-300";
+        return { className: "px-3 py-1 rounded-full text-xs font-medium", style: { color: 'var(--theme-teal)', backgroundColor: 'rgba(42, 157, 143, 0.2)' } };
       case BookingStatus.PENDING:
-        return "bg-yellow-600/30 text-yellow-300";
+        return { className: "px-3 py-1 rounded-full text-xs font-medium", style: { color: 'var(--theme-star)', backgroundColor: 'rgba(212, 160, 23, 0.2)' } };
       case BookingStatus.CANCELLED:
-        return "bg-red-600/30 text-red-300";
+        return { className: "px-3 py-1 rounded-full text-xs font-medium text-red-400", style: { backgroundColor: 'rgba(239, 68, 68, 0.3)' } };
       default:
-        return "bg-gray-600/30 text-gray-300";
+        return { className: "px-3 py-1 rounded-full text-xs font-medium theme-text-muted", style: { backgroundColor: 'var(--theme-card-bg)' } };
     }
   };
 
@@ -52,46 +52,46 @@ export const EarningsSummarySection = ({hotelId, className} : {hotelId: string; 
   if (isLoading) {
     return (
       <section className="mb-8">
-        <h2 className="text-2xl font-bold text-white mb-6">Earnings Summary</h2>
-        <p className="text-gray-400">Loading bookings...</p>
+        <h2 className="text-2xl font-bold theme-text mb-6">Earnings Summary</h2>
+        <p className="theme-text-subtle">Loading bookings...</p>
       </section>
     );
   }
 
   return (
     <section className={`mb-8 ${className}`}>
-      <h2 className="text-2xl font-bold text-white mb-6">Earnings Summary</h2>
+      <h2 className="text-2xl font-bold theme-text mb-6">Earnings Summary</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-linear-to-br from-green-900/40 to-green-700/20 border border-green-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Total Completed</p>
-          <p className="text-3xl font-bold text-green-400 mt-2">
+        <div className="theme-card rounded-xl p-4">
+          <p className="theme-text-muted text-sm">Total Completed</p>
+          <p className="text-3xl font-bold theme-text-teal mt-2">
             ৳ {totalEarnings.toLocaleString()}
           </p>
         </div>
-        <div className="bg-linear-to-br from-yellow-900/40 to-yellow-700/20 border border-yellow-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Pending Amount</p>
-          <p className="text-3xl font-bold text-yellow-400 mt-2">
+        <div className="theme-card rounded-xl p-4">
+          <p className="theme-text-muted text-sm">Pending Amount</p>
+          <p className="text-3xl font-bold mt-2" style={{ color: 'var(--theme-star)' }}>
             ৳ {pendingEarnings.toLocaleString()}
           </p>
         </div>
-        <div className="bg-linear-to-br from-blue-900/40 to-blue-700/20 border border-blue-600/50 rounded-xl p-4">
-          <p className="text-gray-300 text-sm">Total Bookings</p>
-          <p className="text-3xl font-bold text-blue-400 mt-2">{bookings.length}</p>
+        <div className="theme-card rounded-xl p-4">
+          <p className="theme-text-muted text-sm">Total Bookings</p>
+          <p className="text-3xl font-bold theme-text-teal mt-2">{bookings.length}</p>
         </div>
       </div>
 
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
+      <div className="theme-card rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-700/70 border-b border-gray-600">
-              <tr className="">
-                <th className="px-6 py-3 text-white font-semibold">Guest Name</th>
-                <th className="px-6 py-3 text-white font-semibold">Check-in</th>
-                <th className="px-6 py-3 text-white font-semibold">Check-out</th>
-                <th className="px-6 py-3 text-white font-semibold">Nights</th>
-                <th className="px-6 py-3 text-white font-semibold">Amount</th>
-                <th className="px-6 py-3 text-white font-semibold">Status</th>
+            <thead className="bg-inherit" style={{ backgroundColor: 'var(--theme-section-bg)', borderBottom: '1px solid var(--theme-deep-green)' }}>
+              <tr>
+                <th className="px-6 py-3 theme-text font-semibold">Guest Name</th>
+                <th className="px-6 py-3 theme-text font-semibold">Check-in</th>
+                <th className="px-6 py-3 theme-text font-semibold">Check-out</th>
+                <th className="px-6 py-3 theme-text font-semibold">Nights</th>
+                <th className="px-6 py-3 theme-text font-semibold">Amount</th>
+                <th className="px-6 py-3 theme-text font-semibold">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -104,18 +104,19 @@ export const EarningsSummarySection = ({hotelId, className} : {hotelId: string; 
                   return (
                     <tr
                       key={booking.id}
-                      className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors text-center"
+                      className="text-center" style={{ borderBottom: '1px solid var(--theme-deep-green)' }}
                     >
-                      <td className="px-6 py-3 text-white">{booking.user?.firstName || booking.guestName}</td>
-                      <td className="px-6 py-3 text-gray-300 text-sm">{checkInDate}</td>
-                      <td className="px-6 py-3 text-gray-300 text-sm">{checkOutDate}</td>
-                      <td className="px-6 py-3 text-gray-300">{nights}</td>
-                      <td className="px-6 py-3 text-white font-semibold">
+                      <td className="px-6 py-3 theme-text">{booking.user?.firstName || booking.guestName}</td>
+                      <td className="px-6 py-3 theme-text-muted text-sm">{checkInDate}</td>
+                      <td className="px-6 py-3 theme-text-muted text-sm">{checkOutDate}</td>
+                      <td className="px-6 py-3 theme-text-muted">{nights}</td>
+                      <td className="px-6 py-3 theme-text font-semibold">
                         ৳ {booking.totalPrice.toLocaleString()}
                       </td>
                       <td className="px-6 py-3">
                         <span
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}
+                          className={getStatusColor(booking.status).className}
+                          style={getStatusColor(booking.status).style}
                         >
                           {booking.status === BookingStatus.CONFIRMED
                             ? "✓ Confirmed"
@@ -129,7 +130,7 @@ export const EarningsSummarySection = ({hotelId, className} : {hotelId: string; 
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center text-gray-400">
+                  <td colSpan={6} className="px-6 py-8 text-center theme-text-subtle">
                     No bookings found
                   </td>
                 </tr>

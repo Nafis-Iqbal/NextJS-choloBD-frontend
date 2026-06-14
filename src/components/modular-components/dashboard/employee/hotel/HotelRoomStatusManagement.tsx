@@ -22,17 +22,27 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
   );
 
   const getStatusColor = (status: HotelRoomStatus) => {
+    const baseStyle = {
+      paddingLeft: '0.75rem',
+      paddingRight: '0.75rem',
+      paddingTop: '0.25rem',
+      paddingBottom: '0.25rem',
+      borderRadius: '9999px',
+      fontSize: '0.75rem',
+      fontWeight: '500' as const,
+      border: `1px solid`,
+    };
     switch (status) {
       case HotelRoomStatus.AVAILABLE:
-        return "bg-green-600/30 text-green-300 border border-green-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(40, 167, 69, 0.3)', color: 'rgb(40, 167, 69)', borderColor: 'rgba(40, 167, 69, 0.5)' };
       case HotelRoomStatus.BOOKED:
-        return "bg-yellow-600/30 text-yellow-300 border border-yellow-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(255, 193, 7, 0.3)', color: 'rgb(255, 193, 7)', borderColor: 'rgba(255, 193, 7, 0.5)' };
       case HotelRoomStatus.OUT_OF_SERVICE:
-        return "bg-indigo-600/30 text-indigo-300 border border-indigo-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(102, 51, 153, 0.3)', color: 'rgb(102, 51, 153)', borderColor: 'rgba(102, 51, 153, 0.5)' };
       case HotelRoomStatus.MAINTENANCE:
-        return "bg-red-600/30 text-red-300 border border-red-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(220, 53, 69, 0.3)', color: 'rgb(220, 53, 69)', borderColor: 'rgba(220, 53, 69, 0.5)' };
       default:
-        return "bg-gray-600/30 text-gray-300 border border-gray-600/50";
+        return { ...baseStyle, backgroundColor: 'rgba(108, 117, 125, 0.3)', color: 'rgb(108, 117, 125)', borderColor: 'rgba(108, 117, 125, 0.5)' };
     }
   };
 
@@ -54,27 +64,28 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
 
   return (
     <section className={`mb-8 ${className}`}>
-      <h2 className="text-2xl font-bold text-white mb-4">Room Status Management</h2>
+      <h2 className="text-2xl font-bold mb-4" style={{color: 'var(--theme-text)'}}>Room Status Management</h2>
       <div className="space-y-3">
         {rooms.map((room) => (
           <div
             key={room.id}
-            className="bg-gray-800/70 border border-gray-700 rounded-lg p-4 hover:border-teal-600 transition-colors"
+            className="rounded-lg p-4 transition-colors"
+            style={{backgroundColor: 'var(--theme-card-bg)', borderColor: 'var(--theme-deep-green)', borderWidth: '1px'}}
           >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-white font-semibold text-lg">
+                  <h3 className="font-semibold text-lg" style={{color: 'var(--theme-text)'}}>
                     Room {room.roomNumber}
                   </h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedRoomStatus[room.id] || room.roomStatus)}`}>
+                  <span style={getStatusColor(selectedRoomStatus[room.id] || room.roomStatus)}>
                     {(() => {
                       const status = selectedRoomStatus[room.id] || room.roomStatus || "Fix BUG";
                       return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
                     })()}
                   </span>
                 </div>
-                <p className="text-gray-400 text-sm mt-1">
+                <p className="text-sm mt-1" style={{color: 'var(--theme-text-muted)'}}>
                   {room.roomType ? `${room.roomType}` : "Standard Room"}
                 </p>
               </div>
@@ -84,7 +95,8 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
                   onClick={() =>
                     setExpandedRoom(expandedRoom === room.id ? null : room.id)
                   }
-                  className="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm"
+                  className="px-4 py-2 rounded-lg text-sm"
+                  style={{backgroundColor: 'var(--theme-section-bg)', color: 'var(--theme-text)'}}
                 >
                   {expandedRoom === room.id ? "Hide" : "Update"}
                 </button>
@@ -92,34 +104,35 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
             </div>
 
             {expandedRoom === room.id && (
-              <div className="mt-4 pt-4 border-t border-gray-700">
-                <p className="text-gray-300 text-sm mb-3">Change Room Status:</p>
+              <div className="mt-4 pt-4" style={{borderTopColor: 'var(--theme-deep-green)', borderTopWidth: '1px'}}>
+                <p className="text-sm mb-3" style={{color: 'var(--theme-text-muted)'}}>Change Room Status:</p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {[HotelRoomStatus.AVAILABLE, HotelRoomStatus.BOOKED, HotelRoomStatus.MAINTENANCE, HotelRoomStatus.OUT_OF_SERVICE].map((status) => (
                     <button
                       key={status}
                       onClick={() => handleStatusUpdate(room.id, status)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        (selectedRoomStatus[room.id] || room.roomStatus) === status
-                          ? "bg-teal-600 text-white"
-                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                      }`}
+                      className="px-3 py-2 rounded-lg text-sm font-medium transition-colors"
+                      style={{
+                        backgroundColor: (selectedRoomStatus[room.id] || room.roomStatus) === status ? 'var(--theme-teal)' : 'var(--theme-section-bg)',
+                        color: (selectedRoomStatus[room.id] || room.roomStatus) === status ? 'white' : 'var(--theme-text-muted)'
+                      }}
                     >
                       {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
                     </button>
                   ))}
                 </div>
                 {saveError && (
-                  <p className="mt-3 text-sm text-red-400">{saveError}</p>
+                  <p className="mt-3 text-sm" style={{color: 'var(--theme-red)'}}>{saveError}</p>
                 )}
                 <button
                   onClick={() => handleSaveStatusChange(room.id)}
                   disabled={savingRoomId === room.id}
-                  className={`mt-3 w-full py-2 rounded-lg font-medium transition-colors ${
-                    savingRoomId === room.id
-                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                      : "bg-teal-600 hover:bg-teal-700 text-white"
-                  }`}
+                  className="mt-3 w-full py-2 rounded-lg font-medium transition-colors"
+                  style={{
+                    backgroundColor: savingRoomId === room.id ? 'var(--theme-section-bg)' : 'var(--theme-teal)',
+                    color: savingRoomId === room.id ? 'var(--theme-text-subtle)' : 'white',
+                    cursor: savingRoomId === room.id ? 'not-allowed' : 'pointer'
+                  }}
                 >
                   {savingRoomId === room.id ? "Saving..." : "Save Status Change"}
                 </button>

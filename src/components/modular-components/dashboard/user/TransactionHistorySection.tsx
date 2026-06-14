@@ -56,8 +56,15 @@ export const TransactionHistorySection: React.FC<{
   if (isLoading) {
     return (
       <section className={`mb-8 ${className || ''}`}>
-        <h2 className="text-2xl font-bold text-white mb-4">Transaction History</h2>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-center text-gray-400">
+        <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>Transaction History</h2>
+        <div 
+          className="rounded-xl p-6 text-center"
+          style={{
+            backgroundColor: 'var(--theme-card-bg)',
+            border: '1px solid var(--theme-deep-green)',
+            color: 'var(--theme-text-subtle)',
+          }}
+        >
           Loading transactions...
         </div>
       </section>
@@ -67,8 +74,15 @@ export const TransactionHistorySection: React.FC<{
   if (!transactions || transactions.length === 0) {
     return (
       <section className={`mb-8 ${className || ''}`}>
-        <h2 className="text-2xl font-bold text-white mb-4">Transaction History</h2>
-        <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 text-center text-gray-400">
+        <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>Transaction History</h2>
+        <div 
+          className="rounded-xl p-6 text-center"
+          style={{
+            backgroundColor: 'var(--theme-card-bg)',
+            border: '1px solid var(--theme-deep-green)',
+            color: 'var(--theme-text-subtle)',
+          }}
+        >
           No transactions found
         </div>
       </section>
@@ -81,40 +95,59 @@ export const TransactionHistorySection: React.FC<{
 
   return (
     <section className={`mb-8 ${className || ''}`}>
-      <h2 className="text-2xl font-bold text-white mb-4">Transaction History</h2>
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl overflow-hidden">
+      <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>Transaction History</h2>
+      <div 
+        className="rounded-xl overflow-hidden"
+        style={{
+          backgroundColor: 'var(--theme-card-bg)',
+          border: '1px solid var(--theme-deep-green)',
+        }}
+      >
         <div className="overflow-x-auto overflow-y-auto max-h-screen md:max-h-[70vh]">
           <table className="w-full">
-            <thead className="bg-gray-700/70 border-b border-gray-600">
+            <thead style={{ backgroundColor: 'var(--theme-section-bg)', borderBottomColor: 'var(--theme-deep-green)' }} className="border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-white font-semibold">Date</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Type</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Description</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Amount</th>
-                <th className="px-6 py-3 text-left text-white font-semibold">Status</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{ color: 'var(--theme-text)' }}>Date</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{ color: 'var(--theme-text)' }}>Type</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{ color: 'var(--theme-text)' }}>Description</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{ color: 'var(--theme-text)' }}>Amount</th>
+                <th className="px-6 py-3 text-left font-semibold" style={{ color: 'var(--theme-text)' }}>Status</th>
               </tr>
             </thead>
             <tbody>
               {paginatedData.map((transaction) => (
                 <tr
                   key={transaction.id}
-                  className="border-b border-gray-700 hover:bg-gray-700/50 transition-colors"
+                  className="border-b transition-colors"
+                  style={{ 
+                    borderBottomColor: 'var(--theme-deep-green)',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-section-bg)'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                 >
-                  <td className="px-6 py-3 text-gray-300 text-sm">{transaction.date}</td>
-                  <td className="px-6 py-3 text-white font-medium">{transaction.type}</td>
-                  <td className="px-6 py-3 text-gray-400 text-sm">{transaction.description}</td>
-                  <td className="px-6 py-3 text-white font-semibold">
+                  <td className="px-6 py-3 text-sm" style={{ color: 'var(--theme-text-muted)' }}>{transaction.date}</td>
+                  <td className="px-6 py-3 font-medium" style={{ color: 'var(--theme-text)' }}>{transaction.type}</td>
+                  <td className="px-6 py-3 text-sm" style={{ color: 'var(--theme-text-subtle)' }}>{transaction.description}</td>
+                  <td className="px-6 py-3 font-semibold" style={{ color: 'var(--theme-text)' }}>
                     ৳ {transaction.amount.toLocaleString()}
                   </td>
                   <td className="px-6 py-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        transaction.status === "completed"
-                          ? "bg-green-600/30 text-green-300"
-                          : transaction.status === "pending"
-                          ? "bg-yellow-600/30 text-yellow-300"
-                          : "bg-red-600/30 text-red-300"
-                      }`}
+                      className="px-3 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: 
+                          transaction.status === "completed"
+                            ? 'rgba(34, 197, 94, 0.2)'
+                            : transaction.status === "pending"
+                            ? 'rgba(234, 179, 8, 0.2)'
+                            : 'rgba(239, 68, 68, 0.2)',
+                        color:
+                          transaction.status === "completed"
+                            ? '#22C55E'
+                            : transaction.status === "pending"
+                            ? '#EAB308'
+                            : '#EF4444',
+                      }}
                     >
                       {transaction.status === "completed"
                         ? "✓ Completed"

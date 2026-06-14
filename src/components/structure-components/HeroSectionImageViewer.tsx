@@ -103,14 +103,14 @@ export const HeroSectionImageViewer = ({ className, imageList }: { className?: s
             </motion.div>
 
             <button
-                className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/40 rounded-full hover:bg-black/60"
+                className="absolute left-2 md:left-4 top-1/2 transform -translate-y-1/2 p-2 bg-[#2A9D8F]/70 rounded-full hover:bg-[#2A9D8F]"
                 onClick={showPreviousImage}
             >
                 <FaAngleDoubleLeft className="text-2xl md:text-3xl text-white" />
             </button>
 
             <button
-                className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 p-2 bg-black/40 rounded-full hover:bg-black/60"
+                className="absolute right-2 md:right-4 top-1/2 transform -translate-y-1/2 p-2 bg-[#2A9D8F]/70 rounded-full hover:bg-[#2A9D8F]"
                 onClick={showNextImage}
             >
                 <FaAngleDoubleRight className="text-2xl md:text-3xl text-white" />

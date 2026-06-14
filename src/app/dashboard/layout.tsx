@@ -39,17 +39,15 @@ export default function DashboardLayout({
     }
 
     return (
-        <section className="flex flex-col min-h-screen">
+        <section className="flex flex-col">
             <header className="relative">
                 <nav>
                     <Navbar/>
                 </nav>
             </header>
-            
-            <DivGap customHeightGap="h-[55px] md:h-[70px]"/>
 
-            <div className="flex border min-h-screen">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 shadow-[0_0_20px_#00FF99] font-sans">
+            <div className="flex border">
+                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 font-sans">
                     <SidebarMenu 
                         className="fixed w-[15%] top-17 left-0" 
                         isPopOutSidebar={false}

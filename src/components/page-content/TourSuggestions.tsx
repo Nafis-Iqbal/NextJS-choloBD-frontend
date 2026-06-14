@@ -4,14 +4,38 @@ import { SectionHeader } from "./SectionHeader";
 
 type Tour = { id: string; name: string; place: string; days: number; price: number; rating: number };
 
-export const TourSuggestions: React.FC<{ tours: Tour[] }> = ({ tours }) => {
+export const TourSuggestions: React.FC<{ tours: Tour[]; className?: string }> = ({ tours, className }) => {
   return (
-    <section className="w-full bg-section p-6 md:p-8 rounded-xl">
+    <section className={`w-full theme-section rounded-xl p-6 md:p-8 scroll-mt-36 ${className}`} id="tours">
       <SectionHeader title="Suggested Tours" subtitle="Handpicked trips for quick getaways and longer escapes" className="mb-6" />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 font-sans">
         {tours.map((t) => (
           <TourSuggestionsCard key={t.id} tour={t} />
         ))}
+      </div>
+
+      <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <SectionHeader
+          title="Build Your Own Tour"
+          subtitle="Pick places, set dates, add hotels and transport — your plan, your style"
+          className="mb-4"
+        />
+
+        <div className="flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4 font-sans">
+          <Link
+            className="px-5 py-2 rounded-md font-semibold hover:scale-110 theme-btn-teal"
+            href="/tour-builder"
+          >
+            Start Building
+          </Link>
+
+          <Link 
+            className="px-5 py-2 rounded-md font-semibold hover:scale-110 theme-btn-teal"
+            href="tour-builder/tours"
+          >
+            Explore Ideas
+          </Link>
+        </div>
       </div>
     </section>
   );
@@ -19,24 +43,24 @@ export const TourSuggestions: React.FC<{ tours: Tour[] }> = ({ tours }) => {
 
 const TourSuggestionsCard = ({tour} : {tour: Tour}) => {
   return (
-    <div className="rounded-xl overflow-hidden bg-gray-800/70 border border-gray-700">
-      <div className="h-32 md:h-40 bg-indigo-700" />
+    <div className="rounded-xl overflow-hidden theme-card">
+      <div className="h-32 md:h-40 theme-placeholder" />
       <div className="flex flex-col p-4 md:p-5">
 
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-white">{tour.name}</h3>
-          <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">{tour.days} days</span>
+          <h3 className="text-lg font-semibold theme-text">{tour.name}</h3>
+          <span className="text-xs px-2 py-1 rounded theme-section theme-text-muted">{tour.days} days</span>
         </div>
 
-        <p className="text-sm text-gray-300 mt-1">{tour.place}</p>
+        <p className="text-sm theme-text-muted mt-1">{tour.place}</p>
 
         <div className="mt-3 flex items-center justify-between">
-          <span className="text-white font-medium">৳ {tour.price.toLocaleString()}</span>
-          <span className="text-yellow-400">{"★".repeat(Math.round(tour.rating))}</span>
+          <span className="theme-text font-medium">৳ {tour.price.toLocaleString()}</span>
+          <span className="theme-star">{"★".repeat(Math.round(tour.rating))}</span>
         </div>
 
         <Link 
-          className="px-2 py-1 mt-4 w-fit rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm"
+          className="px-2 py-1 mt-4 w-fit rounded-lg text-sm theme-btn-teal"
           href={`tour-builder/tours/${tour.id}`}
         >
           View Details

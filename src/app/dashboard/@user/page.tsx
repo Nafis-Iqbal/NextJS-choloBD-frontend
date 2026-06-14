@@ -21,8 +21,8 @@ export default function UserProfileInfoDashboard() {
     console.log("User Detail Data in Dashboard:", userDetailData);
     if (!isAuthenticated || !currentUserId) {
         return (
-            <section className="flex justify-center items-center h-64">
-                <p className="text-gray-400">Loading user information...</p>
+            <section className="flex justify-center items-center h-64 theme-section">
+                <p className="theme-text-subtle">Loading user information...</p>
             </section>
         );
     }
@@ -33,28 +33,28 @@ export default function UserProfileInfoDashboard() {
         <section className="flex flex-col p-2 font-sans" id="dashboard_profile">
             <div className="md:ml-6 flex flex-col space-y-2">
                 <div className="flex space-x-4">
-                    <h3 className="text-green-500">Your Activities and Profile Info</h3>
+                    <h3 className="theme-text-teal">Your Activities and Profile Info</h3>
 
                     <EditButton onClick={() => router.push(`/user_profile/${currentUserId}`)}></EditButton>
                 </div>
                 
-                <p className="text-green-200">Personalize your account info, preferences.</p>
+                <p className="theme-text-subtle">Personalize your account info, preferences.</p>
 
                 <div className="flex flex-col my-8 space-y-5">
-                    <div className="flex relative w-[180px] h-[180px]">
-                        <Image className="bg-gray-100" src={userDetail?.imageUrl || "/NoUserImage.jpeg"}  alt="Profile Picture" fill></Image>
+                    <div className="flex relative w-[180px] h-[180px]" style={{ backgroundColor: 'var(--theme-section-bg)' }}>
+                        <Image className="" src={userDetail?.imageUrl || "/NoUserImage.jpeg"}  alt="Profile Picture" fill></Image>
                     </div>
                     
-                    <p>Known as&nbsp;&nbsp;<span className="text-2xl text-green-300">{userDetail?.userName || 'Guest User'}</span></p>
+                    <p>Known as&nbsp;&nbsp;<span className="text-2xl theme-text-muted">{userDetail?.userName || 'Guest User'}</span></p>
 
-                    <p>Role is&nbsp;&nbsp;<span className="text-3xl text-green-500">{currentUserRole}</span></p>                    
+                    <p>Role is&nbsp;&nbsp;<span className="text-3xl theme-text-teal">{currentUserRole}</span></p>                    
 
-                    <h4 className="text-green-300">Personal Details</h4>
+                    <h4 className="theme-text-teal">Personal Details</h4>
 
                     <div className="flex flex-col space-y-5">
-                        <p>Email is&nbsp;&nbsp;<span className="text-xl text-green-300">{userDetail?.email}</span></p>
+                        <p>Email is&nbsp;&nbsp;<span className="text-xl theme-text-muted">{userDetail?.email}</span></p>
 
-                        <p>Account created,&nbsp;&nbsp;<span className="text-xl text-green-300">{stripLeadingDateFromISO(userDetail?.createdAt) || "N/A"}</span></p>
+                        <p>Account created,&nbsp;&nbsp;<span className="text-xl theme-text-muted">{stripLeadingDateFromISO(userDetail?.createdAt) || "N/A"}</span></p>
                     </div>
                     
                     <AddressManagerModule 
@@ -64,7 +64,7 @@ export default function UserProfileInfoDashboard() {
                     />
 
                     <div className="flex mt-5 space-x-5">
-                        <button className="p-2 bg-green-700 hover:bg-green-600 text-sm md:text-base text-white rounded-sm">Change Password</button>
+                        <button className="p-2 theme-btn-teal text-sm md:text-base text-white rounded-sm transition-colors">Change Password</button>
                     </div>
                 </div>
 

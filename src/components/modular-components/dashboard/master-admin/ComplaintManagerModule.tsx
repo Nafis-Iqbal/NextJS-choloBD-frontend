@@ -18,20 +18,20 @@ export const ComplaintManagerModule = () => {
     return (
         <section className="flex flex-col" id="complain_management">
             <div className="flex space-x-5 mb-2">
-                <h4 className="">Consumer Complaints</h4>
-                <div className="text-sm px-1 mt-1 bg-red-400 rounded-md self-center">Feature Not Ready</div>
+                <h4 className="theme-text">Consumer Complaints</h4>
+                <div className="text-sm px-1 mt-1 rounded-md self-center" style={{backgroundColor: 'var(--theme-red)', color: 'white'}}>Feature Not Ready</div>
             </div>
             <TableLayout className="mr-5">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[600px]">
-                        <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
+                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                             <p className="w-[5%]">Sr. No.</p>
                             <p className="w-[10%]">Product ID</p>
                             <p className="w-[45%]">Complaint Subject</p>
                             <p className="w-[25%]">Complained by</p>
                             <p className="w-[15%]">Complaint Status</p>
                         </div>
-                        <div className="flex flex-col border-1 border-green-800">
+                        <div className="flex flex-col theme-outline">
                             <ComplaintListTableRow id={1} product_id={"1"} complaintSubject="laptop" complainingUserName="Nafis" complaintStatus={ComplaintStatus.PENDING}/>
                             <ComplaintListTableRow id={1} product_id={"1"} complaintSubject="laptop" complainingUserName="Nafis" complaintStatus={ComplaintStatus.PENDING}/>
                             <ComplaintListTableRow id={1} product_id={"1"} complaintSubject="laptop" complainingUserName="Nafis" complaintStatus={ComplaintStatus.PENDING}/>
@@ -49,7 +49,8 @@ export const ComplaintManagerModule = () => {
                             options={complaintStatusOptions}
                             value="Active"
                             onChange={() => filterByOrderStatus()}
-                            className="bg-gray-600"
+                            style={{backgroundColor: 'var(--theme-card-bg)'}}
+                            className=""
                             disabled
                         />
                     </div>
@@ -75,7 +76,7 @@ const ComplaintListTableRow = ({
     id: number, product_id: string, complaintSubject: string, complainingUserName: string, complaintStatus: ComplaintStatus, mode?: string
 }) => {
     return (
-        <div className="pointer-events-none flex p-2 w-full border-b-1 border-green-900 hover:bg-gray-600 text-center">
+        <div className="pointer-events-none flex p-2 w-full theme-outline text-center" style={{borderColor: 'var(--theme-deep-green)', borderBottomWidth: '1px'}}>
             <p className="w-[5%]">{id}</p>
             <p className="w-[10%]">{product_id}</p>
             <p className="w-[45%]">{complaintSubject}</p>

@@ -110,13 +110,13 @@ export const UserManagerModule = () => {
     return (
         <section className="flex flex-col mt-5" id="users_management">
             <div className="flex mb-2 space-x-5">
-                <h4 className="">All Users</h4>
-                <button className="text-sm px-1 mt-1 bg-green-700 hover:bg-green-600 rounded-md self-center">View All</button>
+                <h4 className="theme-text">All Users</h4>
+                <button className="text-sm px-1 mt-1 rounded-md self-center theme-btn-teal">View All</button>
             </div>
             <TableLayout className="md:mr-5">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[900px]">
-                        <div className="flex border border-green-800 p-2 bg-gray-600 text-center">
+                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                             <p className="w-[5%]">Sr.</p>
                             <p className="w-[25%]">User Name</p>
                             <p className="w-[15%]">Role</p>
@@ -124,7 +124,7 @@ export const UserManagerModule = () => {
                             <p className="w-[15%]">Spent</p>
                             <p className="w-[15%]">Joined</p>
                         </div>
-                        <div className="flex flex-col border-1 border-green-800 h-[80vh] md:h-[50vh] overflow-y-auto">
+                        <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto">
                             {
                                 isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
                                 isFetchError ? (<NoContentTableRow displayMessage="An error occured"  tdColSpan={1}/>) :
@@ -157,7 +157,8 @@ export const UserManagerModule = () => {
                         options={userRoleOptions}
                         onChange={handleChange}
                         value={filters?.role}
-                        className="bg-gray-600"
+                        style={{backgroundColor: 'var(--theme-card-bg)'}}
+                        className=""
                         name="role"
                         label="Role"
                     />
@@ -166,7 +167,8 @@ export const UserManagerModule = () => {
                         options={userStatusOptions}
                         onChange={handleChange}
                         value={filters?.user_status}
-                        className="bg-gray-600"
+                        style={{backgroundColor: 'var(--theme-card-bg)'}}
+                        className=""
                         name="user_status"
                         label="User Status"
                     />
@@ -175,7 +177,8 @@ export const UserManagerModule = () => {
                         options={paymentStatusOptions}
                         onChange={handleChange}
                         value={filters?.payment_status}
-                        className="bg-gray-600"
+                        style={{backgroundColor: 'var(--theme-card-bg)'}}
+                        className=""
                         name="payment_status"
                         label="Payment Status"
                     />

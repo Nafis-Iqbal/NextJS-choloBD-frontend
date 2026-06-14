@@ -3,9 +3,9 @@ import { SectionHeader } from "./SectionHeader";
 
 type Buddy = { id: string; name: string; tag: string; trips: number };
 
-export const CommunitySection: React.FC<{ buddies: Buddy[] }> = ({ buddies }) => {
+export const CommunitySection: React.FC<{ buddies: Buddy[], className?: string }> = ({ buddies, className }) => {
   return (
-    <section className="w-full">
+    <section className={`w-full scroll-mt-36 ${className}`} id="community">
       <SectionHeader
         title="Find People To Go With"
         subtitle="Join trips, start groups, and meet friendly travelers"
@@ -13,12 +13,12 @@ export const CommunitySection: React.FC<{ buddies: Buddy[] }> = ({ buddies }) =>
       />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 font-sans">
         {buddies.map((b) => (
-          <div key={b.id} className="rounded-xl bg-gray-800/70 border border-gray-700 p-4">
-            <div className="h-16 w-16 rounded-full bg-pink-600 mb-3" />
-            <div className="text-white font-medium">{b.name}</div>
-            <div className="text-gray-300 text-sm">#{b.tag}</div>
-            <div className="mt-2 text-xs text-gray-400">Trips: {b.trips}</div>
-            <button className="mt-3 w-full rounded-lg bg-violet-600 hover:bg-violet-700 text-white py-2 text-sm">Say Hi</button>
+          <div key={b.id} className="rounded-xl theme-card p-4">
+            <div className="h-16 w-16 rounded-full theme-avatar mb-3" />
+            <div className="theme-text font-medium">{b.name}</div>
+            <div className="theme-text-muted text-sm">#{b.tag}</div>
+            <div className="mt-2 text-xs theme-text-subtle">Trips: {b.trips}</div>
+            <button className="mt-3 w-full rounded-lg py-2 text-sm theme-btn-teal">Say Hi</button>
           </div>
         ))}
       </div>

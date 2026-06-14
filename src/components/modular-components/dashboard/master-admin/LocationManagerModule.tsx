@@ -71,19 +71,19 @@ export const LocationManagerModule = () => {
             />
 
             {/* Location List Section */}
-            <h4 className="mb-2">Location List</h4>
+            <h4 className="mb-2 theme-text">Location List</h4>
 
             <TableLayout className="mr-5">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[900px]">
-                        <div className="flex border border-green-800 p-2 bg-gray-600 text-center">
+                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                             <p className="w-[10%]">Sr.</p>
                             <p className="w-[30%]">Location Name</p>
                             <p className="w-[25%]">Type</p>
                             <p className="w-[25%]">Country</p>
                             <p className="w-[15%]">Actions</p>
                         </div>
-                        <div className="flex flex-col border-1 border-green-800 h-[80vh] md:h-[50vh] overflow-y-auto">
+                        <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto">
                             {
                                 isLocationLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
                                 isLocationError ? (<NoContentTableRow displayMessage="An error occured"  tdColSpan={1}/>) :
@@ -116,7 +116,8 @@ export const LocationManagerModule = () => {
                             options={[{ value: '', label: '-- All Types --' }, ...locationTypeOptions]}
                             value={locationFilters.locationType}
                             onChange={handleLocationFilterChange}
-                            className="bg-gray-600"
+                            style={{backgroundColor: 'var(--theme-card-bg)'}}
+                            className=""
                         />
                     </div>
 
@@ -133,7 +134,7 @@ export const LocationManagerModule = () => {
             </FilterSectionLayout>
 
             <button 
-                className="mr-5 mt-2 p-2 w-fit bg-green-700 hover:bg-green-600 text-sm md:text-base text-white rounded-sm"
+                className="mr-5 mt-2 p-2 w-fit text-sm md:text-base text-white rounded-sm theme-btn-teal"
                 onClick={() => toggleLocationFormModal(true, locationModal.locationId, 'create')}
             >
                 Add New Location

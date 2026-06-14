@@ -41,14 +41,12 @@ export const HotelServiceEmployeeModule = () => {
   }, [bookingsResponse?.data]);
 
   return (
-    <section className="flex flex-col space-y-2 mt-4 w-full bg-gray-900 text-white min-h-screen p-6" id="hotel_service_employee_module">
+    <section className="flex flex-col space-y-2 mt-4 w-full min-h-screen p-6" id="hotel_service_employee_module" style={{backgroundColor: 'var(--theme-bg)', color: 'var(--theme-text)'}}>
       <div className="max-w-7xl w-full">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-white">Hotel Management Dashboard</h1>
-          <p className="text-gray-400 mt-2">
-            Manage rooms, bookings, complaints, and maintenance tasks
-          </p>
+          <h1 className="text-4xl font-bold" style={{color: 'var(--theme-text)'}}>Hotel Management Dashboard</h1>
+          <p className="mt-2" style={{color: 'var(--theme-text-muted)'}}>Manage rooms, bookings, complaints, and maintenance tasks</p>
         </div>
 
         {/* Metrics Dashboard */}
