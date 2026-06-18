@@ -41,7 +41,7 @@ export default function DashboardLayout({
             <DivGap customHeightGap="h-[55px] md:h-[70px]"/>
 
             <div className="flex border min-h-screen">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 shadow-[0_0_20px_#00FF99] font-sans">
+                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 font-sans">
                     <SidebarMenu 
                         className="fixed w-[15%] top-17 left-0" 
                         isPopOutSidebar={false}
@@ -54,20 +54,16 @@ export default function DashboardLayout({
                             {el}
                         </React.Fragment>
                     ))}
-                </div>
 
-                {/* <aside className="relative z-10 flex-grow w-[25%] shadow-[0_0_20px_#00FF99]">
-                    {stats}
-                </aside> */}
+                    <footer>
+                        <Footer/>
+                    </footer>
+                </div>
             </div>
             
             <nav>
                 <BottomNavbar/>
             </nav>
-            
-            <footer>
-                <Footer/>
-            </footer>
         </section>
     )
 }

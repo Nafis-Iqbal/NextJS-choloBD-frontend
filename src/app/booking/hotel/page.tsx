@@ -153,8 +153,8 @@ function HotelBookingContent() {
 		return (
 			<div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
 				<div className="flex flex-col gap-2">
-					<h3 className="text-green-500 font-fredericka">Hotel Booking</h3>
-					<p className="text-green-200">Loading hotel data...</p>
+					<h3 className="theme-text-teal font-fredericka">Hotel Booking</h3>
+					<p className="theme-text-muted">Loading hotel data...</p>
 				</div>
 			</div>
 		);
@@ -164,8 +164,8 @@ function HotelBookingContent() {
 		return (
 			<div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
 				<div className="flex flex-col gap-2">
-					<h3 className="text-green-500 font-fredericka">Hotel Booking</h3>
-					<p className="text-red-300">Failed to load hotels. Please try again.</p>
+					<h3 className="theme-text-teal font-fredericka">Hotel Booking</h3>
+					<p className="text-red-400">Failed to load hotels. Please try again.</p>
 				</div>
 			</div>
 		);
@@ -174,25 +174,25 @@ function HotelBookingContent() {
 	return (
 		<div className="flex flex-col p-3 md:p-6 mt-5 font-sans min-h-screen">
 			<div className="flex flex-col gap-2">
-				<h3 className="text-green-500 font-fredericka">Hotel Booking</h3>
-				<p className="text-green-200">Search hotels with flexible filters.</p>
+				<h3 className="theme-text-teal font-fredericka">Hotel Booking</h3>
+				<p className="theme-text-muted">Search hotels with flexible filters.</p>
 			</div>
 
 			{/* Filter Options */}
-			<section className="flex flex-col space-y-4 md:w-[60%] mt-5 rounded-xl border border-green-900/60 bg-section p-4 md:p-5">
-				<p className="text-2xl text-green-300">Hotel Filters</p>
+			<section className="flex flex-col space-y-4 md:w-[60%] mt-5 rounded-xl theme-outline bg-section p-4 md:p-5">
+				<p className="text-2xl theme-text-teal">Hotel Filters</p>
 
 				{/* Row 1: City */}
 				<div className="grid grid-cols-1 gap-3 mb-4">
 					<div>
 						<CustomSelectInput
 							label="City"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.city}
 							onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))}
 							options={cityOptions.map((c) => ({ label: c, value: c }))}
 							defaultSelectText="Select a city"
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 				</div>
@@ -202,7 +202,7 @@ function HotelBookingContent() {
 					<div>
 						<CustomSelectInput
 							label="Min Rating"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.minRating}
 							onChange={(e) => setForm((p) => ({ ...p, minRating: e.target.value }))}
 							options={[
@@ -211,20 +211,20 @@ function HotelBookingContent() {
 								{ label: "4.0+", value: "4" },
 								{ label: "4.5+", value: "4.5" },
 							]}
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 					<div>
 						<CustomSelectInput
 							label="Sort"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.sort}
 							onChange={(e) => setForm((p) => ({ ...p, sort: e.target.value as any }))}
 							options={[
 								{ label: "Highest rating", value: "rating" },
 								{ label: "Hotel name", value: "name" },
 							]}
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 				</div>
@@ -234,19 +234,19 @@ function HotelBookingContent() {
 					<div>
 						<CustomDateInput
 							label="Check-in"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.checkIn}
 							onChange={(e) => setForm((p) => ({ ...p, checkIn: e.target.value }))}
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 					<div>
 						<CustomDateInput
 							label="Check-out"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.checkOut}
 							onChange={(e) => setForm((p) => ({ ...p, checkOut: e.target.value }))}
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 				</div>
@@ -256,21 +256,21 @@ function HotelBookingContent() {
 					<div>
 						<CustomSelectInput
 							label="Guests"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.guests}
 							onChange={(e) => setForm((p) => ({ ...p, guests: e.target.value }))}
 							options={["1", "2", "3", "4", "5", "6"].map((n) => ({ label: n, value: n }))}
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 					<div>
 						<CustomSelectInput
 							label="Rooms"
-							labelStyle="text-green-300"
+							labelStyle="theme-text-teal"
 							value={form.rooms}
 							onChange={(e) => setForm((p) => ({ ...p, rooms: e.target.value }))}
 							options={["1", "2", "3", "4"].map((n) => ({ label: n, value: n }))}
-							className="w-full bg-gray-800 border-gray-600 text-gray-100"
+							className="w-full"
 						/>
 					</div>
 				</div>
@@ -296,10 +296,10 @@ function HotelBookingContent() {
 					</button>
 				</div>
 
-				{invalidDates && <p className="mt-3 text-red-300 text-sm">Check-out must be after check-in.</p>}
+				{invalidDates && <p className="mt-3 text-red-400 text-sm">Check-out must be after check-in.</p>}
 				{!invalidDates && nights > 0 && (
-					<p className="mt-3 text-gray-300 text-sm">
-						Stay length: <span className="text-white font-medium">{nights}</span> night(s)
+					<p className="mt-3 theme-text-muted text-sm">
+						Stay length: <span className="theme-text font-medium">{nights}</span> night(s)
 					</p>
 				)}
 			</section>
@@ -307,19 +307,19 @@ function HotelBookingContent() {
 			{/* Filter Results */}
 			<section className="mt-5">
 				<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-					<p className="text-gray-200">
-						Showing <span className="text-white font-medium">{results.length}</span> hotels{" "}
+					<p className="theme-text-muted">
+						Showing <span className="theme-text font-medium">{results.length}</span> hotels{" "}
 						{form.city && (
 							<>
-								in <span className="text-white font-medium">{form.city}</span>
+								in <span className="theme-text font-medium">{form.city}</span>
 							</>
 						)}
 					</p>
 				</div>
 
 				{results.length === 0 ? (
-					<div className="mt-3 rounded-xl border border-gray-700 bg-gray-900/30 p-5">
-						<p className="text-gray-300">No hotels found. Try changing filters.</p>
+					<div className="mt-3 rounded-xl theme-outline bg-sub-section p-5">
+						<p className="theme-text-subtle">No hotels found. Try changing filters.</p>
 					</div>
 				) : (
 					<div className="mt-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -361,25 +361,25 @@ export default function HotelBookingPage() {
 
 function HotelCard({ hotel: h, onViewDetails, onBookNowClicked }: HotelCardProps) {
 	return (
-		<div key={h.id} className="rounded-xl border border-gray-700 bg-gray-900/30 overflow-hidden">
+		<div key={h.id} className="rounded-xl theme-outline bg-sub-section overflow-hidden">
 			<div className="h-28 bg-teal-700" />
 			<div className="p-4">
 				<div className="flex items-start justify-between gap-3">
 					<div>
-						<p className="text-white font-semibold">{h.name}</p>
-						<p className="text-sm text-gray-400">
+						<p className="theme-text font-semibold">{h.name}</p>
+						<p className="text-sm theme-text-subtle">
 							{h.location?.city || "Unknown location"}
 						</p>
 						{h.location?.district && (
-							<p className="text-xs text-gray-500">{h.location.district}</p>
+							<p className="text-xs theme-text-subtle">{h.location.district}</p>
 						)}
 					</div>
-					<div className="text-sm text-yellow-400">{"★".repeat(Math.round(h.rating))}</div>
+					<div className="text-sm theme-star">{"★".repeat(Math.round(h.rating))}</div>
 				</div>
 
 				<div className="mt-2 flex flex-wrap gap-2">
 				{(h.amenities as any[])?.slice(0, 3).map((a: any, idx: number) => (
-					<span key={idx} className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">
+					<span key={idx} className="text-xs px-2 py-1 rounded bg-sub-section theme-text-subtle">
 						{a}
 					</span>
 				))}
@@ -392,8 +392,8 @@ function HotelCard({ hotel: h, onViewDetails, onBookNowClicked }: HotelCardProps
 
 				<div className="mt-3 flex items-center justify-between">
 					<div>
-						<p className="text-white font-semibold">Rating: {h.rating}</p>
-						<p className="text-xs text-gray-400">
+						<p className="theme-text font-semibold">Rating: {h.rating}</p>
+						<p className="text-xs theme-text-subtle">
 							{h.availableRooms || 0} rooms available
 						</p>
 					</div>

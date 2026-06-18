@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import DivGap, {HorizontalDivider, VerticalDivider} from "../custom-elements/UIUtilities";
 import { AboutSection } from "../page-content/AboutSection";
 
-const Footer: React.FC = () => {
+const Footer: React.FC<{className?: string}> = ({className}) => {
     const router = useRouter();
     const [showAbout, setShowAbout] = useState(false);
     
@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
 
     return (
         <>
-            <div className="flex flex-col theme-footer">
+            <div className={`flex flex-col theme-footer ${className}`}>
                 <div className="flex flex-col md:flex-row items-start justify-between px-6 md:px-12 py-6 gap-8">
                     {/* Left: About Button */}
                     <div className="w-full md:w-[40%] flex flex-col gap-4">
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
                         </p>
 
                         <button
-                            onClick={() => setShowAbout(true)}
+                            onClick={() => setShowAbout(false)}
                             className="w-fit px-4 py-2 font-semibold rounded-md transition-colors bg-[var(--theme-deep-green)] hover:brightness-110 text-white"
                         >
                             About the Devs

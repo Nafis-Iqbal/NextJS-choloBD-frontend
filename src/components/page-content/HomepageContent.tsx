@@ -31,12 +31,12 @@ export const HomepageContent = async () => {
     const bottomHeroSectionImages = siteHeroSectionImages.filter((image) => image.section === HeroSection.BOTTOM);
 
     const features = [
-        { title: "Hotel Book", desc: "Trusted stays, easy pay", link: "hotels" },
-        { title: "Ride Tickets", desc: "Bus, train, air", link: "transport" },
-        { title: "Smart Tours", desc: "Auto plan, quick tweaks", link: "tours" },
-        { title: "Find Buddies", desc: "Meet travel friends", link: "community" },
-        { title: "Local Guides", desc: "Tips from pros", link: "guides" },
-        { title: "Wallet & Deals", desc: "Cashback and perks", link: "deals" },
+        { title: "QR Code Tickets & Entry", desc: "Scan once and enter — no paper tickets, no queues", link: "hotels" },
+        { title: "Fully Cashless Payments", desc: "Pay with bKash, Nagad, cards or QR. No ATM hunts", link: "transport" },
+        { title: "Instant Booking", desc: "Real-time availability for tours, buses, trains & ferries", link: "tours" },
+        { title: "Secure & Trackable", desc: "All transactions protected. Track every payment in wallet", link: "community" },
+        { title: "Digital Travel Wallet", desc: "Store tickets, passes & receipts in one place", link: "wallet" },
+        { title: "Cashback & Deals", desc: "Exclusive offers on every QR payment", link: "deals" },
     ];
 
     // Format tour data for display
@@ -65,10 +65,17 @@ export const HomepageContent = async () => {
     ];
 
     const testimonials = [
-        { id: "s1", name: "Farah", quote: "Smooth booking and friendly help!", place: "Bandarban" },
-        { id: "s2", name: "Imran", quote: "Tour builder saved my weekend.", place: "Sylhet" },
-        { id: "s3", name: "Rhea", quote: "Found great hotel deals.", place: "Cox’s Bazar" },
+        { id: "s1", name: "Rashed", quote: "I went to Sylhet without carrying a single note. Everything was QR — game changer!", place: "Dhaka" },
+        { id: "s2", name: "Nadia & Family", quote: "No more ATM lines in remote areas. The QR tickets made our family trip so relaxing.", place: "Cox's Bazar" },
+        { id: "s3", name: "Karim", quote: "Finally a platform that understands Bangladesh travel realities.", place: "Chittagong" },
     ];
+
+    // Focus text content for each section
+    const featuresFocusText = "Experience travel like never before. Pay for all major expenses upfront on our platform, then simply scan QR codes at every step of your journey. From entry tickets to services, we’ve pre-settled the costs so you can explore Bangladesh freely — no cash, no ATM worries, just convenient scanning and peace of mind.";
+    const hotelsFocusText = "Stay at handpicked hotels and resorts across Bangladesh with complete confidence. Pay for your accommodation upfront on our platform and enjoy instant QR check-in at your destination. Skip the cash payments and reception queues — your booking is already settled, leaving you free to relax and make the most of your trip.";
+    const transportFocusText = "Travel smoothly between cities and destinations without cash stress. Book buses, trains, launches, and more in advance on our platform, then board using simple QR code scans. We handle the payments upfront so you can focus on the journey — reliable, cashless, and hassle-free travel across Bangladesh.";
+    const toursFocusText = "Discover carefully curated tours and experiences tailored for you. Pay for the full package upfront, including guides, entries, and activities, then enjoy seamless QR access at every location. Our suggested tours remove the burden of on-site payments, letting you immerse yourself fully in the beauty of Bangladesh.";
+    const communityFocusText = "Connect with fellow travelers and create unforgettable group adventures. Join or form communities, split costs upfront on the platform, and enjoy shared QR experiences together. Make safer, more enjoyable trips with like-minded people — all while keeping the entire journey cash-free and convenient.";
 
     return (
         <div className="flex flex-col items-center space-y-10 md:space-y-16 w-full mx-auto">
@@ -83,23 +90,23 @@ export const HomepageContent = async () => {
 
             <div className="flex flex-col items-center space-y-10 md:space-y-16 w-full px-1 mx-auto md:w-[85%]">
                 {/* Key features */}
-                <FeatureGrid features={features} className="min-h-[75vh]"/>
+                <FeatureGrid features={features} className="min-h-[75vh]" focusText={featuresFocusText}/>
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* Hotel deals */}
-                <HotelDeals className="min-h-[75vh]"/>
+                <HotelDeals className="min-h-[75vh]" focusText={hotelsFocusText}/>
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* Transport tickets */}
-                <TransportTickets tickets={tickets} className="min-h-[75vh]" />
+                <TransportTickets tickets={tickets} className="min-h-[75vh]" focusText={transportFocusText}/>
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* Suggested tours from API */}
-                <TourSuggestions tours={suggestedTours} className="min-h-[75vh]"/>
+                <TourSuggestions tours={suggestedTours} className="min-h-[75vh]" focusText={toursFocusText}/>
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* Community: find tour buddies */}
-                <CommunitySection buddies={buddies} className="min-h-[75vh]"/>
+                <CommunitySection buddies={buddies} className="min-h-[75vh]" focusText={communityFocusText}/>
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* SECTIONS ON GUIDES, WALLETS, & DEALS*/}

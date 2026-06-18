@@ -1,4 +1,4 @@
-import React, {forwardRef} from "react";
+import React, {forwardRef, useRef} from "react";
 
 type CustomInputProps = {
   className?: string;
@@ -29,8 +29,8 @@ export const CustomMiniTextInput = forwardRef<HTMLInputElement, CustomInputProps
           color: 'var(--theme-text)',
           borderWidth: '1px',
           borderColor: 'var(--theme-deep-green)',
-          '--theme-focus-color': 'var(--theme-teal)',
-        } as React.CSSProperties & { '--theme-focus-color': string }}
+          '--tw-ring-color': 'var(--theme-teal)',
+        } as React.CSSProperties & { '--tw-ring-color': string }}
         ref={ref}
         { ...rest }
       />
@@ -68,7 +68,8 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
             borderWidth: '1px',
             borderColor: 'var(--theme-deep-green)',
             outlineColor: 'var(--theme-teal)',
-          }}
+            '--tw-ring-color': 'var(--theme-teal)',
+          } as React.CSSProperties & { '--tw-ring-color': string }}
           ref={ref}
           { ...rest }
         />
@@ -89,59 +90,6 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
 })
 
 CustomTextInput.displayName = "CustomTextInput";
-
-
-export const CustomDateInput = forwardRef<HTMLInputElement, CustomInputProps>((props, ref) => {
-    const {
-      className,
-      label,
-      labelStyle,
-      error,
-      ...rest
-    } = props;
-
-    return (
-      <div className="relative flex flex-col space-y-1 group">
-        {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
-        
-        <style>{`
-          input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.8);
-            cursor: pointer;
-          }
-        `}</style>
-        
-        <input 
-          type="date"
-          className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
-          style={{
-            backgroundColor: 'var(--theme-input-bg)',
-            color: 'var(--theme-text)',
-            borderWidth: '1px',
-            borderColor: 'var(--theme-deep-green)',
-            outlineColor: 'var(--theme-teal)',
-          }}
-          ref={ref}
-          { ...rest }
-        />
-
-        {error && (
-          <div 
-            className="absolute right-0 mt-1 text-xs p-1 rounded shadow z-10"
-            style={{
-              backgroundColor: '#DC2626',
-              color: 'white'
-            }}
-          >
-            {error}
-          </div>
-        )}
-      </div>
-    )
-})
-
-CustomDateInput.displayName = "CustomDateInput";
-
 
 type CustomTextAreaProps = {
   className?: string;
@@ -175,7 +123,8 @@ export const CustomTextAreaInput = forwardRef<HTMLTextAreaElement, CustomTextAre
             borderWidth: '1px',
             borderColor: 'var(--theme-deep-green)',
             outlineColor: 'var(--theme-teal)',
-          }}
+            '--tw-ring-color': 'var(--theme-teal)',
+          } as React.CSSProperties & { '--tw-ring-color': string }}
           ref={ref}
           { ...rest }
         />
@@ -225,15 +174,23 @@ export const CustomSelectInput = forwardRef<HTMLSelectElement, CustomSelectProps
 
   return (
     <div className="relative flex flex-col space-y-1 group">
-      {label && <label className={labelStyle ? labelStyle : "text-green-300"}>{label}</label>}
+      {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
 
       <select
-        className={`p-1 border border-gray-600 rounded-sm focus:outline-none focus:ring-2 focus:ring-green-500 ${className}`}
+        className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
+        style={{
+          borderWidth: '1px',
+          borderColor: 'var(--theme-deep-green)',
+          backgroundColor: 'var(--theme-input-bg)',
+          color: 'var(--theme-text)',
+          outlineColor: 'var(--theme-teal)',
+          '--tw-ring-color': 'var(--theme-teal)',
+        } as React.CSSProperties & { '--tw-ring-color': string }}
         ref={ref}
         { ...rest }
       >
         {options.map((opt) => (
-          <option className="bg-gray-700" key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value}>
             {opt.label}
           </option>
         ))}
@@ -272,7 +229,8 @@ export const CustomCheckboxInput = forwardRef<HTMLInputElement, CustomCheckboxPr
             <label className={`inline-flex items-center space-x-2 cursor-pointer ${labelStyle}`}>
                 <input
                     type="checkbox"
-                    className={`form-checkbox h-4 w-4 text-green-500 bg-gray-700 border-gray-600 rounded-sm focus:ring-green-500`}
+                    className={`form-checkbox h-4 w-4 rounded-sm focus:ring-2`}
+                    style={{ '--tw-ring-color': 'var(--theme-teal)', color: 'var(--theme-teal)', accentColor: 'var(--theme-teal)' } as React.CSSProperties & { '--tw-ring-color': string }}
                     ref={ref}
                     {...rest}
                 />
@@ -289,3 +247,251 @@ export const CustomCheckboxInput = forwardRef<HTMLInputElement, CustomCheckboxPr
 });
 
 CustomCheckboxInput.displayName = "CustomCheckboxInput";
+
+export const CustomDateInput = forwardRef<HTMLInputElement, CustomInputProps>((props, ref) => {
+    const {
+      className,
+      label,
+      labelStyle,
+      error,
+      value,
+      onChange,
+      ...rest
+    } = props;
+
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const openPicker = () => {
+        const input: HTMLInputElement | null = inputRef.current;
+        if (!input) return;
+
+        const inputElement = input as HTMLInputElement & { showPicker?: () => void };
+        if (inputElement.showPicker) {
+            inputElement.showPicker();
+        } else {
+            input.focus();
+            input.click();
+        }
+    };
+
+    return (
+      <div className="relative flex flex-col space-y-1 group">
+        {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
+        
+        <div
+            className={`relative w-full h-[42px] cursor-pointer ${className}`}
+            onClick={openPicker}
+        >
+            <input
+                ref={inputRef}
+                type="date"
+                value={value}
+                onChange={onChange}
+                className="absolute w-0 h-0 opacity-0 pointer-events-none"
+                {...rest}
+            />
+
+            <div 
+                className="w-full h-full px-2 py-2 rounded-sm flex items-center transition-all"
+                style={{
+                    borderWidth: '1px',
+                    borderColor: error ? '#DC2626' : 'var(--theme-deep-green)',
+                    backgroundColor: 'var(--theme-input-bg)',
+                    color: 'var(--theme-text)',
+                }}
+            >
+                {value ? (
+                    (() => {
+                        const valueStr = typeof value === 'string' ? value : String(value || '');
+                        const formatted = formatDateDisplay(valueStr);
+
+                        return (
+                            <span className="text-sm leading-tight">
+                                <span className="font-semibold text-base">
+                                    {formatted?.day}
+                                </span>{" "}
+                                <span>
+                                    {formatted?.rest}
+                                </span>
+                            </span>
+                        );
+                    })()
+                ) : (
+                    <span className="text-sm" style={{ color: 'var(--theme-text-subtle)' }}>
+                        Select Date
+                    </span>
+                )}
+            </div>
+        </div>
+
+        {error && (
+          <div 
+            className="absolute right-0 mt-1 text-xs p-1 rounded shadow z-10"
+            style={{
+              backgroundColor: '#DC2626',
+              color: 'white'
+            }}
+          >
+            {error}
+          </div>
+        )}
+      </div>
+    )
+})
+
+CustomDateInput.displayName = "CustomDateInput";
+
+type CustomDatePickerProps = {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    disabledText?: string;
+    disabled?: boolean;
+    label?: string;
+    labelStyle?: string;
+    error?: string;
+    className?: string;
+};
+
+export const CustomDatePicker = forwardRef<HTMLInputElement, CustomDatePickerProps>(({
+    value,
+    onChange,
+    placeholder = "Select Date",
+    disabledText,
+    disabled = false,
+    label,
+    labelStyle,
+    error,
+    className,
+}, ref) => {
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    const openPicker = () => {
+        if (disabled) return;
+
+        const input: HTMLInputElement | null = inputRef.current;
+        if (!input) return;
+
+        // Use type assertion with HTMLInputElement
+        const inputElement = input as HTMLInputElement & { showPicker?: () => void };
+        if (inputElement.showPicker) {
+            inputElement.showPicker();
+        } else {
+            input.focus();
+            input.click();
+        }
+    };
+
+    return (
+        <div className="relative flex flex-col space-y-1 group">
+            {label && <label style={{ color: labelStyle ? undefined : 'var(--theme-teal)' }} className={labelStyle}>{label}</label>}
+            
+            <div
+                className={`relative w-full h-[42px] ${
+                    disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+                } ${className}`}
+                onClick={openPicker}
+            >
+                <input
+                    ref={inputRef}
+                    type="date"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    disabled={disabled}
+                    className="absolute w-0 h-0 opacity-0 pointer-events-none"
+                />
+
+                <div 
+                    className="w-full h-full px-2 py-2 border rounded-lg bg-white text-black flex items-center transition-all"
+                    style={{
+                        borderColor: error ? '#DC2626' : 'var(--theme-deep-green)',
+                        backgroundColor: disabled ? '#f3f4f6' : 'white',
+                    }}
+                >
+                    {disabled && disabledText ? (
+                        <span className="text-xs font-medium" style={{ color: 'var(--theme-teal)' }}>
+                            {disabledText}
+                        </span>
+                    ) : (
+                        <span className="text-sm leading-tight">                          
+                          {
+                            value ? (
+                                (() => {
+                                    const formatted = formatDateDisplay(value);
+
+                                    return (
+                                        <span className="text-sm leading-tight">
+                                            <span className="font-semibold text-base">
+                                                {formatted?.day}
+                                            </span>{" "}
+                                            <span>
+                                                {formatted?.rest}
+                                            </span>
+                                        </span>
+                                    );
+                                })()
+                            ) : (
+                                <span className="text-sm text-gray-500">
+                                    {placeholder}
+                                </span>
+                            )
+                          }
+                        </span>
+                    )}
+                </div>
+            </div>
+
+            {error && (
+                <div 
+                    className="absolute right-0 mt-1 text-xs p-1 rounded shadow z-10"
+                    style={{
+                        backgroundColor: '#DC2626',
+                        color: 'white'
+                    }}
+                >
+                    {error}
+                </div>
+            )}
+        </div>
+    );
+});
+
+CustomDatePicker.displayName = "CustomDatePicker";
+
+const formatDateDisplay = (dateString: string): {
+    day: string;
+    rest: string;
+} | null => {
+    if (!dateString) return null;
+
+    const date = new Date(dateString);
+
+    const day = date.getDate();
+
+    const suffix =
+        day % 10 === 1 && day !== 11
+            ? "st"
+            : day % 10 === 2 && day !== 12
+            ? "nd"
+            : day % 10 === 3 && day !== 13
+            ? "rd"
+            : "th";
+
+    const month = date.toLocaleString("en-GB", {
+        month: "short",
+    });
+
+    const year = date
+        .getFullYear()
+        .toString()
+        .slice(-2);
+
+    const weekday = date.toLocaleString("en-GB", {
+        weekday: "short",
+    });
+
+    return {
+        day: `${day}`,
+        rest: `${month} '${year} ${weekday}`,
+    };
+};

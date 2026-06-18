@@ -3,6 +3,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { NextImage } from "../custom-elements/UIUtilities";
+import { CustomDatePicker } from "../custom-elements/CustomInputElements";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking } from "react-icons/md";
 import { LocationApi } from "@/services/api";
@@ -165,10 +166,14 @@ export const HeroSectionBookingWidget = ({
 
   return (
     <div
-      className={`relative w-full h-screen md:h-[70vh] overflow-hidden bg-black font-sans ${className ?? ""}`}
+      className={`relative w-full h-screen md:h-[90vh] overflow-hidden bg-black font-sans ${className ?? ""}`}
     >
       {/* Background Image Carousel */}
-      <motion.div ref={heroRef} style={{ scale }} className="absolute w-full h-full">
+      <motion.div 
+        ref={heroRef} 
+        //style={{ scale }} 
+        className="absolute w-full h-full"
+      >
         <AnimatePresence mode="wait" custom={direction} initial={false}>
           <motion.div
             key={displayedImageId}
@@ -211,13 +216,30 @@ export const HeroSectionBookingWidget = ({
       <div className="absolute inset-0 bg-black/40" />
 
       {/* Booking Widget Container - Centered */}
-      <div className="absolute inset-0 flex md:mt-24 px-3 md:px-6 pt-12 md:pt-16 items-start justify-center z-10 bg-transparent ">
+      <div className="absolute inset-0 flex mt-4 md:mt-24 px-3 md:px-6 pt-12 md:pt-16 items-start justify-center z-10 bg-transparent ">
         <div className="w-full max-w-6xl flex flex-col">
+          {/* Main Headline */}
+          <motion.div
+            initial={{ opacity: 0, y: -30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-2 md:mb-8"
+          >
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-6 drop-shadow-lg">
+              Prepaid. QR Easy. Cash-Free Journeys.
+            </h1>
+            <p className="text-base md:text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
+              One payment covers your whole trip. Scan QR codes at every stop — hotels, bus terminals, 
+              boats, attractions. We handle the rest.
+            </p>
+          </motion.div>
+
           {/* Tab Navigation */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-wrap gap-2 md:gap-3 justify-center mb-8 md:mb-5 flex-shrink-0"
+            transition={{ delay: 0.2 }}
+            className="flex flex-wrap gap-2 md:gap-3 justify-center mb-4 md:mb-5 flex-shrink-0"
           >
             {tabs.map((tab) => (
               <button
@@ -266,9 +288,14 @@ export const HeroSectionBookingWidget = ({
 
 /* ─────── Hotel Filter Panel ─────── */
 function HotelFilterPanel({ locations }: { locations: Location[] }) {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [filters, setFilters] = useState<HotelFilters>({
     city: "",
-    checkIn: "",
+    checkIn: getTodayDate(),
     checkOut: "",
     guests: "2",
     rooms: "1",
@@ -336,7 +363,7 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
       <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Hotel</h3>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Destination City</label>
           <div className="relative">
@@ -372,20 +399,18 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Check-in Date</label>
-          <input
-            type="date"
+          <CustomDatePicker
             value={filters.checkIn}
-            onChange={(e) => setFilters({ ...filters, checkIn: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, checkIn: value })}
+            placeholder="Select Check-in Date"
           />
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Check-out Date</label>
-          <input
-            type="date"
+          <CustomDatePicker
             value={filters.checkOut}
-            onChange={(e) => setFilters({ ...filters, checkOut: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, checkOut: value })}
+            placeholder="Select Check-out Date"
           />
         </div>
         <div className="flex flex-col">
@@ -421,18 +446,24 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Search Hotels
+        Find Cashless Hotels
       </button>
+      <p className="text-xs text-gray-600 text-center mt-3">Join thousands exploring Cox's Bazar, Sylhet, Bandarban & more — completely hassle-free.</p>
     </div>
   );
 }
 
 /* ─────── Bus Filter Panel ─────── */
 function BusFilterPanel({ locations }: { locations: Location[] }) {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [filters, setFilters] = useState<BusFilters>({
     departureCity: "",
     arrivalCity: "",
-    departureDate: "",
+    departureDate: getTodayDate(),
     returnDate: "",
     passengers: "1",
     busClass: "standard",
@@ -481,7 +512,7 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
           </label>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Departure City</label>
           <input
@@ -503,25 +534,24 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Travel Date</label>
-          <input
-            type="date"
+          <label className="text-sm font-semibold text-gray-700 mb-2">Departure Date</label>
+          <CustomDatePicker
             value={filters.departureDate}
-            onChange={(e) => setFilters({ ...filters, departureDate: e.target.value })}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, departureDate: value })}
+            placeholder="Select Departure Date"
           />
         </div>
-        {filters.tripType === "returntrip" && (
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
-            <input
-              type="date"
-              value={filters.returnDate}
-              onChange={(e) => setFilters({ ...filters, returnDate: e.target.value })}
-              className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
-            />
-          </div>
-        )}
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
+          <CustomDatePicker
+            value={filters.returnDate}
+            onChange={(value) => setFilters({ ...filters, returnDate: value })}
+            placeholder="Select Return Date"
+            disabled={filters.tripType === "oneway"}
+            disabledText="💰 Save costs on return trip"
+          />
+        </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Passengers</label>
           <select
@@ -553,18 +583,24 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Search Buses
+        Get QR Bus Tickets
       </button>
+      <p className="text-xs text-gray-600 text-center mt-3">Board instantly with QR — no queues, no paper tickets.</p>
     </div>
   );
 }
 
 /* ─────── Train Filter Panel ─────── */
 function TrainFilterPanel({ locations }: { locations: Location[] }) {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [filters, setFilters] = useState<TrainFilters>({
     departureStation: "",
     arrivalStation: "",
-    departureDate: "",
+    departureDate: getTodayDate(),
     returnDate: "",
     passengers: "1",
     trainClass: "general",
@@ -613,7 +649,7 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
           </label>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">From Station</label>
           <input
@@ -635,25 +671,23 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Travel Date</label>
-          <input
-            type="date"
+          <label className="text-sm font-semibold text-gray-700 mb-2">Departure Date</label>
+          <CustomDatePicker
             value={filters.departureDate}
-            onChange={(e) => setFilters({ ...filters, departureDate: e.target.value })}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, departureDate: value })}
+            placeholder="Select Departure Date"
           />
         </div>
-        {filters.tripType === "returntrip" && (
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
-            <input
-              type="date"
-              value={filters.returnDate}
-              onChange={(e) => setFilters({ ...filters, returnDate: e.target.value })}
-              className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
-            />
-          </div>
-        )}
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
+          <CustomDatePicker
+            value={filters.returnDate}
+            onChange={(value) => setFilters({ ...filters, returnDate: value })}
+            placeholder="Select Return Date"
+            disabled={filters.tripType === "oneway"}
+            disabledText="💰 Save costs on return trip"
+          />
+        </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Passengers</label>
           <select
@@ -686,18 +720,24 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Search Trains
+        Get QR Train Tickets
       </button>
+      <p className="text-xs text-gray-600 text-center mt-3">Travel smoothly with instant QR tickets — cashless & convenient.</p>
     </div>
   );
 }
 
 /* ─────── Flight Filter Panel ─────── */
 function FlightFilterPanel({ locations }: { locations: Location[] }) {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [filters, setFilters] = useState<FlightFilters>({
     departureCity: "",
     arrivalCity: "",
-    departureDate: "",
+    departureDate: getTodayDate(),
     returnDate: "",
     passengers: "1",
     tripType: "oneway",
@@ -747,7 +787,7 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
           </label>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">From</label>
           <input
@@ -770,24 +810,22 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Departure Date</label>
-          <input
-            type="date"
+          <CustomDatePicker
             value={filters.departureDate}
-            onChange={(e) => setFilters({ ...filters, departureDate: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, departureDate: value })}
+            placeholder="Select Departure Date"
           />
         </div>
-        {filters.tripType === "roundtrip" && (
-          <div className="flex flex-col">
-            <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
-            <input
-              type="date"
-              value={filters.returnDate}
-              onChange={(e) => setFilters({ ...filters, returnDate: e.target.value })}
-              className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
-            />
-          </div>
-        )}
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
+          <CustomDatePicker
+            value={filters.returnDate}
+            onChange={(value) => setFilters({ ...filters, returnDate: value })}
+            placeholder="Select Return Date"
+            disabled={filters.tripType === "oneway"}
+            disabledText="💰 Save costs on round trip"
+          />
+        </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Passengers</label>
           <select
@@ -807,17 +845,23 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Search Flights
+        Find Cashless Flights
       </button>
+      <p className="text-xs text-gray-600 text-center mt-3">Skip the hassle — pay with bKash, Nagad or QR instantly.</p>
     </div>
   );
 }
 
 /* ─────── Tour Filter Panel ─────── */
 function TourFilterPanel({ locations }: { locations: Location[] }) {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [filters, setFilters] = useState<TourFilters>({
     location: "",
-    startDate: "",
+    startDate: getTodayDate(),
     duration: "3",
     tourists: "2",
     tourType: "",
@@ -885,7 +929,22 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
       <h3 className="text-lg md:text-xl font-bold text-black mb-6">Plan a Tour</h3>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Tour Type</label>
+          <select
+            value={filters.tourType}
+            onChange={(e) => setFilters({ ...filters, tourType: e.target.value })}
+            className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            <option value="">-- Any Tour Type --</option>
+            <option value="adventure">Adventure</option>
+            <option value="cultural">Cultural</option>
+            <option value="nature">Nature</option>
+            <option value="beach">Beach</option>
+            <option value="hiking">Hiking</option>
+          </select>
+        </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Destination</label>
           <div className="relative">
@@ -921,11 +980,10 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Start Date</label>
-          <input
-            type="date"
+          <CustomDatePicker
             value={filters.startDate}
-            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, startDate: value })}
+            placeholder="Select Start Date"
           />
         </div>
         <div className="flex flex-col">
@@ -956,37 +1014,28 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
             ))}
           </select>
         </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Tour Type</label>
-          <select
-            value={filters.tourType}
-            onChange={(e) => setFilters({ ...filters, tourType: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
-          >
-            <option value="">-- Any Tour Type --</option>
-            <option value="adventure">Adventure</option>
-            <option value="cultural">Cultural</option>
-            <option value="nature">Nature</option>
-            <option value="beach">Beach</option>
-            <option value="hiking">Hiking</option>
-          </select>
-        </div>
       </div>
       <button
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Search Tours
+        Explore Cashless Tours
       </button>
+      <p className="text-xs text-gray-600 text-center mt-3">All-inclusive tours with QR payments — no cash needed anywhere.</p>
     </div>
   );
 }
 
 /* ─────── Activity Filter Panel ─────── */
 function ActivityFilterPanel({ locations }: { locations: Location[] }) {
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const [filters, setFilters] = useState<ActivityFilters>({
     location: "",
-    date: "",
+    date: getTodayDate(),
     participants: "1",
     activityType: "",
   });
@@ -1052,7 +1101,22 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
       <h3 className="text-lg md:text-xl font-bold text-black mb-6">Find Activities</h3>
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Activity Type</label>
+          <select
+            value={filters.activityType}
+            onChange={(e) => setFilters({ ...filters, activityType: e.target.value })}
+            className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            <option value="">-- Any Activity Type --</option>
+            <option value="adventure">Adventure Sports</option>
+            <option value="water">Water Sports</option>
+            <option value="trek">Trekking</option>
+            <option value="cultural">Cultural</option>
+            <option value="extreme">Extreme Sports</option>
+          </select>
+        </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Location</label>
           <div className="relative">
@@ -1088,11 +1152,10 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Activity Date</label>
-          <input
-            type="date"
+          <CustomDatePicker
             value={filters.date}
-            onChange={(e) => setFilters({ ...filters, date: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            onChange={(value) => setFilters({ ...filters, date: value })}
+            placeholder="Select Activity Date"
           />
         </div>
         <div className="flex flex-col">
@@ -1109,28 +1172,14 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
             ))}
           </select>
         </div>
-        <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Activity Type</label>
-          <select
-            value={filters.activityType}
-            onChange={(e) => setFilters({ ...filters, activityType: e.target.value })}
-            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
-          >
-            <option value="">-- Any Activity Type --</option>
-            <option value="adventure">Adventure Sports</option>
-            <option value="water">Water Sports</option>
-            <option value="trek">Trekking</option>
-            <option value="cultural">Cultural</option>
-            <option value="extreme">Extreme Sports</option>
-          </select>
-        </div>
       </div>
       <button
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Search Activities
+        Book QR Activities
       </button>
+      <p className="text-xs text-gray-600 text-center mt-3">Seamless experiences — pay once, enjoy everything with QR.</p>
     </div>
   );
 }

@@ -41,9 +41,9 @@ export default async function HomePage() {
                 <HomepageContent/>
             </div>
           
-            <nav>
+            {/* <nav>
                 <BottomNavbar/>
-            </nav>
+            </nav> */}
             
             <footer>
                 <Footer/>

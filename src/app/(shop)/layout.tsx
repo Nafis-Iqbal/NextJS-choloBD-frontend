@@ -31,7 +31,7 @@ export default function WalletRechargeLayout({
             <DivGap customHeightGap="h-[55px] md:h-[70px]"/>
 
             <div className="flex border min-h-screen">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 shadow-[0_0_20px_#00FF99] font-sans">
+                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 font-sans">
                     <SidebarMenu 
                         className="fixed w-[15%] top-17 left-0" 
                         isPopOutSidebar={false}
@@ -40,12 +40,12 @@ export default function WalletRechargeLayout({
 
                 <div className="flex flex-col flex-grow w-[85%] border-r-4">
                     {children}
+
+                    <nav>
+                        <BottomNavbar/>
+                    </nav>
                 </div>
             </div>
-            
-            <nav>
-                <BottomNavbar/>
-            </nav>
             
             <footer>
                 <Footer/>

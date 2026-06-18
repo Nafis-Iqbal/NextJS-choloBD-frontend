@@ -11,9 +11,10 @@ interface HotelDealsProps {
   animationSpeed?: number; // Duration in seconds (default: 30)
   cardWidth?: number; // Card width in pixels (default: 256 which is w-64)
   className?: string;
+  focusText?: string;
 }
 
-export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 256, className = '' }) => {
+export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 256, className = '', focusText }) => {
   const { data: hotelsResponse, isLoading, error } = HotelApi.useGetPopularHotelsRQ();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
@@ -50,7 +51,11 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
   if (isLoading) {
     return (
       <section className={`w-full ${className}`} id="hotels">
-        <SectionHeader title="Hotel Deals" subtitle="Comfort stays at friendly prices" className="mb-6" />
+        <SectionHeader 
+          title="Stay Comfortably — Pay QR, Rest Easy" 
+          subtitle="Handpicked hotels & resorts with instant cashless check-in across Bangladesh" 
+          className="mb-6" 
+        />
         <div className="flex gap-4 md:gap-6 font-sans overflow-hidden">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-shrink-0 w-64 rounded-xl theme-card p-4 animate-pulse">
@@ -68,7 +73,11 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
   if (error || formattedHotels.length === 0) {
     return (
       <section className={`w-full ${className}`} id="hotels">
-        <SectionHeader title="Hotel Deals" subtitle="Comfort stays at friendly prices" className="mb-6" />
+        <SectionHeader 
+          title="Stay Comfortably — Pay QR, Rest Easy" 
+          subtitle="Handpicked hotels & resorts with instant cashless check-in across Bangladesh" 
+          className="mb-6" 
+        />
         <p className="theme-text-muted text-center py-8">No hotels available at the moment.</p>
       </section>
     );
@@ -76,7 +85,11 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
 
   return (
     <section className={`w-full ${className}`} id="hotels">
-      <SectionHeader title="Hotel Deals" subtitle="Comfort stays at friendly prices" className="mb-6" />
+      <SectionHeader 
+        title="Stay Comfortably — Pay QR, Rest Easy" 
+        subtitle="Handpicked hotels & resorts with instant cashless check-in across Bangladesh" 
+        className="mb-6" 
+      />
       
       <div className="relative w-full">
         {/* Left Arrow Button */}
@@ -121,6 +134,9 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
                 <div className="mt-2 flex items-center justify-between">
                   <span className="theme-star text-sm">{"★".repeat(Math.round(h.rating))}</span>
                 </div>
+                <div className="mt-2 text-xs font-medium text-teal-600 dark:text-teal-400">
+                  ✓ Cashless Ready • Instant Confirmation
+                </div>
                 
                 <Link href={`/hotels/${h.id}`} className="mt-3 w-full rounded-lg py-2 text-sm block text-center transition-colors theme-btn-teal">View Details</Link>
               </div>
@@ -137,6 +153,15 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
           →
         </button>
       </div>
+      {focusText && (
+        <div className="mt-12 md:mt-16 flex justify-center">
+          <div className="max-w-3xl px-6 py-8 md:py-10 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-[var(--theme-teal)] to-transparent" />
+            <p className="font-sans theme-text text-lg md:text-xl font-medium leading-relaxed text-center">{focusText}</p>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-[var(--theme-teal)] to-transparent" />
+          </div>
+        </div>
+      )}
     </section>
   );
 };

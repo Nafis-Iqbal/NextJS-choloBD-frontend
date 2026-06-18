@@ -16,6 +16,7 @@ import { FaUser, FaGift, FaGlobe, FaSignOutAlt, FaBlackTie, FaSearch, FaCaretDow
 import IconWithBadge from "../custom-elements/IconWithBadge";
 import BasicButton from "../custom-elements/Buttons";
 import { SearchInputBar } from "./SearchInputBar";
+import { NextImage } from "../custom-elements/UIUtilities";
 
 
 const THEMES = ['forest', 'dusk', 'crimson', 'violet', 'amber', 'iceBlue', 'rose'] as const;
@@ -132,7 +133,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
         >
             <div className="relative flex justify-between items-center w-[100%] h-full bg-transparent">
                 {/* Start Section */}
-                <div className="relative flex space-x-2 md:space-x-0 md:justify-between items-center w-[40%] md:w-[65%] bg-transparent">
+                <div className="relative flex space-x-2 md:space-x-0 md:justify-between items-center w-[30%] md:w-[65%] h-full bg-transparent">
                     {/* Small Screen Menu*/}
                     <BasicButton
                         buttonColor="bg-white/20"
@@ -166,11 +167,11 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     </AnimatePresence>
 
                     <button 
-                        className="hidden md:block w-[20%] ml-5 p-2 text-center bg-[#D32B3A] md:text-xl lg:text-2xl text-white font-satisfy
-                        rounded-sm transition-all duration-150 hover:scale-110 hover:brightness-125 hover:backdrop-blur-sm"
+                        className="hidden md:block w-[20%] h-full ml-5 p-2 md:text-xl lg:text-2xl text-white bg-[var(--theme-red)] font-satisfy
+                         transition-all duration-150 brightness-125 hover:scale-102 hover:brightness-150"
                         onClick={() => onLogoClick()}
                     >
-                        Cholo BD!
+                        <NextImage src="/CholoBD-Logo.png" alt="Home" className="h-full w-full" nextImageClassName="object-contain"/>
                     </button>
                     
                     <SearchInputBar 
@@ -182,17 +183,17 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                 
                 {/* Mid Section */}
                 {/* Homepage Button */}
-                <div className="flex w-[20%] md:hidden justify-center bg-transparent">
+                <div className="flex w-[40%] md:hidden justify-center bg-transparent">
                     <button 
-                        className="self-center block md:hidden p-2 text-center bg-[var(--theme-red)] text-white rounded-full shadow-sm"
+                        className="self-center block md:hidden h-30 w-90 p-0 text-center bg-[var(--theme-red)]"
                         onClick={() => router.push("/")}
                     >
-                        <FaBlackTie className="inline-block text-2xl" />
+                        <NextImage src="/CholoBD-Logo.png" alt="Home" className="h-full w-full" nextImageClassName="object-contain"/>
                     </button>
                 </div>
 
                 {/* End Section */}
-                <div className="flex justify-end h-full w-[40%] md:w-auto space-x-2 bg-transparent">
+                <div className="flex justify-end h-full w-[30%] md:w-auto space-x-2 bg-transparent">
                     {/* Search Bar Button */}
                     <BasicButton
                         buttonColor="bg-white/20"

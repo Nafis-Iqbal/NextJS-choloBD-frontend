@@ -3,12 +3,12 @@ import { SectionHeader } from "./SectionHeader";
 
 type Feature = { title: string; desc: string; link: string };
 
-export const FeatureGrid: React.FC<{ features: Feature[]; className?: string}> = ({ features, className }) => {
+export const FeatureGrid: React.FC<{ features: Feature[]; className?: string; focusText?: string}> = ({ features, className, focusText }) => {
   return (
     <section className={`w-full ${className ?? ""}`}>
       <SectionHeader
-        title="Everything For Your Next Trip"
-        subtitle="Suggest tours, build custom plans, book stays & rides, and meet buddies"
+        title="Your Complete Cashless Travel Companion"
+        subtitle="QR payments, instant tickets, zero cash hassles — everything you need in one platform"
         className="mb-6"
       />
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 font-sans">
@@ -23,6 +23,15 @@ export const FeatureGrid: React.FC<{ features: Feature[]; className?: string}> =
           </a>
         ))}
       </div>
+      {focusText && (
+        <div className="mt-12 md:mt-32 flex justify-center">
+          <div className="max-w-3xl px-6 py-8 md:py-10 relative">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-[var(--theme-teal)] to-transparent" />
+            <p className="font-sans theme-text text-lg md:text-xl font-medium leading-relaxed text-center">{focusText}</p>
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-[var(--theme-teal)] to-transparent" />
+          </div>
+        </div>
+      )}
     </section>
   );
 };
