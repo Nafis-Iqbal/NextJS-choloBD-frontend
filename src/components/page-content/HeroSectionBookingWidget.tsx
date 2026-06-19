@@ -7,6 +7,8 @@ import { CustomDatePicker } from "../custom-elements/CustomInputElements";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking } from "react-icons/md";
 import { LocationApi } from "@/services/api";
+import { HomeLanguageToggle } from "./HomeLanguageToggle";
+import type { HomeMessages, SupportedHomeLocale } from "@/i18n/homeMessages";
 
 type BookingTab = "hotels" | "bus" | "train" | "flight" | "tours" | "activities";
 
@@ -70,9 +72,15 @@ interface ActivityFilters {
 export const HeroSectionBookingWidget = ({
   imageList,
   className,
+  copy,
+  currentLocale,
+  requiredFieldsAlert,
 }: {
   imageList?: ImageProps[];
   className?: string;
+  copy: HomeMessages["hero"];
+  currentLocale: SupportedHomeLocale;
+  requiredFieldsAlert: string;
 }) => {
   // Provide fallback to BDHeroImg.jpg if no images provided
   const images = imageList && imageList.length > 0 ? imageList : [{ imageURL: "/BDHeroImg.jpg", imageAlt: "BD Hero" }];
@@ -125,12 +133,12 @@ export const HeroSectionBookingWidget = ({
   };
 
   const tabs: { id: BookingTab; label: string; icon: React.ReactNode }[] = [
-    { id: "hotels", label: "Hotels", icon: <MdHotel className="text-xl" /> },
-    { id: "bus", label: "Bus", icon: <MdDirectionsBus className="text-xl" /> },
-    { id: "train", label: "Train", icon: <MdTrain className="text-xl" /> },
-    { id: "flight", label: "Flight", icon: <MdFlightTakeoff className="text-xl" /> },
-    { id: "tours", label: "Tours", icon: <MdTour className="text-xl" /> },
-    { id: "activities", label: "Activities", icon: <MdHiking className="text-xl" /> },
+    { id: "hotels", label: copy.tabs.hotels, icon: <MdHotel className="text-xl" /> },
+    { id: "bus", label: copy.tabs.bus, icon: <MdDirectionsBus className="text-xl" /> },
+    { id: "train", label: copy.tabs.train, icon: <MdTrain className="text-xl" /> },
+    { id: "flight", label: copy.tabs.flight, icon: <MdFlightTakeoff className="text-xl" /> },
+    { id: "tours", label: copy.tabs.tours, icon: <MdTour className="text-xl" /> },
+    { id: "activities", label: copy.tabs.activities, icon: <MdHiking className="text-xl" /> },
   ];
 
   const handleTabChange = (newTab: BookingTab) => {
@@ -166,7 +174,7 @@ export const HeroSectionBookingWidget = ({
 
   return (
     <div
-      className={`relative w-full h-screen md:h-[90vh] overflow-hidden bg-black font-sans ${className ?? ""}`}
+      className={`relative w-full min-h-screen md:min-h-[90vh] overflow-hidden bg-black font-sans ${className ?? ""}`}
     >
       {/* Background Image Carousel */}
       <motion.div 
@@ -216,8 +224,11 @@ export const HeroSectionBookingWidget = ({
       <div className="absolute inset-0 bg-black/40" />
 
       {/* Booking Widget Container - Centered */}
-      <div className="absolute inset-0 flex mt-4 md:mt-24 px-3 md:px-6 pt-12 md:pt-16 items-start justify-center z-10 bg-transparent ">
+      <div className="relative flex mt-4 md:mt-24 px-3 md:px-6 pt-12 md:pt-16 pb-8 md:pb-12 items-start justify-center z-10 bg-transparent">
         <div className="w-full max-w-6xl flex flex-col">
+          <div className="mb-4 flex justify-end">
+            <HomeLanguageToggle locale={currentLocale} label={copy.toggle.label} />
+          </div>
           {/* Main Headline */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
@@ -226,11 +237,10 @@ export const HeroSectionBookingWidget = ({
             className="text-center mb-2 md:mb-8"
           >
             <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-6 drop-shadow-lg">
-              Prepaid. QR Easy. Cash-Free Journeys.
+              {copy.title}
             </h1>
             <p className="text-base md:text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
-              One payment covers your whole trip. Scan QR codes at every stop — hotels, bus terminals, 
-              boats, attractions. We handle the rest.
+              {copy.subtitle}
             </p>
           </motion.div>
 
@@ -272,12 +282,12 @@ export const HeroSectionBookingWidget = ({
               }}
               className="w-full"
             >
-              {activeTab === "hotels" && <HotelFilterPanel locations={allLocations} />}
-              {activeTab === "bus" && <BusFilterPanel locations={allLocations} />}
-              {activeTab === "train" && <TrainFilterPanel locations={allLocations} />}
-              {activeTab === "flight" && <FlightFilterPanel locations={allLocations} />}
-              {activeTab === "tours" && <TourFilterPanel locations={allLocations} />}
-              {activeTab === "activities" && <ActivityFilterPanel locations={allLocations} />}
+              {activeTab === "hotels" && <HotelFilterPanel locations={allLocations} copy={copy.panels.hotels} requiredFieldsAlert={requiredFieldsAlert} />}
+              {activeTab === "bus" && <BusFilterPanel locations={allLocations} copy={copy.panels.bus} requiredFieldsAlert={requiredFieldsAlert} />}
+              {activeTab === "train" && <TrainFilterPanel locations={allLocations} copy={copy.panels.train} requiredFieldsAlert={requiredFieldsAlert} />}
+              {activeTab === "flight" && <FlightFilterPanel locations={allLocations} copy={copy.panels.flight} requiredFieldsAlert={requiredFieldsAlert} />}
+              {activeTab === "tours" && <TourFilterPanel locations={allLocations} copy={copy.panels.tours} requiredFieldsAlert={requiredFieldsAlert} />}
+              {activeTab === "activities" && <ActivityFilterPanel locations={allLocations} copy={copy.panels.activities} requiredFieldsAlert={requiredFieldsAlert} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -287,7 +297,15 @@ export const HeroSectionBookingWidget = ({
 };
 
 /* ─────── Hotel Filter Panel ─────── */
-function HotelFilterPanel({ locations }: { locations: Location[] }) {
+function HotelFilterPanel({
+  locations,
+  copy,
+  requiredFieldsAlert,
+}: {
+  locations: Location[];
+  copy: HomeMessages["hero"]["panels"]["hotels"];
+  requiredFieldsAlert: string;
+}) {
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -348,7 +366,7 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.city || !filters.checkIn || !filters.checkOut) {
-      alert("Please fill in all required fields");
+      alert(requiredFieldsAlert);
       return;
     }
     const qs = new URLSearchParams();
@@ -362,14 +380,14 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Hotel</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black mb-6">{copy.title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Destination City</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.destinationLabel}</label>
           <div className="relative">
             <input
               type="text"
-              placeholder="Search destination..."
+              placeholder={copy.destinationPlaceholder}
               value={locationSearch}
               onChange={(e) => {
                 setLocationSearch(e.target.value);
@@ -398,45 +416,45 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
           </div>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Check-in Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.checkInLabel}</label>
           <CustomDatePicker
             value={filters.checkIn}
             onChange={(value) => setFilters({ ...filters, checkIn: value })}
-            placeholder="Select Check-in Date"
+            placeholder={copy.checkInPlaceholder}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Check-out Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.checkOutLabel}</label>
           <CustomDatePicker
             value={filters.checkOut}
             onChange={(value) => setFilters({ ...filters, checkOut: value })}
-            placeholder="Select Check-out Date"
+            placeholder={copy.checkOutPlaceholder}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Guests</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.guestsLabel}</label>
           <select
             value={filters.guests}
             onChange={(e) => setFilters({ ...filters, guests: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n} Guest{n > 1 ? "s" : ""}
+            {copy.guestsOptions.map((option, index) => (
+              <option key={option} value={String(index + 1)}>
+                {option}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Rooms</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.roomsLabel}</label>
           <select
             value={filters.rooms}
             onChange={(e) => setFilters({ ...filters, rooms: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4].map((n) => (
-              <option key={n} value={n}>
-                {n} Room{n > 1 ? "s" : ""}
+            {copy.roomsOptions.map((option, index) => (
+              <option key={option} value={String(index + 1)}>
+                {option}
               </option>
             ))}
           </select>
@@ -446,15 +464,23 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Find Cashless Hotels
+        {copy.button}
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">Join thousands exploring Cox's Bazar, Sylhet, Bandarban & more — completely hassle-free.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">{copy.footer}</p>
     </div>
   );
 }
 
 /* ─────── Bus Filter Panel ─────── */
-function BusFilterPanel({ locations }: { locations: Location[] }) {
+function BusFilterPanel({
+  locations,
+  copy,
+  requiredFieldsAlert,
+}: {
+  locations: Location[];
+  copy: HomeMessages["hero"]["panels"]["bus"];
+  requiredFieldsAlert: string;
+}) {
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -472,7 +498,7 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.departureCity || !filters.arrivalCity || !filters.departureDate) {
-      alert("Please fill in all required fields");
+      alert(requiredFieldsAlert);
       return;
     }
     const qs = new URLSearchParams();
@@ -487,7 +513,7 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Bus</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black mb-6">{copy.title}</h3>
       <div className="mb-6">
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-black">
@@ -495,87 +521,87 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
               type="radio"
               value="oneway"
               checked={filters.tripType === "oneway"}
-              onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "oneway" })}
+            onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "oneway" })}
               className="accent-[var(--theme-teal)]"
             />
-            <span className="font-medium">One-way</span>
+            <span className="font-medium">{copy.oneWay}</span>
           </label>
           <label className="flex items-center gap-2 text-black">
             <input
               type="radio"
               value="returntrip"
               checked={filters.tripType === "returntrip"}
-              onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "returntrip" })}
+            onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "returntrip" })}
               className="accent-[var(--theme-teal)]"
             />
-            <span className="font-medium">Return Trip</span>
+            <span className="font-medium">{copy.returnTrip}</span>
           </label>
         </div>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Departure City</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.departureCityLabel}</label>
           <input
             type="text"
-            placeholder="From..."
+            placeholder={copy.departureCityPlaceholder}
             value={filters.departureCity}
             onChange={(e) => setFilters({ ...filters, departureCity: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Arrival City</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.arrivalCityLabel}</label>
           <input
             type="text"
-            placeholder="To..."
+            placeholder={copy.arrivalCityPlaceholder}
             value={filters.arrivalCity}
             onChange={(e) => setFilters({ ...filters, arrivalCity: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Departure Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.departureDateLabel}</label>
           <CustomDatePicker
             value={filters.departureDate}
             onChange={(value) => setFilters({ ...filters, departureDate: value })}
-            placeholder="Select Departure Date"
+            placeholder={copy.departureDatePlaceholder}
           />
         </div>
 
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.returnDateLabel}</label>
           <CustomDatePicker
             value={filters.returnDate}
             onChange={(value) => setFilters({ ...filters, returnDate: value })}
-            placeholder="Select Return Date"
+            placeholder={copy.returnDatePlaceholder}
             disabled={filters.tripType === "oneway"}
-            disabledText="💰 Save costs on return trip"
+            disabledText={`💰 ${copy.returnDateDisabledText}`}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Passengers</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.passengersLabel}</label>
           <select
             value={filters.passengers}
             onChange={(e) => setFilters({ ...filters, passengers: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n} Passenger{n > 1 ? "s" : ""}
+            {copy.passengersOptions.map((option, index) => (
+              <option key={option} value={String(index + 1)}>
+                {option}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Bus Type</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.busTypeLabel}</label>
           <select
             value={filters.busClass}
             onChange={(e) => setFilters({ ...filters, busClass: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            <option value="standard">Standard</option>
-            <option value="ac">AC</option>
-            <option value="sleeper">Sleeper</option>
+            <option value="standard">{copy.busTypeOptions.standard}</option>
+            <option value="ac">{copy.busTypeOptions.ac}</option>
+            <option value="sleeper">{copy.busTypeOptions.sleeper}</option>
           </select>
         </div>
       </div>
@@ -583,15 +609,23 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Get QR Bus Tickets
+        {copy.button}
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">Board instantly with QR — no queues, no paper tickets.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">{copy.footer}</p>
     </div>
   );
 }
 
 /* ─────── Train Filter Panel ─────── */
-function TrainFilterPanel({ locations }: { locations: Location[] }) {
+function TrainFilterPanel({
+  locations,
+  copy,
+  requiredFieldsAlert,
+}: {
+  locations: Location[];
+  copy: HomeMessages["hero"]["panels"]["train"];
+  requiredFieldsAlert: string;
+}) {
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -609,7 +643,7 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.departureStation || !filters.arrivalStation || !filters.departureDate) {
-      alert("Please fill in all required fields");
+      alert(requiredFieldsAlert);
       return;
     }
     const qs = new URLSearchParams();
@@ -624,7 +658,7 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Train</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black mb-6">{copy.title}</h3>
       <div className="mb-6">
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-black">
@@ -632,87 +666,87 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
               type="radio"
               value="oneway"
               checked={filters.tripType === "oneway"}
-              onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "oneway" })}
+            onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "oneway" })}
               className="accent-[var(--theme-teal)]"
             />
-            <span className="font-medium">One-way</span>
+            <span className="font-medium">{copy.oneWay}</span>
           </label>
           <label className="flex items-center gap-2 text-black">
             <input
               type="radio"
               value="returntrip"
               checked={filters.tripType === "returntrip"}
-              onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "returntrip" })}
+            onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "returntrip" })}
               className="accent-[var(--theme-teal)]"
             />
-            <span className="font-medium">Return Trip</span>
+            <span className="font-medium">{copy.returnTrip}</span>
           </label>
         </div>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">From Station</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.fromStationLabel}</label>
           <input
             type="text"
-            placeholder="Departure station..."
+            placeholder={copy.fromStationPlaceholder}
             value={filters.departureStation}
             onChange={(e) => setFilters({ ...filters, departureStation: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">To Station</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.toStationLabel}</label>
           <input
             type="text"
-            placeholder="Arrival station..."
+            placeholder={copy.toStationPlaceholder}
             value={filters.arrivalStation}
             onChange={(e) => setFilters({ ...filters, arrivalStation: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Departure Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.departureDateLabel}</label>
           <CustomDatePicker
             value={filters.departureDate}
             onChange={(value) => setFilters({ ...filters, departureDate: value })}
-            placeholder="Select Departure Date"
+            placeholder={copy.departureDatePlaceholder}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.returnDateLabel}</label>
           <CustomDatePicker
             value={filters.returnDate}
             onChange={(value) => setFilters({ ...filters, returnDate: value })}
-            placeholder="Select Return Date"
+            placeholder={copy.returnDatePlaceholder}
             disabled={filters.tripType === "oneway"}
-            disabledText="💰 Save costs on return trip"
+            disabledText={`💰 ${copy.returnDateDisabledText}`}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Passengers</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.passengersLabel}</label>
           <select
             value={filters.passengers}
             onChange={(e) => setFilters({ ...filters, passengers: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n} Passenger{n > 1 ? "s" : ""}
+            {copy.passengersOptions.map((option, index) => (
+              <option key={option} value={String(index + 1)}>
+                {option}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Class</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.classLabel}</label>
           <select
             value={filters.trainClass}
             onChange={(e) => setFilters({ ...filters, trainClass: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            <option value="general">General</option>
-            <option value="first">First Class</option>
-            <option value="second">Second Class</option>
-            <option value="sleeper">Sleeper</option>
+            <option value="general">{copy.classOptions.general}</option>
+            <option value="first">{copy.classOptions.first}</option>
+            <option value="second">{copy.classOptions.second}</option>
+            <option value="sleeper">{copy.classOptions.sleeper}</option>
           </select>
         </div>
       </div>
@@ -720,15 +754,23 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Get QR Train Tickets
+        {copy.button}
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">Travel smoothly with instant QR tickets — cashless & convenient.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">{copy.footer}</p>
     </div>
   );
 }
 
 /* ─────── Flight Filter Panel ─────── */
-function FlightFilterPanel({ locations }: { locations: Location[] }) {
+function FlightFilterPanel({
+  locations,
+  copy,
+  requiredFieldsAlert,
+}: {
+  locations: Location[];
+  copy: HomeMessages["hero"]["panels"]["flight"];
+  requiredFieldsAlert: string;
+}) {
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -745,7 +787,7 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.departureCity || !filters.arrivalCity || !filters.departureDate) {
-      alert("Please fill in all required fields");
+      alert(requiredFieldsAlert);
       return;
     }
     const qs = new URLSearchParams();
@@ -762,7 +804,7 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Flight</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black mb-6">{copy.title}</h3>
       <div className="mb-6">
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-black">
@@ -770,72 +812,72 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
               type="radio"
               value="oneway"
               checked={filters.tripType === "oneway"}
-              onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "oneway" })}
+            onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "oneway" })}
               className="accent-[var(--theme-teal)]"
             />
-            <span className="font-medium">One-way</span>
+            <span className="font-medium">{copy.oneWay}</span>
           </label>
           <label className="flex items-center gap-2 text-black">
             <input
               type="radio"
               value="roundtrip"
               checked={filters.tripType === "roundtrip"}
-              onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "roundtrip" })}
+            onChange={(e) => setFilters({ ...filters, tripType: e.target.value as "roundtrip" })}
               className="accent-[var(--theme-teal)]"
             />
-            <span className="font-medium">Round-trip</span>
+            <span className="font-medium">{copy.roundTrip}</span>
           </label>
         </div>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">From</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.fromLabel}</label>
           <input
             type="text"
-            placeholder="Departure city..."
+            placeholder={copy.fromPlaceholder}
             value={filters.departureCity}
             onChange={(e) => setFilters({ ...filters, departureCity: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">To</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.toLabel}</label>
           <input
             type="text"
-            placeholder="Arrival city..."
+            placeholder={copy.toPlaceholder}
             value={filters.arrivalCity}
             onChange={(e) => setFilters({ ...filters, arrivalCity: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Departure Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.departureDateLabel}</label>
           <CustomDatePicker
             value={filters.departureDate}
             onChange={(value) => setFilters({ ...filters, departureDate: value })}
-            placeholder="Select Departure Date"
+            placeholder={copy.departureDatePlaceholder}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Return Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.returnDateLabel}</label>
           <CustomDatePicker
             value={filters.returnDate}
             onChange={(value) => setFilters({ ...filters, returnDate: value })}
-            placeholder="Select Return Date"
+            placeholder={copy.returnDatePlaceholder}
             disabled={filters.tripType === "oneway"}
-            disabledText="💰 Save costs on round trip"
+            disabledText={`💰 ${copy.returnDateDisabledText}`}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Passengers</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.passengersLabel}</label>
           <select
             value={filters.passengers}
             onChange={(e) => setFilters({ ...filters, passengers: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 6].map((n) => (
-              <option key={n} value={n}>
-                {n} Passenger{n > 1 ? "s" : ""}
+            {copy.passengersOptions.map((option, index) => (
+              <option key={option} value={String(index + 1)}>
+                {option}
               </option>
             ))}
           </select>
@@ -845,15 +887,23 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Find Cashless Flights
+        {copy.button}
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">Skip the hassle — pay with bKash, Nagad or QR instantly.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">{copy.footer}</p>
     </div>
   );
 }
 
 /* ─────── Tour Filter Panel ─────── */
-function TourFilterPanel({ locations }: { locations: Location[] }) {
+function TourFilterPanel({
+  locations,
+  copy,
+  requiredFieldsAlert,
+}: {
+  locations: Location[];
+  copy: HomeMessages["hero"]["panels"]["tours"];
+  requiredFieldsAlert: string;
+}) {
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -914,7 +964,7 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.startDate || !filters.duration) {
-      alert("Please fill in all required fields");
+      alert(requiredFieldsAlert);
       return;
     }
     const qs = new URLSearchParams();
@@ -928,29 +978,29 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Plan a Tour</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black mb-6">{copy.title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Tour Type</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.tourTypeLabel}</label>
           <select
             value={filters.tourType}
             onChange={(e) => setFilters({ ...filters, tourType: e.target.value })}
             className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            <option value="">-- Any Tour Type --</option>
-            <option value="adventure">Adventure</option>
-            <option value="cultural">Cultural</option>
-            <option value="nature">Nature</option>
-            <option value="beach">Beach</option>
-            <option value="hiking">Hiking</option>
+            <option value="">{copy.tourTypeOptions.any}</option>
+            <option value="adventure">{copy.tourTypeOptions.adventure}</option>
+            <option value="cultural">{copy.tourTypeOptions.cultural}</option>
+            <option value="nature">{copy.tourTypeOptions.nature}</option>
+            <option value="beach">{copy.tourTypeOptions.beach}</option>
+            <option value="hiking">{copy.tourTypeOptions.hiking}</option>
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Destination</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.destinationLabel}</label>
           <div className="relative">
             <input
               type="text"
-              placeholder="Search destination..."
+              placeholder={copy.destinationPlaceholder}
               value={locationSearch}
               onChange={(e) => {
                 setLocationSearch(e.target.value);
@@ -979,37 +1029,37 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
           </div>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.startDateLabel}</label>
           <CustomDatePicker
             value={filters.startDate}
             onChange={(value) => setFilters({ ...filters, startDate: value })}
-            placeholder="Select Start Date"
+            placeholder={copy.startDatePlaceholder}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Duration</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.durationLabel}</label>
           <select
             value={filters.duration}
             onChange={(e) => setFilters({ ...filters, duration: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 7, 10, 14].map((d) => (
-              <option key={d} value={d}>
-                {d} Day{d > 1 ? "s" : ""}
+            {copy.durationOptions.map((option, index) => (
+              <option key={option} value={String([1, 2, 3, 4, 5, 7, 10, 14][index])}>
+                {option}
               </option>
             ))}
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Tourists</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.touristsLabel}</label>
           <select
             value={filters.tourists}
             onChange={(e) => setFilters({ ...filters, tourists: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 6, 8, 10].map((t) => (
-              <option key={t} value={t}>
-                {t} Tourist{t > 1 ? "s" : ""}
+            {copy.touristsOptions.map((option, index) => (
+              <option key={option} value={String([1, 2, 3, 4, 5, 6, 8, 10][index])}>
+                {option}
               </option>
             ))}
           </select>
@@ -1019,18 +1069,26 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Explore Cashless Tours
+        {copy.button}
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">All-inclusive tours with QR payments — no cash needed anywhere.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">{copy.footer}</p>
     </div>
   );
 }
 
 /* ─────── Activity Filter Panel ─────── */
-function ActivityFilterPanel({ locations }: { locations: Location[] }) {
+function ActivityFilterPanel({
+  locations,
+  copy,
+  requiredFieldsAlert,
+}: {
+  locations: Location[];
+  copy: HomeMessages["hero"]["panels"]["activities"];
+  requiredFieldsAlert: string;
+}) {
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toISOString().split("T")[0];
   };
 
   const [filters, setFilters] = useState<ActivityFilters>({
@@ -1045,8 +1103,8 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const locationSuggestions = locations
-    .filter(loc => loc.locationType === "DISTRICT")
-    .filter(loc => {
+    .filter((loc) => loc.locationType === "DISTRICT")
+    .filter((loc) => {
       const term = locationSearch.trim().toLowerCase();
       if (!term) return false;
       const name = loc.name?.toLowerCase() || "";
@@ -1055,27 +1113,27 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
       return name.includes(term) || city.includes(term) || division.includes(term);
     })
     .sort((a, b) => {
-        const term = locationSearch.trim().toLowerCase();
+      const term = locationSearch.trim().toLowerCase();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const score = (loc: any) => {
-            const name = loc.name?.toLowerCase() || "";
-            const city = loc.city?.toLowerCase() || "";
-            const division = loc.division?.toLowerCase() || "";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const score = (loc: any) => {
+        const name = loc.name?.toLowerCase() || "";
+        const city = loc.city?.toLowerCase() || "";
+        const division = loc.division?.toLowerCase() || "";
 
-            if (name === term)return 300;
-            if (name.startsWith(term)) return 250;
+        if (name === term) return 300;
+        if (name.startsWith(term)) return 250;
 
-            if (city === term) return 200;
-            if (city.startsWith(term)) return 150;
+        if (city === term) return 200;
+        if (city.startsWith(term)) return 150;
 
-            if (division === term) return 100;
-            if (division.startsWith(term)) return 50;
+        if (division === term) return 100;
+        if (division.startsWith(term)) return 50;
 
-            return 10;
-        };
+        return 10;
+      };
 
-        return score(b) - score(a);
+      return score(b) - score(a);
     })
     .slice(0, 5);
 
@@ -1087,7 +1145,7 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.date) {
-      alert("Please fill in all required fields");
+      alert(requiredFieldsAlert);
       return;
     }
     const qs = new URLSearchParams();
@@ -1100,29 +1158,29 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Find Activities</h3>
+      <h3 className="text-lg md:text-xl font-bold text-black mb-6">{copy.title}</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Activity Type</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.activityTypeLabel}</label>
           <select
             value={filters.activityType}
             onChange={(e) => setFilters({ ...filters, activityType: e.target.value })}
             className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            <option value="">-- Any Activity Type --</option>
-            <option value="adventure">Adventure Sports</option>
-            <option value="water">Water Sports</option>
-            <option value="trek">Trekking</option>
-            <option value="cultural">Cultural</option>
-            <option value="extreme">Extreme Sports</option>
+            <option value="">{copy.activityTypeOptions.any}</option>
+            <option value="adventure">{copy.activityTypeOptions.adventure}</option>
+            <option value="water">{copy.activityTypeOptions.water}</option>
+            <option value="trek">{copy.activityTypeOptions.trek}</option>
+            <option value="cultural">{copy.activityTypeOptions.cultural}</option>
+            <option value="extreme">{copy.activityTypeOptions.extreme}</option>
           </select>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Location</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.locationLabel}</label>
           <div className="relative">
             <input
               type="text"
-              placeholder="Search location..."
+              placeholder={copy.locationPlaceholder}
               value={locationSearch}
               onChange={(e) => {
                 setLocationSearch(e.target.value);
@@ -1151,23 +1209,23 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
           </div>
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Activity Date</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.activityDateLabel}</label>
           <CustomDatePicker
             value={filters.date}
             onChange={(value) => setFilters({ ...filters, date: value })}
-            placeholder="Select Activity Date"
+            placeholder={copy.activityDatePlaceholder}
           />
         </div>
         <div className="flex flex-col">
-          <label className="text-sm font-semibold text-gray-700 mb-2">Participants</label>
+          <label className="text-sm font-semibold text-gray-700 mb-2">{copy.participantsLabel}</label>
           <select
             value={filters.participants}
             onChange={(e) => setFilters({ ...filters, participants: e.target.value })}
             className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
-            {[1, 2, 3, 4, 5, 6, 8, 10].map((p) => (
-              <option key={p} value={p}>
-                {p} Participant{p > 1 ? "s" : ""}
+            {copy.participantsOptions.map((option, index) => (
+              <option key={option} value={String([1, 2, 3, 4, 5, 6, 8, 10][index])}>
+                {option}
               </option>
             ))}
           </select>
@@ -1177,9 +1235,9 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
         onClick={handleSearch}
         className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
       >
-        Book QR Activities
+        {copy.button}
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">Seamless experiences — pay once, enjoy everything with QR.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">{copy.footer}</p>
     </div>
   );
 }

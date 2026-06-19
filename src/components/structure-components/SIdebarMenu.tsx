@@ -6,6 +6,10 @@ import Link from 'next/link';
 import { redirect, usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { AuthApi } from '@/services/api';
+import {
+    navigationMessages,
+    type NavigationMessages,
+} from '@/i18n/navigationMessages';
 
 import { FaBlackTie, FaWindowClose } from 'react-icons/fa';
 
@@ -148,16 +152,18 @@ type SidebarMenuBlockProps = {
     opensOnHover?: boolean;
     currentUserRole?: string;
     menuConfig: SidebarMenuConfig;
+    copy: NavigationMessages["sidebar"];
 }
 
-const SidebarMenuBlock = ({ menuSectionName, opensOnHover = false, currentUserRole, menuConfig }: SidebarMenuBlockProps) => {
+const SidebarMenuBlock = ({ menuSectionName, opensOnHover = false, currentUserRole, menuConfig, copy }: SidebarMenuBlockProps) => {
     let dashboardItems: MenuItem[] = [];
+    const translatedItems: Readonly<Record<string, string>> = copy.items;
 
     if (!currentUserRole) {
         dashboardItems = [
-            { label: 'Loading', href: '#', isPlaceholder: true },
-            { label: 'Loading', href: '#', isPlaceholder: true },
-            { label: 'Loading', href: '#', isPlaceholder: true }
+            { label: copy.loading, href: '#', isPlaceholder: true },
+            { label: copy.loading, href: '#', isPlaceholder: true },
+            { label: copy.loading, href: '#', isPlaceholder: true }
         ];
     } else if (menuConfig[currentUserRole]) {
         dashboardItems = menuConfig[currentUserRole];
@@ -191,7 +197,7 @@ const SidebarMenuBlock = ({ menuSectionName, opensOnHover = false, currentUserRo
                             href={item.href}
                             onClick={(e) => item.disabled && e.preventDefault()}
                         >
-                            {item.label}
+                            {translatedItems[item.label] ?? item.label}
                         </Link>
                     </li>
                 );
@@ -206,9 +212,10 @@ type SidebarMenuProps = {
     isPopOutSidebar: boolean;
     opensOnHover?: boolean;
     setSidebarVisibility?: React.Dispatch<React.SetStateAction<boolean>>;
+    copy?: NavigationMessages["sidebar"];
 }
 
-const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({className, style, isPopOutSidebar, opensOnHover = false, setSidebarVisibility}, ref) => {
+const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({className, style, isPopOutSidebar, opensOnHover = false, setSidebarVisibility, copy = navigationMessages.en.sidebar}, ref) => {
     const pathName = usePathname();
     const router = useRouter();
     
@@ -272,12 +279,12 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
                     <div>
                         <div className="flex justify-center items-center min-h-[120px] font-bold text-white text-3xl bg-[var(--theme-teal)]
                         border-b-2 border-[var(--theme-deep-green)]">Cholo BD!</div>
-                        <button className="w-[100%] h-[40px] text-lg text-white font-sans theme-btn-teal" onClick={() => onClose()}>Close</button>
+                        <button className="w-[100%] h-[40px] text-lg text-white font-sans theme-btn-teal" onClick={() => onClose()}>{copy.close}</button>
                     </div>
                 )}
 
                 <div className="relative">
-                    <div className="relative p-3 text-xl text-center border-b-2 text-white font-sans overflow-visible theme-sidebar-header">Hello there!
+                    <div className="relative p-3 text-xl text-center border-b-2 text-white font-sans overflow-visible theme-sidebar-header">{copy.greeting}
                         {opensOnHover && (
                             <div 
                                 className="absolute flex justify-center items-center -right-[3.25rem] -top-1 h-[108%] w-[50px] bg-[var(--theme-teal)] rounded-r-md cursor-pointer hover:bg-[var(--theme-teal-hover)] transition-colors z-40"
@@ -292,8 +299,8 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
 
                     <div className="flex-1 overflow-y-auto sidebar-scrollable">
                         <div className='flex flex-col font-sans'>
-                            <p className="text-lg pt-20 pb-10 theme-text-teal text-center">Log In to access additional features</p>
-                            <button className="w-[100%] h-[40px] mb-10 text-lg text-center theme-btn-teal" onClick={() => onLogInPrompt()}>Log In</button>
+                            <p className="text-lg pt-20 pb-10 theme-text-teal text-center">{copy.loginPrompt}</p>
+                            <button className="w-[100%] h-[40px] mb-10 text-lg text-center theme-btn-teal" onClick={() => onLogInPrompt()}>{copy.logIn}</button>
                         </div>
                     </div>
                 </div>
@@ -334,32 +341,36 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
                     <div className="flex-1 overflow-y-auto sidebar-scrollable max-h-[75vh] md:max-h-[80vh]">
                         {pathName === "/dashboard" &&
                             <SidebarMenuBlock
-                                menuSectionName='Dashboard Sections'
+                                menuSectionName={copy.sections.dashboard}
                                 opensOnHover={opensOnHover}
                                 currentUserRole={currentUserRole}
                                 menuConfig={dashboardSectionMenu}
+                                copy={copy}
                             />
                         }
 
                         <SidebarMenuBlock
-                            menuSectionName='Pages'
+                            menuSectionName={copy.sections.pages}
                             opensOnHover={opensOnHover}
                             currentUserRole={currentUserRole}
                             menuConfig={sitePagesMenu}
+                            copy={copy}
                         />
 
                         <SidebarMenuBlock
-                            menuSectionName='Quick Actions'
+                            menuSectionName={copy.sections.quickActions}
                             opensOnHover={opensOnHover}
                             currentUserRole={currentUserRole}
                             menuConfig={quickActionsMenu}
+                            copy={copy}
                         />
 
                         <SidebarMenuBlock
-                            menuSectionName='Personalize'
+                            menuSectionName={copy.sections.personalize}
                             opensOnHover={opensOnHover}
                             currentUserRole={currentUserRole}
                             menuConfig={personalizeMenu}
+                            copy={copy}
                         />
                     </div>
                 </div>

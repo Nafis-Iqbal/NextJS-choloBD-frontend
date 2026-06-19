@@ -17,22 +17,29 @@ import IconWithBadge from "../custom-elements/IconWithBadge";
 import BasicButton from "../custom-elements/Buttons";
 import { SearchInputBar } from "./SearchInputBar";
 import { NextImage } from "../custom-elements/UIUtilities";
+import {
+    navigationMessages,
+    type NavigationMessages,
+} from "@/i18n/navigationMessages";
 
 
 const THEMES = ['forest', 'dusk', 'crimson', 'violet', 'amber', 'iceBlue', 'rose'] as const;
 type Theme = typeof THEMES[number];
 
-const THEME_LABELS: Record<Theme, string> = {
-    forest: '🌿 Forest',
-    dusk:   '🌇 Dusk',
-    crimson: '🩸 Crimson',
-    violet: '🍇 Violet',
-    amber: '🍂 Amber',
-    iceBlue: '🧊 Ice Blue',
-    rose: '🌹 Rose',
+const THEME_ICONS: Record<Theme, string> = {
+    forest: '🌿',
+    dusk: '🌇',
+    crimson: '🩸',
+    violet: '🍇',
+    amber: '🍂',
+    iceBlue: '🧊',
+    rose: '🌹',
 };
 
-const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) => {
+const Navbar: React.FC<{
+    affectOpacity?: boolean;
+    copy?: NavigationMessages;
+}> = ({affectOpacity = false, copy = navigationMessages.en}) => {
     const router = useRouter();
     const logout = useLogout();
     
@@ -151,6 +158,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     <AnimatePresence>
                         {isSideBarMenuOpen && 
                             <MotionSidebarMenu 
+                                copy={copy.sidebar}
                                 className="mt-2 top-full z-90"
                                 isPopOutSidebar={true}
                                 setSidebarVisibility={setIsSideBarMenuOpen}
@@ -175,6 +183,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     </button>
                     
                     <SearchInputBar 
+                        copy={copy.search}
                         className="hidden md:block w-[75%] mr-3" 
                         isOpen={true}
                         setInputBarVisibility={setIsSearchBarOpen}
@@ -224,6 +233,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     <AnimatePresence>
                         {isMenuOpen && 
                             <MotionDropdownMenu 
+                                copy={copy.dropdown}
                                 className="mt-2 top-full -right-1 z-90"
                                 variants={{
                                 rest: { y: '-100%', transition: { type: 'spring', stiffness: 500, damping: 40, delay: 2.0 } },
@@ -242,12 +252,12 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                         <button
                             className="relative p-2 group transition-all duration-150 hover:scale-120"
                             onClick={cycleTheme}
-                            title={`Theme: ${THEME_LABELS[currentTheme]} — click to cycle`}
+                            title={`${copy.themeTitle}: ${copy.themes[currentTheme]}`}
                         >
                             <FaGlobe className="md:text-2xl text-white"/>
                             <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-sans font-normal
                                 text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                {THEME_LABELS[currentTheme]}
+                                {THEME_ICONS[currentTheme]} {copy.themes[currentTheme]}
                             </span>
                         </button>
 
@@ -259,9 +269,9 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                             <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
                         </Link>
 
-                        {!isAuthenticated ? (<Link className="p-2 transition-all hover:scale-110 text-center text-white" href="/booking/trackers">Booking Tracker</Link>) : <></>}
+                        {!isAuthenticated ? (<Link className="p-2 transition-all hover:scale-110 text-center text-white" href="/booking/trackers">{copy.bookingTracker}</Link>) : <></>}
 
-                        {!isAuthenticated ? (<Link className="p-2 hover:scale-110 text-white" href="/login">Log In</Link>) : 
+                        {!isAuthenticated ? (<Link className="p-2 hover:scale-110 text-white" href="/login">{copy.logIn}</Link>) :
                         (
                             <>
                                 <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
@@ -274,7 +284,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                                         className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-gray-300/30 text-white text-sm text-center rounded-sm"
                                         onClick={() => router.push("wallet/wallet-recharge")}
                                     >
-                                        Get Credits!
+                                        {copy.getCredits}
                                     </button>
                                 </div>
                             </>
@@ -284,6 +294,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     </div>
                 </div>
                 <SearchInputBar 
+                    copy={copy.search}
                     className="md:hidden absolute top-full w-full"
                     setInputBarVisibility={setIsSearchBarOpen}
                     isOpen={isSearchBarOpen}

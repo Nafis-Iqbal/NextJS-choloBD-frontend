@@ -3,14 +3,21 @@ import Footer from "@/components/structure-components/Footer";
 import BottomNavbar from "@/components/structure-components/BottomNavbar";
 import { MotionSidebarMenu } from "@/components/structure-components/SIdebarMenu";
 import { HomepageContent } from "@/components/page-content/HomepageContent";
+import { getLocale } from "next-intl/server";
+import {
+    homeMessages,
+    type SupportedHomeLocale,
+} from "@/i18n/homeMessages";
 
 export default async function HomePage() {
+    const locale = (await getLocale()) as SupportedHomeLocale;
+    const navigationCopy = (homeMessages[locale] ?? homeMessages.en).navigation;
     
     return (
         <section className="flex flex-col">
             <header className="relative">
                 <nav>
-                    <Navbar affectOpacity={true}/>
+                    <Navbar affectOpacity={true} copy={navigationCopy}/>
                 </nav>
             </header>
             
@@ -35,6 +42,7 @@ export default async function HomePage() {
                         isPopOutSidebar={false}
                         opensOnHover={true}
                         className="fixed w-[15%]"
+                        copy={navigationCopy.sidebar}
                     />
                 </aside>
                 
@@ -51,4 +59,3 @@ export default async function HomePage() {
         </section>
     );
 }
-        

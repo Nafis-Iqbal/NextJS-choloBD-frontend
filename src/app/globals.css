@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+:root {
+  --font-geist-sans: "Inter", "Segoe UI", sans-serif;
+  --font-geist-mono: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+  --font-ubuntu-mono: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+  --font-satisfy: "Brush Script MT", "Segoe Script", cursive;
+}
+
 @layer components {
     /* === Global Buttons — driven by theme variables === */
     .green-button {

@@ -2,15 +2,21 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { SearchApi } from "@/services/api";
 import { NextImage } from "../custom-elements/UIUtilities";
+import {
+    navigationMessages,
+    type NavigationMessages,
+} from "@/i18n/navigationMessages";
 
 export const SearchInputBar = ({
     isOpen, 
     className,
     setInputBarVisibility,
+    copy = navigationMessages.en.search,
 } : {
     isOpen?: boolean, 
     className?: string,
     setInputBarVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+    copy?: NavigationMessages["search"];
 }) => {
     const router = useRouter();
     const [searchTerm, setSearchTerm] = useState<string>("");
@@ -49,7 +55,7 @@ export const SearchInputBar = ({
             <div className="relative flex justify-center bg-inherit">
                 <input 
                     type="text" 
-                    placeholder="Looking for something?"
+                    placeholder={copy.placeholder}
                     value={searchTerm}
                     onChange={handleChange}
                     className="w-full bg-white border border-gray-300 rounded-md px-4 py-2 font-sans placeholder-gray-400 text-gray-800 
@@ -67,7 +73,7 @@ export const SearchInputBar = ({
                                 onClick={() => onSearchResultNavigate("hotels", hotel.id)}
                             >
                                 <p className="ml-1 md:ml-3">{hotel.name}</p>
-                                <p className="text-blue-400 font-semibold"> Activity Spot</p>
+                                <p className="text-blue-400 font-semibold">{copy.hotel}</p>
                                 <NextImage 
                                     src={hotel.images?.[0]?.url || null} 
                                     alt={hotel.name} 
@@ -83,7 +89,7 @@ export const SearchInputBar = ({
                                 onClick={() => onSearchResultNavigate("tour-spots", tourSpot.id)}
                             >
                                 <p className="ml-1 md:ml-3">{tourSpot.name}</p>
-                                <p className="text-green-400 font-semibold"> Tour Spot</p>
+                                <p className="text-green-400 font-semibold">{copy.tourSpot}</p>
                                 <NextImage 
                                     src={tourSpot.images?.[0]?.url || null} 
                                     alt={tourSpot.name} 
@@ -99,7 +105,7 @@ export const SearchInputBar = ({
                                 onClick={() => onSearchResultNavigate("activity-spots", activitySpot.id)}
                             >
                                 <p className="ml-1 md:ml-3">{activitySpot.name}</p>
-                                <p className="text-pink-400 font-semibold"> Activity Spot</p>
+                                <p className="text-pink-400 font-semibold">{copy.activitySpot}</p>
                                 <NextImage 
                                     src={activitySpot.images?.[0]?.url || null} 
                                     alt={activitySpot.name} 

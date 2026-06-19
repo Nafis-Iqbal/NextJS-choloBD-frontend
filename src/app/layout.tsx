@@ -1,34 +1,12 @@
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Satisfy, Ubuntu_Mono, Fredericka_the_Great } from "next/font/google";
+import { getLocale } from "next-intl/server";
 
 import { ClientProviders } from "@/providers/ClientProviders";
 
 import NotificationPopUp from "@/components/modals/NotificationPopUpModal";
 import LoadingModal from "@/components/modals/LoadingContentModal";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const ubuntuMono = Ubuntu_Mono({
-  weight: "400",
-  variable: "--font-ubuntu-mono",
-  subsets: ["latin"],
-});
-
-const satisfy = Satisfy({
-  weight: "400",
-  variable: "--font-satisfy",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: {
@@ -62,9 +40,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
 
   return (
-    <html lang="en" className={`${satisfy.className} ${geistSans.variable} ${geistMono.variable} ${ubuntuMono.variable} antialiased scroll-smooth`}>
+    <html lang={locale} className="antialiased scroll-smooth">
       <body className="overflow-x-hidden">
         <main>
           <ClientProviders>
@@ -77,4 +56,3 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     </html>
   );
 }
-
