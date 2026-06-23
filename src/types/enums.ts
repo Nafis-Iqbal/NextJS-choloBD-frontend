@@ -94,6 +94,13 @@ export enum HotelRoomStatus {
   OUT_OF_SERVICE = "OUT_OF_SERVICE"
 }
 
+export enum RoomShift {
+  ALL_DAY,
+  NIGHT, // 10:00 PM - 8:00 AM (next day)
+  MORNING, // 8:00 AM - 3:00 PM
+  AFTERNOON // 3:00 PM - 10:00 PM
+}
+
 // Review and Rating Enums
 export enum ReviewType {
   HOTEL = "HOTEL",

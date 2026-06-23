@@ -7,6 +7,7 @@ import { CustomDatePicker } from "../custom-elements/CustomInputElements";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking } from "react-icons/md";
 import { LocationApi } from "@/services/api";
+import { RoomShift } from "@/types/enums";
 
 type BookingTab = "hotels" | "bus" | "train" | "flight" | "tours" | "activities";
 
@@ -21,6 +22,7 @@ interface HotelFilters {
   checkOut: string;
   guests: string;
   rooms: string;
+  shift: RoomShift;
 }
 
 interface BusFilters {
@@ -299,6 +301,7 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
     checkOut: "",
     guests: "2",
     rooms: "1",
+    shift: RoomShift.NIGHT,
   });
 
   const [locationSearch, setLocationSearch] = useState("");
@@ -346,17 +349,43 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
     setShowSuggestions(false);
   };
 
+  const handleShiftChange = (newShift: RoomShift) => {
+    if (newShift !== RoomShift.ALL_DAY) {
+      // Set checkout date to be the same as checkin date
+      setFilters({ ...filters, shift: newShift, checkOut: filters.checkIn });
+    } else {
+      // If changing to ALL_DAY and checkout is the same as checkin, clear it
+      if (filters.checkOut === filters.checkIn) {
+        setFilters({ ...filters, shift: newShift, checkOut: "" });
+      } else {
+        setFilters({ ...filters, shift: newShift });
+      }
+    }
+  };
+
   const handleSearch = () => {
-    if (!filters.city || !filters.checkIn || !filters.checkOut) {
+    let validationFilters = filters;
+
+    // Apply shift logic before validation
+    if (filters.shift !== RoomShift.ALL_DAY) {
+      validationFilters = { ...validationFilters, checkOut: validationFilters.checkIn };
+    } else {
+      if (validationFilters.checkOut === validationFilters.checkIn) {
+        validationFilters = { ...validationFilters, checkOut: "" };
+      }
+    }
+
+    if (!validationFilters.city || !validationFilters.checkIn || !validationFilters.checkOut) {
       alert("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();
-    qs.set("city", filters.city);
-    qs.set("checkIn", filters.checkIn);
-    qs.set("checkOut", filters.checkOut);
-    qs.set("guests", filters.guests);
-    qs.set("rooms", filters.rooms);
+    qs.set("city", validationFilters.city);
+    qs.set("shift", RoomShift[validationFilters.shift]);
+    qs.set("checkIn", validationFilters.checkIn);
+    qs.set("checkOut", validationFilters.checkOut);
+    qs.set("guests", validationFilters.guests);
+    qs.set("rooms", validationFilters.rooms);
     window.location.href = `/booking/hotel?${qs.toString()}`;
   };
 
@@ -396,6 +425,32 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
               </div>
             )}
           </div>
+        </div>
+        <div className="hidden md:flex md:flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Shift</label>
+          <select
+            value={filters.shift}
+            onChange={(e) => handleShiftChange(parseInt(e.target.value) as RoomShift)}
+            className="max-w-xs w-full text-sm md:text-base px-1 md:px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            <option value={RoomShift.ALL_DAY}>Whole Day</option>
+            <option className="md:block" value={RoomShift.NIGHT}>Night (10 PM - 8 AM)</option>
+            <option value={RoomShift.MORNING}>Morning (8 AM - 3 PM)</option>
+            <option value={RoomShift.AFTERNOON}>Afternoon (3 PM - 10 PM)</option>
+          </select>
+        </div>
+        <div className="flex flex-col md:hidden">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Shift</label>
+          <select
+            value={filters.shift}
+            onChange={(e) => handleShiftChange(parseInt(e.target.value) as RoomShift)}
+            className="max-w-xs w-full text-sm md:text-base px-1 md:px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            <option value={RoomShift.ALL_DAY}>Whole Day</option>
+            <option className="md:block" value={RoomShift.NIGHT}>Night</option>
+            <option value={RoomShift.MORNING}>Morning</option>
+            <option value={RoomShift.AFTERNOON}>Afternoon</option>
+          </select>
         </div>
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Check-in Date</label>

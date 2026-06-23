@@ -18,10 +18,10 @@ export default function AdminDashboard() {
     );
 
     return (
-        <section className="flex flex-col p-2 font-sans" id="service_admin_dashboard">
+        <section className="flex flex-col p-2 font-sans" id="service_admin_dashboard" style={{backgroundColor: 'var(--theme-section-bg)', color: 'var(--theme-text)'}}>
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="text-green-500">Service Admin Panel</h3>
-                <p className="text-green-200">Manage your business here.</p>
+                <h3 className="theme-text-teal">Service Admin Panel</h3>
+                <p className="theme-text-subtle">Manage your business here.</p>
 
                 {
                     currentUserServiceType === "HOTEL_BOOKING" ? <HotelServiceAdminModule /> : 

@@ -60,6 +60,10 @@ export default function DashboardLayout({
                             {el}
                         </React.Fragment>
                     ))}
+
+                    <footer>
+                        <Footer/>
+                    </footer>
                 </div>
 
                 {/* <aside className="relative z-10 flex-grow w-[25%] shadow-[0_0_20px_#00FF99]">
@@ -67,13 +71,9 @@ export default function DashboardLayout({
                 </aside> */}
             </div>
             
-            <nav>
+            {/* <nav>
                 <BottomNavbar/>
-            </nav>
-            
-            <footer>
-                <Footer/>
-            </footer>
+            </nav> */}
         </section>
     )
 }

@@ -11,6 +11,7 @@ interface CreateHotelRoomBookingInput {
   userId: string;
   checkInDate: string | Date;
   checkOutDate: string | Date;
+  shift?: string;
   totalPrice: number;
   paymentMethod?: string;
   specialRequests?: string;

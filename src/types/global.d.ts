@@ -227,6 +227,7 @@ declare global {
 
     checkInDate: Date;
     checkOutDate: Date;
+    shift?: RoomShift;
     totalPrice: number;
     confirmationCode: string;
     status: BookingStatus;
@@ -314,6 +315,7 @@ declare global {
     website?: string;
     totalRooms?: number;
     availableRooms?: number;
+    isRoomAvailableForSelectedShift?: boolean;
     amenities?: Category[];
     policies?: Category[];
     hotelCategories?: HotelCategory[];
@@ -338,6 +340,9 @@ declare global {
     singleBedCount: number;
     doubleBedCount: number;
     pricePerNight: number;
+    nightShiftPrice: number;
+    morningShiftPrice: number;
+    afternoonShiftPrice: number;
     totalCount: number;
     availableCount: number;
     createdAt: Date;

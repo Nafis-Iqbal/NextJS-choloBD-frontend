@@ -16,8 +16,8 @@ export default function EmployeeDashboard() {
     return (
         <section className="flex flex-col p-2 font-sans" id="service_maintenance_dashboard" style={{backgroundColor: 'var(--theme-section-bg)', color: 'var(--theme-text)'}}>
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="theme-text-teal" style={{color: 'var(--theme-teal)'}}>Employee Maintenance Panel</h3>
-                <p className="theme-text-muted" style={{color: 'var(--theme-text-muted)'}}>All service management functionality, accessed here.</p>
+                <h3 className="theme-text-teal">Employee Maintenance Panel</h3>
+                <p className="theme-text-muted">All service management functionality, accessed here.</p>
 
                 {currentUserServiceType === "HOTEL_BOOKING" ? <HotelServiceEmployeeModule /> : null}
                 <HotelServiceEmployeeModule/>

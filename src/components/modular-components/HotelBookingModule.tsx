@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { HotelBookingApi, HotelApi, PaymentApi, WalletApi } from "@/services/api";
 import { createHotelRoomBookingSchema } from "@/validators/hotelBookingValidators";
 import { produceValidationErrorMessage } from "@/utilities/utilities";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
-import { ServiceType } from "@/types/enums";
+import { ServiceType, RoomShift } from "@/types/enums";
+import { CustomDateInput, CustomSelectInput } from "@/components/custom-elements/CustomInputElements";
 
 interface BookingState {
 	checkInDate: string;
@@ -19,6 +20,7 @@ interface BookingState {
 	guestPhoneNumber: string;
 	paymentMethod: string;
 	specialRequests: string;
+	shift: keyof typeof RoomShift;
 }
 
 interface HotelBookingPanelProps {
@@ -26,6 +28,11 @@ interface HotelBookingPanelProps {
 	userId: string;
 	onBookingSuccess?: () => void;
 	onCancel?: () => void;
+	initialCheckIn?: string;
+	initialCheckOut?: string;
+	initialGuests?: number;
+	initialRooms?: number;
+	initialShift?: keyof typeof RoomShift;
 }
 
 interface RoomCardProps {
@@ -33,24 +40,36 @@ interface RoomCardProps {
 	roomCount: number;
 	nights: number;
 	onRoomSelection: (roomTypeId: string, quantity: number) => void;
+	shift: keyof typeof RoomShift;
 }
 
-export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel }: HotelBookingPanelProps) {
+export function HotelBookingPanel({ 
+	hotelId, 
+	userId, 
+	onBookingSuccess, 
+	onCancel,
+	initialCheckIn,
+	initialCheckOut,
+	initialGuests,
+	initialRooms,
+	initialShift,
+}: HotelBookingPanelProps) {
 	const {data: hotelData, isLoading, error, status} = HotelApi.useGetHotelDetailRQ(hotelId);
 	const hotelInfo = hotelData?.data as Hotel | undefined;
 	const { openNotificationPopUpMessage } = useGlobalUI();
 	
 	const [bookingState, setBookingState] = useState<BookingState>({
-		checkInDate: new Date().toISOString().split('T')[0],
-		checkOutDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-		numberOfGuests: 1,
-		numberOfRooms: 1,
+		checkInDate: initialCheckIn || new Date().toISOString().split('T')[0],
+		checkOutDate: initialCheckOut || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+		numberOfGuests: initialGuests || 1,
+		numberOfRooms: initialRooms || 1,
 		selectedRooms: new Map(),
 		guestName: "",
 		guestEmail: "",
 		guestPhoneNumber: "",
 		paymentMethod: "sslcommerz",
 		specialRequests: "",
+		shift: initialShift || "ALL_DAY",
 	});
 
 	const [isProcessing, setIsProcessing] = useState(false);
@@ -136,8 +155,15 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 		const checkIn = new Date(bookingState.checkInDate);
 		const checkOut = new Date(bookingState.checkOutDate);
 		const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
-		return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-	}, [bookingState.checkInDate, bookingState.checkOutDate]);
+		let calculatedNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+		
+		// For shift-based bookings (same day), count as 1 unit
+		if (bookingState.shift !== "ALL_DAY" && calculatedNights === 0) {
+			calculatedNights = 1;
+		}
+		
+		return calculatedNights;
+	}, [bookingState.checkInDate, bookingState.checkOutDate, bookingState.shift]);
 
 	// Get available room types - filter by availableCount
 	const availableRooms = useMemo(() => {
@@ -145,20 +171,49 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 		return hotelInfo.roomTypes.filter((roomType: HotelRoomType) => roomType.availableCount > 0);
 	}, [hotelInfo?.roomTypes]);
 
-	// Calculate total cost
+	// Helper function to get price based on shift
+	const getPriceByShift = (roomType: HotelRoomType, shift: keyof typeof RoomShift): number => {
+		switch (shift) {
+			case "MORNING":
+				return roomType.morningShiftPrice ?? 0;
+			case "AFTERNOON":
+				return roomType.afternoonShiftPrice ?? 0;
+			case "NIGHT":
+				return roomType.nightShiftPrice ?? 0;
+			case "ALL_DAY":
+			default:
+				return roomType.pricePerNight ?? 0;
+		}
+	};
+
+	// Calculate total cost based on selected shift
 	const totalCost = useMemo(() => {
 		let total = 0;
 		bookingState.selectedRooms.forEach((quantity, roomTypeId) => {
-				const roomType = hotelInfo?.roomTypes?.find((rt: HotelRoomType) => rt.id === roomTypeId);
-			if (roomType?.pricePerNight) {
-				total += roomType.pricePerNight * nights * quantity;
+			const roomType = hotelInfo?.roomTypes?.find((rt: HotelRoomType) => rt.id === roomTypeId);
+			if (roomType) {
+				const price = getPriceByShift(roomType, bookingState.shift);
+				total += price * nights * quantity;
 			}
 		});
 		return total;
-	}, [bookingState.selectedRooms, hotelInfo?.roomTypes, nights]);
+	}, [bookingState.selectedRooms, hotelInfo?.roomTypes, nights, bookingState.shift]);
 
 	// Validation checks
-	const isDateValid = nights > 0 && bookingState.checkInDate < bookingState.checkOutDate;
+	const isDateValid = useMemo(() => {
+		if (bookingState.shift !== "ALL_DAY") {
+			// For non-ALL_DAY shifts, checkout must equal checkin
+			if (!bookingState.checkInDate || !bookingState.checkOutDate) return false;
+			return bookingState.checkOutDate === bookingState.checkInDate;
+		} else {
+			// For ALL_DAY, checkout must be after checkin
+			if (!bookingState.checkInDate || !bookingState.checkOutDate) return false;
+			const a = new Date(bookingState.checkInDate);
+			const b = new Date(bookingState.checkOutDate);
+			return b.getTime() > a.getTime();
+		}
+	}, [bookingState.checkInDate, bookingState.checkOutDate, bookingState.shift]);
+
 	const isGuestInfoComplete =
 		bookingState.guestName.trim() &&
 		bookingState.guestEmail.trim() &&
@@ -272,6 +327,7 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 			guestPhoneNumber: "",
 			paymentMethod: "sslcommerz",
 			specialRequests: "",
+			shift: "ALL_DAY",
 		});
 		setConfirmationCode(null);
 		setBookingId(null);
@@ -282,29 +338,29 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 	// Early return if hotel data not loaded
 	if (!hotelInfo) {
 		return (
-			<section className="mt-8 rounded-xl border border-green-900/60 bg-gray-900/40 p-4 md:p-6">
-				{isLoading && <p className="text-gray-300">Loading hotel information...</p>}
-				{error && <p className="text-red-300">Failed to load hotel. Please try again.</p>}
-				{!isLoading && !error && <p className="text-yellow-300">No hotel data available</p>}
+			<section className="mt-8 rounded-xl theme-outline bg-sub-section p-4 md:p-6" id="hotel-booking-panel">
+				{isLoading && <p className="theme-text-muted">Loading hotel information...</p>}
+				{error && <p className="text-red-400">Failed to load hotel. Please try again.</p>}
+				{!isLoading && !error && <p className="theme-text-subtle">No hotel data available</p>}
 			</section>
 		);
 	}
 
 	return (
-		<section className="mt-8 rounded-xl border border-green-900/60 bg-gray-900/40 p-4 md:p-6" id="hotel-booking-panel">
-			<h2 className="text-3xl font-semibold text-white mb-2">{hotelInfo.name}</h2>
-			<p className="text-gray-400 text-sm mb-6">Complete your hotel room booking</p>
+		<section className="mt-8 rounded-xl theme-outline bg-sub-section p-4 md:p-6" id="hotel-booking-panel">
+			<h2 className="text-3xl font-semibold theme-text-teal mb-2">{hotelInfo.name}</h2>
+			<p className="theme-text-muted text-sm mb-6">Complete your hotel room booking</p>
 
 			{confirmationCode ? (
-				<div className="bg-green-900/20 border max-w-2xl mx-auto border-green-700/50 rounded-lg p-6">
-					<h3 className="text-green-400 font-semibold text-lg mb-2 text-center">Booking Confirmed!</h3>
-					<p className="text-gray-300 mb-4 text-center">Confirmation Code: <span className="font-bold text-green-400">{confirmationCode}</span></p>
+				<div className="theme-outline bg-sub-section rounded-lg p-6 max-w-2xl mx-auto">
+					<h3 className="theme-text font-semibold text-lg mb-2 text-center">Booking Confirmed!</h3>
+					<p className="theme-text-muted mb-4 text-center">Confirmation Code: <span className="font-bold theme-text">{confirmationCode}</span></p>
 					
 					{/* Booking Summary with Payment Option */}
-					<div className="bg-gray-800/50 rounded-lg border border-gray-700 p-4 mb-4">
+					<div className="bg-section rounded-lg p-4 mb-4">
 						<div className="flex justify-between items-center mb-4">
-							<span className="text-gray-300 font-medium">Total Amount:</span>
-							<span className="text-green-400 text-xl font-bold">৳ {totalCost.toLocaleString()}</span>
+							<span className="theme-text font-medium">Total Amount:</span>
+							<span className="theme-text-teal text-xl font-bold">৳ {totalCost.toLocaleString()}</span>
 						</div>
 						
 						<div className="flex space-x-2 w-full">
@@ -313,13 +369,13 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 									setPayingForBooking(!payingForBooking);
 									setPaymentMethod(null);
 								}}
-								className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded font-medium transition-colors"
+								className="flex-1 px-3 py-2 theme-btn-teal text-sm rounded font-medium transition-colors"
 							>
 								Pay Now
 							</button>
 							<button
 								onClick={handleReset}
-								className="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded font-medium transition-all"
+								className="flex-1 px-3 py-2 green-button text-sm rounded font-medium transition-all"
 							>
 								Book Another Room
 							</button>
@@ -327,10 +383,10 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 
 						{/* Payment Method Selection */}
 						{payingForBooking && (
-							<div className="mt-4 p-3 bg-gray-700/50 border border-gray-600 rounded-lg mx-auto">
-								<p className="text-gray-200 text-xs font-semibold mb-3">Select Payment Method</p>
+							<div className="mt-4 p-3 bg-section rounded-lg mx-auto">
+								<p className="theme-text-muted text-xs font-semibold mb-3">Select Payment Method</p>
 								<div className="space-y-2 mb-3">
-									<label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+									<label className="flex items-center gap-3 p-2 bg-sub-section rounded theme-outline cursor-pointer hover:border-2 hover:border-teal-500/60 transition-colors">
 										<input
 											type="radio"
 											name="payment-method"
@@ -340,12 +396,12 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 											className="w-4 h-4"
 										/>
 										<div className="flex-1">
-											<p className="text-white text-xs font-medium">💰 Wallet</p>
-											<p className="text-gray-400 text-xs">Pay using your wallet balance</p>
+											<p className="theme-text text-xs font-medium">💰 Wallet</p>
+											<p className="theme-text-subtle text-xs">Pay using your wallet balance</p>
 										</div>
 									</label>
 
-									<label className="flex items-center gap-3 p-2 bg-gray-800/50 rounded border border-gray-700 cursor-pointer hover:border-blue-500 transition-colors">
+									<label className="flex items-center gap-3 p-2 bg-sub-section rounded theme-outline cursor-pointer hover:border-2 hover:border-teal-500/60 transition-colors">
 										<input
 											type="radio"
 											name="payment-method"
@@ -355,8 +411,8 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 											className="w-4 h-4"
 										/>
 										<div className="flex-1">
-											<p className="text-white text-xs font-medium">💳 Card</p>
-											<p className="text-gray-400 text-xs">Pay using credit or debit card</p>
+											<p className="theme-text text-xs font-medium">💳 Card</p>
+											<p className="theme-text-subtle text-xs">Pay using credit or debit card</p>
 										</div>
 									</label>
 								</div>
@@ -365,7 +421,7 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 									<button
 										disabled={!paymentMethod || isProcessingPayment}
 										onClick={onProceedPaymentClicked}
-										className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+										className="flex-1 px-3 py-2 theme-btn-teal text-xs rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 									>
 										{isProcessingPayment ? "Processing..." : "Proceed Payment"}
 									</button>
@@ -375,7 +431,7 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 											setPaymentMethod(null);
 										}}
 										disabled={isProcessingPayment}
-										className="px-3 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed text-white text-xs rounded font-medium transition-colors"
+										className="px-3 py-2 bg-section theme-outline text-xs rounded font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed theme-text hover:theme-text-teal"
 									>
 										Close
 									</button>
@@ -387,54 +443,80 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 			) : (
 				<>
 					{/* Step 1: Date & Guest Selection */}
-					<div className="bg-gray-800/40 rounded-lg border border-gray-700 p-5 mb-6">
-						<h3 className="text-white font-semibold mb-4">Step 1: Select Dates & Guests</h3>
+					<div className="bg-sub-section rounded-lg theme-outline p-5 mb-6">
+					<h3 className="theme-text-teal font-semibold mb-4">Step 1: Select Dates, Shift & Guests</h3>
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 							<div>
-								<label className="text-gray-400 text-xs font-semibold uppercase">Check-in Date</label>
-								<input
-									type="date"
+								<CustomDateInput
+									label="Check-in Date"
+									labelStyle="theme-text-teal"
 									value={bookingState.checkInDate}
 									onChange={(e) => handleDateChange("checkInDate", e.target.value)}
-									className="w-full mt-2 px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded focus:outline-none focus:border-green-500"
+									className="w-full"
 								/>
 							</div>
 							<div>
-								<label className="text-gray-400 text-xs font-semibold uppercase">Check-out Date</label>
-								<input
-									type="date"
+								<CustomDateInput
+									label="Check-out Date"
+									labelStyle="theme-text-teal"
 									value={bookingState.checkOutDate}
 									onChange={(e) => handleDateChange("checkOutDate", e.target.value)}
-									className="w-full mt-2 px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded focus:outline-none focus:border-green-500"
+									className="w-full"
 								/>
 							</div>
 							<div>
-								<label className="text-gray-400 text-xs font-semibold uppercase">Number of Guests</label>
-								<input
-									type="number"
-									min="1"
-									value={bookingState.numberOfGuests}
-									onChange={(e) => handleGuestInfoChange("numberOfGuests", parseInt(e.target.value))}
-									className="w-full mt-2 px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded focus:outline-none focus:border-green-500"
+								<CustomSelectInput
+									label="Room Shift"
+									labelStyle="theme-text-teal"
+									value={bookingState.shift}
+									onChange={(e) => handleGuestInfoChange("shift", e.target.value as keyof typeof RoomShift)}
+									options={[
+										{ label: "All Day", value: "ALL_DAY" },
+										{ label: "Morning (8AM - 3PM)", value: "MORNING" },
+										{ label: "Afternoon (3PM - 10PM)", value: "AFTERNOON" },
+										{ label: "Night (10PM - 8AM)", value: "NIGHT" },
+									]}
+									className="w-full"
 								/>
 							</div>
-
+							<div>
+								<CustomSelectInput
+									label="Number of Guests"
+									labelStyle="theme-text-teal"
+									value={bookingState.numberOfGuests.toString()}
+									onChange={(e) => handleGuestInfoChange("numberOfGuests", parseInt(e.target.value))}
+									options={["1", "2", "3", "4", "5", "6"].map((n) => ({ label: n, value: n }))}
+									className="w-full"
+								/>
+							</div>
+							<div>
+								<CustomSelectInput
+									label="Number of Rooms"
+									labelStyle="theme-text-teal"
+									value={bookingState.numberOfRooms.toString()}
+									onChange={(e) => handleGuestInfoChange("numberOfRooms", parseInt(e.target.value))}
+									options={["1", "2", "3", "4"].map((n) => ({ label: n, value: n }))}
+									className="w-full"
+								/>
+							</div>
 						</div>
 						{!isDateValid && bookingState.checkInDate && bookingState.checkOutDate && (
-							<p className="text-red-300 text-xs mt-3">⚠️ Check-out date must be after check-in date</p>
+							<p className="text-red-400 text-xs mt-3">⚠️ {bookingState.shift !== "ALL_DAY" 
+								? "For this shift, check-out must be the same as check-in date." 
+								: "Check-out must be after check-in."}</p>
 						)}
 						{isDateValid && (
-							<p className="text-green-300 text-xs mt-3">✓ {nights} night{nights !== 1 ? "s" : ""}</p>
+							<p className="theme-text-teal text-xs mt-3">✓ {nights} night{nights !== 1 ? "s" : ""}</p>
 						)}
 					</div>
 
 					{/* Step 2: Room Selection */}
 					{isDateValid ? (
-					<div className="bg-gray-800/40 rounded-lg border border-gray-700 p-5 mb-6">
-						<h3 className="text-white font-semibold mb-4">Step 2: Select Rooms</h3>
+					<div className="bg-sub-section rounded-lg theme-outline p-5 mb-6">
+					<h3 className="theme-text-teal font-semibold mb-4">Step 2: Select Rooms</h3>
 						{availableRooms.length === 0 ? (
-							<div className="bg-red-900/20 border border-red-700/30 rounded-lg p-5">
-								<p className="text-red-300 text-sm">No available rooms for these dates at this hotel</p>
+							<div className="bg-sub-section theme-outline rounded-lg p-5">
+								<p className="text-red-400 text-sm">No available rooms for these dates at this hotel</p>
 							</div>
 						) : (
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -446,6 +528,7 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 											roomType={roomType}
 											roomCount={roomCount}
 											nights={nights}
+											shift={bookingState.shift}
 											onRoomSelection={handleRoomSelection}
 										/>
 									);
@@ -454,84 +537,114 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 						)}
 					</div>
 				) : (
-					<div className="bg-yellow-900/20 border border-yellow-700/30 rounded-lg p-5 mb-6">
-						<p className="text-yellow-300 text-sm">Please select valid dates to see available rooms</p>
+					<div className="bg-sub-section theme-outline rounded-lg p-5 mb-6">
+						<p className="theme-text-muted text-sm">Please select valid dates to see available rooms</p>
 					</div>
 				)}
 
 					{/* Step 3: Guest Information */}
 					{hasRoomsSelected && (
-						<div className="bg-gray-800/40 rounded-lg border border-gray-700 p-5 mb-6">
-							<h3 className="text-white font-semibold mb-4">Step 3: Guest Information</h3>
+						<div className="bg-sub-section rounded-lg theme-outline p-5 mb-6">
+						<h3 className="theme-text-teal font-semibold mb-4">Step 3: Guest Information</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
 								<input
 									type="text"
 									placeholder="Full Name"
 									value={bookingState.guestName}
 									onChange={(e) => handleGuestInfoChange("guestName", e.target.value)}
-									className="px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded placeholder-gray-400 focus:outline-none focus:border-green-500"
+									className="theme-input px-3 py-2 rounded"
+									style={{
+										backgroundColor: 'var(--theme-input-bg)',
+										color: 'var(--theme-text)',
+										borderWidth: '1px',
+										borderColor: 'var(--theme-deep-green)',
+									} as React.CSSProperties}
 								/>
 								<input
 									type="email"
 									placeholder="Email Address"
 									value={bookingState.guestEmail}
 									onChange={(e) => handleGuestInfoChange("guestEmail", e.target.value)}
-									className="px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded placeholder-gray-400 focus:outline-none focus:border-green-500"
+									className="theme-input px-3 py-2 rounded"
+									style={{
+										backgroundColor: 'var(--theme-input-bg)',
+										color: 'var(--theme-text)',
+										borderWidth: '1px',
+										borderColor: 'var(--theme-deep-green)',
+									} as React.CSSProperties}
 								/>
 								<input
 									type="tel"
 									placeholder="Phone Number"
 									value={bookingState.guestPhoneNumber}
 									onChange={(e) => handleGuestInfoChange("guestPhoneNumber", e.target.value)}
-									className="px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded placeholder-gray-400 focus:outline-none focus:border-green-500"
+									className="theme-input px-3 py-2 rounded"
+									style={{
+										backgroundColor: 'var(--theme-input-bg)',
+										color: 'var(--theme-text)',
+										borderWidth: '1px',
+										borderColor: 'var(--theme-deep-green)',
+									} as React.CSSProperties}
 								/>
 							</div>
 							<textarea
 								placeholder="Special Requests (Optional)"
 								value={bookingState.specialRequests}
 								onChange={(e) => handleGuestInfoChange("specialRequests", e.target.value)}
-								className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded placeholder-gray-400 focus:outline-none focus:border-green-500 resize-none"
+								className="w-full px-3 py-2 rounded resize-none theme-input"
+								style={{
+									backgroundColor: 'var(--theme-input-bg)',
+									color: 'var(--theme-text)',
+									borderWidth: '1px',
+									borderColor: 'var(--theme-deep-green)',
+								} as React.CSSProperties}
 								rows={3}
 							/>
 						</div>
 					)}
 
 					{/* Booking Summary */}
-					{hasRoomsSelected && (
-						<div className="bg-linear-to-r from-green-900/20 to-teal-900/20 border border-green-800/40 rounded-lg p-5 mb-6">
-							<h3 className="text-white font-semibold mb-4">Booking Summary</h3>
+				{hasRoomsSelected && isGuestInfoComplete && (
+						<div className="bg-section rounded-lg theme-outline p-5 mb-6">
+						<h3 className="theme-text-teal font-semibold mb-4">Booking Summary</h3>
 							<div className="space-y-2 mb-4">
 								{Array.from(bookingState.selectedRooms.entries()).map(([roomTypeId, quantity]) => {
 									const roomType = hotelInfo.roomTypes?.find((rt: HotelRoomType) => rt.id === roomTypeId);
-									const pricePerNight = roomType?.pricePerNight || 0;
+									const pricePerNight = getPriceByShift(roomType!, bookingState.shift);
+									const isPriceAvailable = pricePerNight > 0;
 									const subtotal = pricePerNight * nights * quantity;
-									return (
-										<div key={roomTypeId} className="flex justify-between items-center text-sm border-b border-gray-700 pb-2">
-											<span className="text-gray-300">
-												{roomType?.roomType} × {quantity} room{quantity > 1 ? "s" : ""} × {nights} night{nights !== 1 ? "s" : ""}
+								const unitLabel = bookingState.shift === "ALL_DAY" ? `night${nights !== 1 ? "s" : ""}` : `${bookingState.shift.toLowerCase()} shift`;
+								return (
+									<div key={roomTypeId} className="flex justify-between items-center text-sm pb-2" style={{ borderBottom: '1px solid var(--theme-deep-green)' }}>
+										<span className="theme-text-muted">
+											{roomType?.roomType} × {quantity} room{quantity > 1 ? "s" : ""} × {bookingState.shift === "ALL_DAY" ? nights : 1} {unitLabel}
 											</span>
-											<span className="text-white">৳ {subtotal.toLocaleString()}</span>
+											{isPriceAvailable ? (
+												<span className="theme-text">৳ {subtotal.toLocaleString()}</span>
+											) : (
+												<span className="text-red-400">Not Available</span>
+											)}
 										</div>
 									);
 								})}
 							</div>
-							<div className="border-t border-gray-700 pt-4">
+							<div style={{ borderTop: '1px solid var(--theme-deep-green)' }} className="pt-4">
 								<div className="flex justify-between items-center">
-									<span className="text-white font-semibold">Total Amount:</span>
-									<span className="text-green-400 text-2xl font-bold">৳ {totalCost.toLocaleString()}</span>
+									<span className="theme-text font-semibold">Total Amount:</span>
+									<span className="theme-text-teal text-2xl font-bold">৳ {totalCost.toLocaleString()}</span>
 								</div>
 							</div>
 						</div>
 					)}
 
 					{/* Action Buttons */}
-					{hasRoomsSelected && (
+				{hasRoomsSelected && isGuestInfoComplete && (
 						<div className="flex gap-3">
 							<button
 								className={`flex-1 py-3 px-4 rounded font-medium transition-all ${
 									canBook && !isProcessing
-										? "bg-green-600 hover:bg-green-700 text-white"
-										: "bg-gray-700 text-gray-500 cursor-not-allowed opacity-50"
+										? "theme-btn-teal"
+										: "opacity-50 cursor-not-allowed"
 								}`}
 								disabled={!canBook || isProcessing}
 								onClick={handleBookingSubmit}
@@ -539,7 +652,7 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 								{isProcessing ? "Processing Booking..." : "Complete Booking"}
 							</button>
 							<button
-								className="px-6 py-3 rounded border border-gray-600 text-gray-300 hover:border-gray-500 hover:text-white transition-all"
+								className="px-6 py-3 rounded theme-btn-teal hover:theme-text-teal transition-all"
 								onClick={handleReset}
 								disabled={isProcessing}
 							>
@@ -547,7 +660,7 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 							</button>
 							{onCancel && (
 								<button
-									className="px-6 py-3 rounded border border-red-600 text-red-300 hover:border-red-500 hover:text-red-200 transition-all"
+									className="px-6 py-3 rounded border-2 text-red-400 hover:text-red-300 border-red-700 hover:border-red-600 transition-all"
 									onClick={onCancel}
 									disabled={isProcessing}
 								>
@@ -562,9 +675,39 @@ export function HotelBookingPanel({ hotelId, userId, onBookingSuccess, onCancel 
 	);
 }
 
-function RoomCard({ roomType, roomCount, nights, onRoomSelection }: RoomCardProps) {
+function RoomCard({ roomType, roomCount, nights, shift, onRoomSelection }: RoomCardProps) {
+	// Helper function to get price based on shift
+	const getPriceByShift = (roomType: HotelRoomType, shift: keyof typeof RoomShift): number => {
+		switch (shift) {
+			case "MORNING":
+				return roomType.morningShiftPrice ?? 0;
+			case "AFTERNOON":
+				return roomType.afternoonShiftPrice ?? 0;
+			case "NIGHT":
+				return roomType.nightShiftPrice ?? 0;
+			case "ALL_DAY":
+			default:
+				return roomType.pricePerNight ?? 0;
+		}
+	};
+
+	// Helper function to get price title based on shift
+	const getShiftLabel = (shift: keyof typeof RoomShift): string => {
+		switch (shift) {
+			case "MORNING":
+				return "Price (Morning 8AM-3PM)";
+			case "AFTERNOON":
+				return "Price (Afternoon 3PM-10PM)";
+			case "NIGHT":
+				return "Price (Night 10PM-8AM)";
+			case "ALL_DAY":
+			default:
+				return "Price per Night";
+		}
+	};
+
 	// Extract pricing and bed info from roomType
-	const pricePerNight = roomType.pricePerNight || 0;
+	const pricePerNight = getPriceByShift(roomType, shift);
 	const singleBedCount = roomType.singleBedCount || 0;
 	const doubleBedCount = roomType.doubleBedCount || 0;
 	const roomTypeLabel = roomType.roomType || "Room";
@@ -572,6 +715,9 @@ function RoomCard({ roomType, roomCount, nights, onRoomSelection }: RoomCardProp
 	const maxGuests = (singleBedCount * 1) + (doubleBedCount * 2);
 	const availableCount = roomType.availableCount || 0;
 	const totalCount = roomType.totalCount || 0;
+
+	// Check if price is available (not negative or zero)
+	const isPriceAvailable = pricePerNight > 0;
 
 	// Check if this roomType is selected
 	const isSelected = roomCount > 0;
@@ -589,66 +735,86 @@ function RoomCard({ roomType, roomCount, nights, onRoomSelection }: RoomCardProp
 	return (
 		<div
 			key={roomType.id}
-			className="rounded-lg border-2 border-gray-700 bg-gray-800/50 p-5 hover:border-green-600/40 hover:shadow-lg transition-all"
+			className="rounded-lg theme-outline bg-sub-section p-5 transition-all"
+			style={{ 
+				boxShadow: 'none',
+				borderWidth: '2px'
+			}}
 		>
 			{/* Room Type Header */}
 			<div className="mb-4">
 				<div className="flex items-start justify-between mb-2">
 					<div className="flex items-center gap-2">
-						<h4 className="text-white font-bold text-lg">
+						<h4 className="theme-text font-bold text-lg">
 							{roomTypeLabel?.charAt(0).toUpperCase() + roomTypeLabel?.slice(1).toLowerCase()}
 						</h4>
 						{isSelected && (
-							<span className="text-xs bg-green-600/30 text-green-300 px-2 py-1 rounded border border-green-600">Selected</span>
+							<span className="text-xs bg-teal-600/30 theme-text-teal px-2 py-1 rounded border-2 border-teal-700/60">Selected</span>
 						)}
 					</div>
-					<span className="text-xs bg-green-900/30 text-green-300 px-2 py-1 rounded border border-green-700/50">{availableCount} Available</span>
+					<span className="text-xs theme-text-teal px-2 py-1 rounded border border-teal-700/50">{availableCount} Available</span>
 				</div>
-				<p className="text-gray-400 text-sm">
+				<p className="theme-text-muted text-sm">
 					{singleBedCount > 0 && `${singleBedCount} Single Bed`}
 					{singleBedCount > 0 && doubleBedCount > 0 && " + "}
 					{doubleBedCount > 0 && `${doubleBedCount} Double Bed`}
 				</p>
-				<p className="text-gray-500 text-xs mt-2">Sleeps up to {maxGuests} guests • {totalCount} rooms total</p>
+				<p className="theme-text-subtle text-xs mt-2">Sleeps up to {maxGuests} guests • {totalCount} rooms total</p>
 			</div>
 
 			{/* Price Section */}
-			<div className="bg-gray-900/40 rounded-lg p-3 mb-4 border border-gray-700/50">
-				<p className="text-gray-400 text-xs uppercase font-semibold mb-1">Price per Night</p>
-				<p className="text-green-400 font-bold text-xl">৳ {pricePerNight.toLocaleString()}</p>
+			<div className="bg-section rounded-lg p-3 mb-4 theme-outline">
+				<p className="theme-text-subtle text-xs uppercase font-semibold mb-1">{getShiftLabel(shift)}</p>
+				{isPriceAvailable ? (
+					<p className="theme-text-teal font-bold text-xl">৳ {pricePerNight.toLocaleString()}</p>
+				) : (
+					<p className="text-red-400 font-bold text-xl">Not Available</p>
+				)}
 			</div>
 
 			{/* Quantity Selector - only show if selected */}
 			{isSelected && (
 				<div className="mb-4">
-					<label className="text-gray-400 text-xs uppercase font-semibold block mb-2">Quantity</label>
-					<div className="flex items-center gap-3 bg-gray-800/60 rounded-lg p-3 border border-gray-600">
+					<label className="theme-text-subtle text-xs uppercase font-semibold block mb-2">Quantity</label>
+					<div className="flex items-center gap-3 p-3 rounded-lg theme-outline" style={{ backgroundColor: 'var(--theme-input-bg)' }}>
 						<button
-							className="w-8 h-8 rounded bg-red-600 hover:bg-red-700 text-white font-bold transition-colors flex items-center justify-center"
+							className="w-8 h-8 rounded text-red-400 font-bold transition-colors flex items-center justify-center"
+							style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--theme-deep-green)' }}
 							onClick={() => onRoomSelection(roomType.id, Math.max(1, roomCount - 1))}
 						>
 							−
 						</button>
-						<span className="px-4 py-2 text-white font-bold text-lg min-w-12 text-center bg-gray-900 border border-gray-700 rounded">
+						<span className="px-4 py-2 theme-text font-bold text-lg min-w-12 text-center rounded" style={{ backgroundColor: 'var(--theme-section-bg)', border: '1px solid var(--theme-deep-green)' }}>
 							{roomCount}
 						</span>
 						<button
 							disabled={roomCount >= availableCount}
-							className="w-8 h-8 rounded bg-green-600 hover:bg-green-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-bold transition-colors flex items-center justify-center"
+							className="w-8 h-8 rounded font-bold transition-colors flex items-center justify-center"
+							style={{ 
+								color: roomCount >= availableCount ? '#999' : 'var(--theme-teal)',
+								backgroundColor: roomCount >= availableCount ? 'rgba(100, 100, 100, 0.2)' : 'rgba(20, 184, 166, 0.2)',
+								border: '1px solid var(--theme-deep-green)',
+								cursor: roomCount >= availableCount ? 'not-allowed' : 'pointer'
+							}}
 							onClick={() => onRoomSelection(roomType.id, Math.min(availableCount, roomCount + 1))}
 						>
 							+
 						</button>
 					</div>
-					<p className="text-gray-500 text-xs mt-2">Max available: {availableCount} room{availableCount !== 1 ? "s" : ""}</p>
+					<p className="theme-text-subtle text-xs mt-2">Max available: {availableCount} room{availableCount !== 1 ? "s" : ""}</p>
 				</div>
 			)}
 
 			{/* Subtotal - only show if selected */}
 			{isSelected && (
-				<div className="bg-green-900/20 border border-green-700/50 rounded-lg p-3 text-sm mb-4">
-					<p className="text-gray-300 mb-1">{roomCount} room{roomCount > 1 ? "s" : ""} × {nights} night{nights !== 1 ? "s" : ""}</p>
-					<p className="text-green-400 font-bold text-lg">Total: ৳{roomTotal.toLocaleString()}</p>
+				<div className="theme-outline bg-section rounded-lg p-3 text-sm mb-4">
+					{isPriceAvailable ? (
+						<p className="theme-text-muted mb-1">
+							{roomCount} room{roomCount > 1 ? "s" : ""} × {shift === "ALL_DAY" ? nights : 1} {shift === "ALL_DAY" ? `night${nights !== 1 ? "s" : ""}` : `${shift.toLowerCase()} shift`}
+						</p>
+					) : (
+						<p className="text-red-400 font-bold text-lg">Not Available</p>
+					)}
 				</div>
 			)}
 
@@ -656,17 +822,19 @@ function RoomCard({ roomType, roomCount, nights, onRoomSelection }: RoomCardProp
 			<div>
 				{isSelected ? (
 					<button
-						className="w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded font-medium transition-all"
+						className="w-full py-2 px-4 rounded font-medium transition-all"
+						style={{ backgroundColor: 'rgba(239, 68, 68, 0.3)', color: '#ff7070', border: '1px solid #dc2626' }}
 						onClick={handleCancel}
 					>
 						Cancel
 					</button>
 				) : (
 					<button
-						className="green-button w-full rounded font-medium transition-all"
+						disabled={!isPriceAvailable}
+						className="green-button w-full rounded font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={handleSelect}
 					>
-						Select
+						{isPriceAvailable ? "Select" : "Not Available"}
 					</button>
 				)}
 			</div>

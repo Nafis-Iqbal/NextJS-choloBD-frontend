@@ -5,6 +5,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
 import { CustomSelectInput, CustomDateInput } from "@/components/custom-elements/CustomInputElements";
+import { RoomShift } from "@/types/enums";
 
 import { AuthApi, HotelApi, LocationApi } from "@/services/api";
 import { HotelBookingPanel } from "@/components/modular-components/HotelBookingModule";
@@ -13,6 +14,12 @@ import { HotelBookingPanel } from "@/components/modular-components/HotelBookingM
 type HotelDisplayItem = Hotel & {
 	displayPrice?: number;
 };
+
+interface HotelCardProps {
+	hotel: HotelDisplayItem;
+	onBookNowClicked: (hotel: HotelDisplayItem) => void;
+	onViewDetails: (hotel: HotelDisplayItem) => void;
+}
 
 function nightsBetween(checkIn?: string, checkOut?: string) {
 	if (!checkIn || !checkOut) return 0;
@@ -23,25 +30,6 @@ function nightsBetween(checkIn?: string, checkOut?: string) {
 	return Math.max(0, diff);
 }
 
-interface HotelCardProps {
-	hotel: HotelDisplayItem;
-	onBookNowClicked: (hotel: HotelDisplayItem) => void;
-	onViewDetails: (hotel: HotelDisplayItem) => void;
-}
-
-interface HotelDetailsPanelProps {
-	hotel: HotelDisplayItem;
-	form: {
-		checkIn: string;
-		checkOut: string;
-		guests: string;
-		rooms: string;
-	};
-	nights: number;
-	onViewPage: () => void;
-	onReserve: () => void;
-}
-
 function HotelBookingContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -49,24 +37,28 @@ function HotelBookingContent() {
 	const { data: authResponse, isLoading: isAuthLoading } = AuthApi.useGetUserAuthenticationRQ(true);
 	const isAuthenticated = authResponse?.data?.isAuthenticated;
 	const authUserId = authResponse?.data?.userId;
-	//console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isAuthLoading);
-
-	// Fetch real hotel data from API
-	const { data: hotelsResponse, isLoading, error } = HotelApi.useGetAllHotelsRQ();
-	const hotels: Hotel[] = useMemo(() => {
-		return hotelsResponse?.data || [];
-	}, [hotelsResponse]);
 
 	// Fetch locations to construct city options
 	const { data: locationsResponse, isLoading: locationsLoading, error: locationsError } = LocationApi.useGetAllLocationsRQ();
 
-	// Extract district type locations as city options
+	// Extract district type locations as city options with ID mapping
 	const cityOptions = useMemo(() => {
 		const districts = (locationsResponse?.data || [])
-			.filter((loc) => loc.locationType === "DISTRICT")
+			.filter((loc) => loc.locationType === "CITY")
 			.map((loc) => loc.name)
 			.sort();
 		return districts;
+	}, [locationsResponse]);
+
+	// Map location names to IDs for API queries
+	const locationNameToIdMap = useMemo(() => {
+		const map: Record<string, string> = {};
+		(locationsResponse?.data || [])
+			.filter((loc) => loc.locationType === "CITY")
+			.forEach((loc) => {
+				map[loc.name] = loc.id;
+			});
+		return map;
 	}, [locationsResponse]);
 
 	const [form, setForm] = useState({
@@ -76,8 +68,50 @@ function HotelBookingContent() {
 		guests: "2",
 		rooms: "1",
 		minRating: "0",
+		shift: "ALL_DAY" as keyof typeof RoomShift,
 		sort: "rating" as "rating" | "name",
 	});
+
+	// Build API query string based on form filters
+	const apiQueryString = useMemo(() => {
+		const params = new URLSearchParams();
+		console.log(form);
+		// Add locationId if city is selected
+		if (form.city && locationNameToIdMap[form.city]) {
+			params.append("locationId", locationNameToIdMap[form.city]);
+		}
+
+		// Add rating filters
+		if (form.minRating && form.minRating !== "0") {
+			params.append("minRating", form.minRating);
+		}
+
+		// Add shift filter
+		if (form.shift && form.shift !== "ALL_DAY") {
+			params.append("shift", form.shift);
+		}
+
+		// Add check-in date
+		if (form.checkIn) {
+			params.append("checkInDate", form.checkIn);
+		}
+
+		// Add check-out date
+		if (form.checkOut) {
+			params.append("checkOutDate", form.checkOut);
+		}
+
+		// Add isActive filter (default to true for user-facing queries)
+		params.append("isActive", "true");
+
+		return params.toString();
+	}, [form.city, form.minRating, form.shift, form.checkIn, form.checkOut, locationNameToIdMap]);
+
+	// Fetch real hotel data from API
+	const { data: hotelsResponse, isLoading, error } = HotelApi.useGetAllHotelsRQ(apiQueryString);
+	const hotels: Hotel[] = useMemo(() => {
+		return hotelsResponse?.data || [];
+	}, [hotelsResponse]);
 
 	const [selectedHotel, setSelectedHotel] = useState<HotelDisplayItem | null>(null);
 
@@ -89,6 +123,7 @@ function HotelBookingContent() {
 		const guests = searchParams.get("guests") || "2";
 		const rooms = searchParams.get("rooms") || "1";
 		const minRating = searchParams.get("minRating") || "0";
+		const shift = (searchParams.get("shift") || "ALL_DAY") as keyof typeof RoomShift;
 		const sort = (searchParams.get("sort") || "rating") as any;
 
 		setForm((prev) => ({
@@ -99,6 +134,7 @@ function HotelBookingContent() {
 			guests,
 			rooms,
 			minRating: ["0", "3", "4", "4.5"].includes(minRating) ? minRating : "0",
+			shift: Object.keys(RoomShift).includes(shift) ? shift : "ALL_DAY",
 			sort: sort === "name" ? "name" : "rating",
 		}));
 	}, [searchParams, cityOptions]);
@@ -106,20 +142,9 @@ function HotelBookingContent() {
 	const nights = useMemo(() => nightsBetween(form.checkIn, form.checkOut), [form.checkIn, form.checkOut]);
 
 	const results = useMemo(() => {
-		const minRating = Number(form.minRating || "0");
-
-		// Step 1: Filter by city
-		const filteredByCity = form.city 
-			? hotels.filter((h) => h.location?.name === form.city)
-			: hotels;
-
-		// Step 2: Filter by minimum rating
-		const filteredByRating = minRating > 0
-			? filteredByCity.filter((h) => h.rating >= minRating)
-			: filteredByCity;
-
-		// Step 3: Sort results by selected criteria
-		const sorted = [...filteredByRating].sort((a, b) => {
+		// API has already filtered by city, rating, shift, and dates
+		// Only need to do client-side sorting
+		const sorted = [...hotels].sort((a, b) => {
 			if (form.sort === "name") {
 				return a.name.localeCompare(b.name);
 			}
@@ -127,27 +152,21 @@ function HotelBookingContent() {
 		});
 
 		return sorted;
-	}, [hotels, form.city, form.minRating, form.sort]);
-
-	const pushQuery = () => {
-		const qs = new URLSearchParams();
-		qs.set("city", form.city);
-		if (form.checkIn) qs.set("checkIn", form.checkIn);
-		if (form.checkOut) qs.set("checkOut", form.checkOut);
-		qs.set("guests", form.guests);
-		qs.set("rooms", form.rooms);
-		if (form.minRating !== "0") qs.set("minRating", form.minRating);
-		qs.set("sort", form.sort);
-
-		router.push(`?${qs.toString()}`);
-	};
+	}, [hotels, form.sort]);
 
 	const invalidDates = useMemo(() => {
-		if (!form.checkIn || !form.checkOut) return false;
-		const a = new Date(form.checkIn);
-		const b = new Date(form.checkOut);
-		return b.getTime() <= a.getTime();
-	}, [form.checkIn, form.checkOut]);
+		if (form.shift !== "ALL_DAY") {
+			// For non-ALL_DAY shifts, checkout must equal checkin
+			if (!form.checkIn || !form.checkOut) return true;
+			return form.checkOut !== form.checkIn;
+		} else {
+			// For ALL_DAY, checkout must be after checkin
+			if (!form.checkIn || !form.checkOut) return false;
+			const a = new Date(form.checkIn);
+			const b = new Date(form.checkOut);
+			return b.getTime() <= a.getTime();
+		}
+	}, [form.checkIn, form.checkOut, form.shift]);
 
 	if (isLoading) {
 		return (
@@ -229,7 +248,26 @@ function HotelBookingContent() {
 					</div>
 				</div>
 
-				{/* Row 3: Check-in - Check-out */}
+				{/* Row 3: Shift */}
+				<div className="grid grid-cols-1 gap-3 mb-4">
+					<div>
+						<CustomSelectInput
+							label="Room Shift"
+							labelStyle="theme-text-teal"
+							value={form.shift}
+							onChange={(e) => setForm((p) => ({ ...p, shift: e.target.value as keyof typeof RoomShift }))}
+							options={[
+								{ label: "All Day", value: "ALL_DAY" },
+								{ label: "Morning (8AM - 3PM)", value: "MORNING" },
+								{ label: "Afternoon (3PM - 10PM)", value: "AFTERNOON" },
+								{ label: "Night (10PM - 8AM)", value: "NIGHT" },
+							]}
+							className="w-full"
+						/>
+					</div>
+				</div>
+
+				{/* Row 4: Check-in - Check-out */}
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
 					<div>
 						<CustomDateInput
@@ -251,7 +289,7 @@ function HotelBookingContent() {
 					</div>
 				</div>
 
-				{/* Row 4: Guests - Rooms */}
+				{/* Row 5: Guests - Rooms */}
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
 					<div>
 						<CustomSelectInput
@@ -287,6 +325,7 @@ function HotelBookingContent() {
 								guests: "2",
 								rooms: "1",
 								minRating: "0",
+								shift: "ALL_DAY",
 								sort: "rating",
 							});
 							router.push("?");
@@ -296,7 +335,13 @@ function HotelBookingContent() {
 					</button>
 				</div>
 
-				{invalidDates && <p className="mt-3 text-red-400 text-sm">Check-out must be after check-in.</p>}
+				{invalidDates && (
+					<p className="mt-3 text-red-400 text-sm">
+						{form.shift !== "ALL_DAY" 
+							? "For this shift, check-out must be the same as check-in date." 
+							: "Check-out must be after check-in."}
+					</p>
+				)}
 				{!invalidDates && nights > 0 && (
 					<p className="mt-3 theme-text-muted text-sm">
 						Stay length: <span className="theme-text font-medium">{nights}</span> night(s)
@@ -345,6 +390,11 @@ function HotelBookingContent() {
 				<HotelBookingPanel
 					hotelId={selectedHotel.id}
 					userId={authUserId || "Guest"}
+					initialCheckIn={form.checkIn}
+					initialCheckOut={form.checkOut}
+					initialGuests={parseInt(form.guests)}
+					initialRooms={parseInt(form.rooms)}
+					initialShift={form.shift}
 				/>
 			)}
 		</div>
@@ -394,14 +444,13 @@ function HotelCard({ hotel: h, onViewDetails, onBookNowClicked }: HotelCardProps
 					<div>
 						<p className="theme-text font-semibold">Rating: {h.rating}</p>
 						<p className="text-xs theme-text-subtle">
-							{h.availableRooms || 0} rooms available
+							Rooms are  available
 						</p>
 					</div>
 
 					<div className="flex gap-2">
 					<button 
-						disabled={(h.availableRooms || 0) === 0}
-						className={`green-button text-sm px-2 py-1 ${(h.availableRooms || 0) === 0 ? 'bg-gray-400 cursor-not-allowed' : ''}`}
+						className="green-button text-sm px-2 py-1"
 						onClick={() => onBookNowClicked(h)}
 					>
 							Book Now!

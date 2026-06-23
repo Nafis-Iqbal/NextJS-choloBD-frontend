@@ -69,9 +69,9 @@ export function useGetAllHotelsRQ(queryString?: string) {
     return useQuery<ApiResponse<any[]>>({
         queryFn: () => getAllHotels(queryString),
         queryKey: ["hotels", queryString],
-        staleTime: queryString ? 0 : 30_000,
-        gcTime: 30_000,
-        refetchOnMount: queryString ? "always" : false,
+        staleTime: 30_000,
+        gcTime: 5 * 60_000,
+        refetchOnMount: false,
     });
 }
 
