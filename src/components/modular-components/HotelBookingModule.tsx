@@ -36,11 +36,33 @@ interface HotelBookingPanelProps {
 }
 
 interface RoomCardProps {
-	roomType: HotelRoomType;
+	roomData: AvailableRoomType;
 	roomCount: number;
 	nights: number;
 	onRoomSelection: (roomTypeId: string, quantity: number) => void;
 	shift: keyof typeof RoomShift;
+}
+
+interface AvailableRoomType {
+	roomTypeId: string;
+	roomType: string;
+	totalRooms: number;
+	availableRooms: number;
+	basePrice: number;
+	nightShiftPrice: number;
+	morningShiftPrice: number;
+	afternoonShiftPrice: number;
+	allowShiftBooking: boolean;
+}
+
+interface HotelRoomAvailabilityResponse {
+	isAvailable: boolean;
+	totalRoomsNeeded: number;
+	totalAvailableRooms: number;
+	bookingType: 'DATE_RANGE' | 'SHIFT';
+	shift?: keyof typeof RoomShift;
+	availableRoomsByType: AvailableRoomType[];
+	message: string;
 }
 
 export function HotelBookingPanel({ 
@@ -54,8 +76,6 @@ export function HotelBookingPanel({
 	initialRooms,
 	initialShift,
 }: HotelBookingPanelProps) {
-	const {data: hotelData, isLoading, error, status} = HotelApi.useGetHotelDetailRQ(hotelId);
-	const hotelInfo = hotelData?.data as Hotel | undefined;
 	const { openNotificationPopUpMessage } = useGlobalUI();
 	
 	const [bookingState, setBookingState] = useState<BookingState>({
@@ -78,6 +98,35 @@ export function HotelBookingPanel({
 	const [payingForBooking, setPayingForBooking] = useState(false);
 	const [paymentMethod, setPaymentMethod] = useState<"wallet" | "card" | null>(null);
 	const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+
+	// Validation checks - must come before availabilityQueryString
+	const isDateValid = useMemo(() => {
+		if (bookingState.shift !== "ALL_DAY") {
+			// For non-ALL_DAY shifts, checkout must equal checkin
+			if (!bookingState.checkInDate || !bookingState.checkOutDate) return false;
+			return bookingState.checkOutDate === bookingState.checkInDate;
+		} else {
+			// For ALL_DAY, checkout must be after checkin
+			if (!bookingState.checkInDate || !bookingState.checkOutDate) return false;
+			const a = new Date(bookingState.checkInDate);
+			const b = new Date(bookingState.checkOutDate);
+			return b.getTime() > a.getTime();
+		}
+	}, [bookingState.checkInDate, bookingState.checkOutDate, bookingState.shift]);
+
+	// Build querystring for availability check
+	const availabilityQueryString = useMemo(() => {
+		if (!isDateValid || !bookingState.numberOfRooms) return undefined;
+		const params = new URLSearchParams();
+		params.append("numberOfRooms", String(bookingState.numberOfRooms));
+		params.append("checkInDate", bookingState.checkInDate);
+		params.append("checkOutDate", bookingState.checkOutDate);
+		params.append("shift", bookingState.shift);
+		return params.toString();
+	}, [bookingState.numberOfRooms, bookingState.checkInDate, bookingState.checkOutDate, bookingState.shift, isDateValid]);
+
+	const {data: availabilityData, isLoading, error, status} = HotelApi.useGetHotelRoomAvailabilityRQ(hotelId, availabilityQueryString);
+	const availabilityInfo = availabilityData?.data as HotelRoomAvailabilityResponse | undefined;
 
 	// API Hooks
 	const { mutate: createBookingMutation } = HotelBookingApi.useCreateBookingRQ(
@@ -165,24 +214,24 @@ export function HotelBookingPanel({
 		return calculatedNights;
 	}, [bookingState.checkInDate, bookingState.checkOutDate, bookingState.shift]);
 
-	// Get available room types - filter by availableCount
+	// Get available room types from availability response
 	const availableRooms = useMemo(() => {
-		if (!hotelInfo?.roomTypes) return [];
-		return hotelInfo.roomTypes.filter((roomType: HotelRoomType) => roomType.availableCount > 0);
-	}, [hotelInfo?.roomTypes]);
+		if (!availabilityInfo?.availableRoomsByType) return [];
+		return availabilityInfo.availableRoomsByType.filter((roomType: AvailableRoomType) => roomType.availableRooms > 0);
+	}, [availabilityInfo?.availableRoomsByType]);
 
-	// Helper function to get price based on shift
-	const getPriceByShift = (roomType: HotelRoomType, shift: keyof typeof RoomShift): number => {
+	// Helper function to get price based on shift (from new response structure)
+	const getPriceByShift = (roomData: AvailableRoomType, shift: keyof typeof RoomShift): number => {
 		switch (shift) {
 			case "MORNING":
-				return roomType.morningShiftPrice ?? 0;
+				return roomData.morningShiftPrice ?? 0;
 			case "AFTERNOON":
-				return roomType.afternoonShiftPrice ?? 0;
+				return roomData.afternoonShiftPrice ?? 0;
 			case "NIGHT":
-				return roomType.nightShiftPrice ?? 0;
+				return roomData.nightShiftPrice ?? 0;
 			case "ALL_DAY":
 			default:
-				return roomType.pricePerNight ?? 0;
+				return roomData.basePrice ?? 0;
 		}
 	};
 
@@ -190,29 +239,14 @@ export function HotelBookingPanel({
 	const totalCost = useMemo(() => {
 		let total = 0;
 		bookingState.selectedRooms.forEach((quantity, roomTypeId) => {
-			const roomType = hotelInfo?.roomTypes?.find((rt: HotelRoomType) => rt.id === roomTypeId);
-			if (roomType) {
-				const price = getPriceByShift(roomType, bookingState.shift);
+			const roomData = availabilityInfo?.availableRoomsByType?.find((rt: AvailableRoomType) => rt.roomTypeId === roomTypeId);
+			if (roomData) {
+				const price = getPriceByShift(roomData, bookingState.shift);
 				total += price * nights * quantity;
 			}
 		});
 		return total;
-	}, [bookingState.selectedRooms, hotelInfo?.roomTypes, nights, bookingState.shift]);
-
-	// Validation checks
-	const isDateValid = useMemo(() => {
-		if (bookingState.shift !== "ALL_DAY") {
-			// For non-ALL_DAY shifts, checkout must equal checkin
-			if (!bookingState.checkInDate || !bookingState.checkOutDate) return false;
-			return bookingState.checkOutDate === bookingState.checkInDate;
-		} else {
-			// For ALL_DAY, checkout must be after checkin
-			if (!bookingState.checkInDate || !bookingState.checkOutDate) return false;
-			const a = new Date(bookingState.checkInDate);
-			const b = new Date(bookingState.checkOutDate);
-			return b.getTime() > a.getTime();
-		}
-	}, [bookingState.checkInDate, bookingState.checkOutDate, bookingState.shift]);
+	}, [bookingState.selectedRooms, availabilityInfo?.availableRoomsByType, nights, bookingState.shift]);
 
 	const isGuestInfoComplete =
 		bookingState.guestName.trim() &&
@@ -249,7 +283,7 @@ export function HotelBookingPanel({
 	};
 
 	const handleBookingSubmit = async () => {
-		if (!canBook || !userId || !hotelInfo) return;
+		if (!canBook || !userId) return;
 
 		setIsProcessing(true);
 
@@ -261,10 +295,11 @@ export function HotelBookingPanel({
 
 		// Build booking data matching CreateHotelRoomBookingInput shape
 		const bookingData = {
-			hotelId: hotelInfo.id,
+			hotelId: hotelId,
 			userId,
 			checkInDate: bookingState.checkInDate,
 			checkOutDate: bookingState.checkOutDate,
+			shift: bookingState.shift,
 			totalPrice: totalCost,
 			paymentMethod: bookingState.paymentMethod || undefined,
 			specialRequests: bookingState.specialRequests || undefined,
@@ -335,20 +370,20 @@ export function HotelBookingPanel({
 		setPaymentMethod(null);
 	};
 
-	// Early return if hotel data not loaded
-	if (!hotelInfo) {
+	// Early return if availability data not loaded
+	if (!availabilityInfo && isDateValid) {
 		return (
 			<section className="mt-8 rounded-xl theme-outline bg-sub-section p-4 md:p-6" id="hotel-booking-panel">
-				{isLoading && <p className="theme-text-muted">Loading hotel information...</p>}
-				{error && <p className="text-red-400">Failed to load hotel. Please try again.</p>}
-				{!isLoading && !error && <p className="theme-text-subtle">No hotel data available</p>}
+				{isLoading && <p className="theme-text-muted">Loading room availability...</p>}
+				{error && <p className="text-red-400">Failed to load availability. Please try again.</p>}
+				{!isLoading && !error && <p className="theme-text-subtle">No availability data</p>}
 			</section>
 		);
 	}
 
 	return (
 		<section className="mt-8 rounded-xl theme-outline bg-sub-section p-4 md:p-6" id="hotel-booking-panel">
-			<h2 className="text-3xl font-semibold theme-text-teal mb-2">{hotelInfo.name}</h2>
+			<h2 className="text-3xl font-semibold theme-text-teal mb-2">Hotel Room Booking</h2>
 			<p className="theme-text-muted text-sm mb-6">Complete your hotel room booking</p>
 
 			{confirmationCode ? (
@@ -520,12 +555,12 @@ export function HotelBookingPanel({
 							</div>
 						) : (
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-								{availableRooms.map((roomType: HotelRoomType) => {
-									const roomCount = bookingState.selectedRooms.get(roomType.id) || 0;
+							{availableRooms.map((roomData: AvailableRoomType) => {
+									const roomCount = bookingState.selectedRooms.get(roomData.roomTypeId) || 0;
 									return (
 										<RoomCard
-											key={roomType.id}
-											roomType={roomType}
+											key={roomData.roomTypeId}
+											roomData={roomData}
 											roomCount={roomCount}
 											nights={nights}
 											shift={bookingState.shift}
@@ -609,15 +644,15 @@ export function HotelBookingPanel({
 						<h3 className="theme-text-teal font-semibold mb-4">Booking Summary</h3>
 							<div className="space-y-2 mb-4">
 								{Array.from(bookingState.selectedRooms.entries()).map(([roomTypeId, quantity]) => {
-									const roomType = hotelInfo.roomTypes?.find((rt: HotelRoomType) => rt.id === roomTypeId);
-									const pricePerNight = getPriceByShift(roomType!, bookingState.shift);
-									const isPriceAvailable = pricePerNight > 0;
-									const subtotal = pricePerNight * nights * quantity;
+								const roomData = availabilityInfo?.availableRoomsByType?.find((rt: AvailableRoomType) => rt.roomTypeId === roomTypeId);
+									const pricePerUnit = getPriceByShift(roomData!, bookingState.shift);
+									const isPriceAvailable = pricePerUnit > 0;
+									const subtotal = pricePerUnit * nights * quantity;
 								const unitLabel = bookingState.shift === "ALL_DAY" ? `night${nights !== 1 ? "s" : ""}` : `${bookingState.shift.toLowerCase()} shift`;
 								return (
 									<div key={roomTypeId} className="flex justify-between items-center text-sm pb-2" style={{ borderBottom: '1px solid var(--theme-deep-green)' }}>
 										<span className="theme-text-muted">
-											{roomType?.roomType} × {quantity} room{quantity > 1 ? "s" : ""} × {bookingState.shift === "ALL_DAY" ? nights : 1} {unitLabel}
+											{roomData?.roomType} × {quantity} room{quantity > 1 ? "s" : ""} × {bookingState.shift === "ALL_DAY" ? nights : 1} {unitLabel}
 											</span>
 											{isPriceAvailable ? (
 												<span className="theme-text">৳ {subtotal.toLocaleString()}</span>
@@ -675,19 +710,19 @@ export function HotelBookingPanel({
 	);
 }
 
-function RoomCard({ roomType, roomCount, nights, shift, onRoomSelection }: RoomCardProps) {
+function RoomCard({ roomData, roomCount, nights, shift, onRoomSelection }: RoomCardProps) {
 	// Helper function to get price based on shift
-	const getPriceByShift = (roomType: HotelRoomType, shift: keyof typeof RoomShift): number => {
+	const getPriceByShift = (roomData: AvailableRoomType, shift: keyof typeof RoomShift): number => {
 		switch (shift) {
 			case "MORNING":
-				return roomType.morningShiftPrice ?? 0;
+				return roomData.morningShiftPrice ?? 0;
 			case "AFTERNOON":
-				return roomType.afternoonShiftPrice ?? 0;
+				return roomData.afternoonShiftPrice ?? 0;
 			case "NIGHT":
-				return roomType.nightShiftPrice ?? 0;
+				return roomData.nightShiftPrice ?? 0;
 			case "ALL_DAY":
 			default:
-				return roomType.pricePerNight ?? 0;
+				return roomData.basePrice ?? 0;
 		}
 	};
 
@@ -706,35 +741,32 @@ function RoomCard({ roomType, roomCount, nights, shift, onRoomSelection }: RoomC
 		}
 	};
 
-	// Extract pricing and bed info from roomType
-	const pricePerNight = getPriceByShift(roomType, shift);
-	const singleBedCount = roomType.singleBedCount || 0;
-	const doubleBedCount = roomType.doubleBedCount || 0;
-	const roomTypeLabel = roomType.roomType || "Room";
-	const roomTotal = pricePerNight * nights * roomCount;
-	const maxGuests = (singleBedCount * 1) + (doubleBedCount * 2);
-	const availableCount = roomType.availableCount || 0;
-	const totalCount = roomType.totalCount || 0;
+	// Extract pricing info from roomData
+	const pricePerUnit = getPriceByShift(roomData, shift);
+	const roomTypeLabel = roomData.roomType || "Room";
+	const roomTotal = pricePerUnit * nights * roomCount;
+	const availableCount = roomData.availableRooms || 0;
+	const totalCount = roomData.totalRooms || 0;
 
 	// Check if price is available (not negative or zero)
-	const isPriceAvailable = pricePerNight > 0;
+	const isPriceAvailable = pricePerUnit > 0;
 
 	// Check if this roomType is selected
 	const isSelected = roomCount > 0;
 
 	const handleSelect = () => {
 		// Start with quantity 1 when selected
-		onRoomSelection(roomType.id, 1);
+		onRoomSelection(roomData.roomTypeId, 1);
 	};
 
 	const handleCancel = () => {
 		// Deselect by setting quantity to 0
-		onRoomSelection(roomType.id, 0);
+		onRoomSelection(roomData.roomTypeId, 0);
 	};
 
 	return (
 		<div
-			key={roomType.id}
+			key={roomData.roomTypeId}
 			className="rounded-lg theme-outline bg-sub-section p-5 transition-all"
 			style={{ 
 				boxShadow: 'none',
@@ -754,19 +786,14 @@ function RoomCard({ roomType, roomCount, nights, shift, onRoomSelection }: RoomC
 					</div>
 					<span className="text-xs theme-text-teal px-2 py-1 rounded border border-teal-700/50">{availableCount} Available</span>
 				</div>
-				<p className="theme-text-muted text-sm">
-					{singleBedCount > 0 && `${singleBedCount} Single Bed`}
-					{singleBedCount > 0 && doubleBedCount > 0 && " + "}
-					{doubleBedCount > 0 && `${doubleBedCount} Double Bed`}
-				</p>
-				<p className="theme-text-subtle text-xs mt-2">Sleeps up to {maxGuests} guests • {totalCount} rooms total</p>
+				<p className="theme-text-subtle text-xs mt-2">Sleeps multiple guests • {totalCount} rooms total</p>
 			</div>
 
 			{/* Price Section */}
 			<div className="bg-section rounded-lg p-3 mb-4 theme-outline">
 				<p className="theme-text-subtle text-xs uppercase font-semibold mb-1">{getShiftLabel(shift)}</p>
 				{isPriceAvailable ? (
-					<p className="theme-text-teal font-bold text-xl">৳ {pricePerNight.toLocaleString()}</p>
+					<p className="theme-text-teal font-bold text-xl">৳ {pricePerUnit.toLocaleString()}</p>
 				) : (
 					<p className="text-red-400 font-bold text-xl">Not Available</p>
 				)}
@@ -780,7 +807,7 @@ function RoomCard({ roomType, roomCount, nights, shift, onRoomSelection }: RoomC
 						<button
 							className="w-8 h-8 rounded text-red-400 font-bold transition-colors flex items-center justify-center"
 							style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', border: '1px solid var(--theme-deep-green)' }}
-							onClick={() => onRoomSelection(roomType.id, Math.max(1, roomCount - 1))}
+							onClick={() => onRoomSelection(roomData.roomTypeId, Math.max(1, roomCount - 1))}
 						>
 							−
 						</button>
@@ -796,7 +823,7 @@ function RoomCard({ roomType, roomCount, nights, shift, onRoomSelection }: RoomC
 								border: '1px solid var(--theme-deep-green)',
 								cursor: roomCount >= availableCount ? 'not-allowed' : 'pointer'
 							}}
-							onClick={() => onRoomSelection(roomType.id, Math.min(availableCount, roomCount + 1))}
+							onClick={() => onRoomSelection(roomData.roomTypeId, Math.min(availableCount, roomCount + 1))}
 						>
 							+
 						</button>

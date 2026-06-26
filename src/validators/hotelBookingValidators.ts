@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RoomShift } from "@/types/enums";
 
 function toStartOfDay(date: Date) {
   const d = new Date(date);
@@ -37,6 +38,9 @@ export const createHotelRoomBookingSchema = z.object({
       }),
     z.date(),
   ]),
+
+  shift: z.enum(["ALL_DAY", "MORNING", "AFTERNOON", "NIGHT"])
+    .default("ALL_DAY"),
   
   totalPrice: z.number()
     .positive({ message: "Total price must be greater than 0" })
@@ -76,6 +80,7 @@ export const createHotelRoomBookingSchema = z.object({
   const today = toStartOfDay(new Date());
   const checkIn = asDate(data.checkInDate);
   const checkOut = asDate(data.checkOutDate);
+  const shift = data.shift || "ALL_DAY";
 
   if (!checkIn || Number.isNaN(checkIn.getTime())) {
     return;
@@ -93,12 +98,24 @@ export const createHotelRoomBookingSchema = z.object({
     return;
   }
 
-  if (toStartOfDay(checkOut) <= toStartOfDay(checkIn)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["checkOutDate"],
-      message: "Check-out date must be after check-in date",
-    });
+  if (shift === "ALL_DAY") {
+    // For all-day shifts, checkout must be after check-in
+    if (toStartOfDay(checkOut) <= toStartOfDay(checkIn)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["checkOutDate"],
+        message: "Check-out date must be after check-in date",
+      });
+    }
+  } else {
+    // For other shifts (MORNING, AFTERNOON, NIGHT), checkout must be the same as check-in
+    if (toStartOfDay(checkOut).getTime() !== toStartOfDay(checkIn).getTime()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["checkOutDate"],
+        message: "For this shift, check-out must be the same as check-in date",
+      });
+    }
   }
 });
 
@@ -128,6 +145,9 @@ export const updateHotelRoomBookingSchema = z.object({
     z.date(),
   ])
     .optional(),
+
+  shift: z.enum(["ALL_DAY", "MORNING", "AFTERNOON", "NIGHT"])
+    .optional(),
   
   totalPrice: z.number()
     .positive({ message: "Total price must be greater than 0" })
@@ -152,15 +172,29 @@ export const updateHotelRoomBookingSchema = z.object({
 
   const checkIn = asDate(data.checkInDate);
   const checkOut = asDate(data.checkOutDate);
+  const shift = data.shift || "ALL_DAY";
+
   if (!checkIn || !checkOut) return;
   if (Number.isNaN(checkIn.getTime()) || Number.isNaN(checkOut.getTime())) return;
 
-  if (toStartOfDay(checkOut) <= toStartOfDay(checkIn)) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["checkOutDate"],
-      message: "Check-out date must be after check-in date",
-    });
+  if (shift === "ALL_DAY") {
+    // For all-day shifts, checkout must be after check-in
+    if (toStartOfDay(checkOut) <= toStartOfDay(checkIn)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["checkOutDate"],
+        message: "Check-out date must be after check-in date",
+      });
+    }
+  } else {
+    // For other shifts (MORNING, AFTERNOON, NIGHT), checkout must be the same as check-in
+    if (toStartOfDay(checkOut).getTime() !== toStartOfDay(checkIn).getTime()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["checkOutDate"],
+        message: "For this shift, check-out must be the same as check-in date",
+      });
+    }
   }
 });
 

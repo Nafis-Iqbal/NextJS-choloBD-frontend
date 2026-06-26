@@ -2,7 +2,15 @@
 import Image from "next/image";
 import { useState } from "react";
 
-export const Logo = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : {textSize?: string, position?: string}) => {
+export const Logo = ({width = 120, height = 50, position = "ml-5"} : {width?: number, height?: number, position?: string}) => {
+    return (
+        <div className={`${position} relative`} style={{width: `${width}px`, height: `${height}px`}}>
+            <Image src="/cholobd-logo.png" alt="Cholo BD Logo" fill className="object-contain" />
+        </div>
+    );
+}
+
+export const Logo_old = ({textSize = "md:text-xl lg:text-2xl", position = "ml-5"} : {textSize?: string, position?: string}) => {
     return (
         <div className={`md:w-fit ${position} md:p-4 text-center ${textSize} font-satisfy rounded-sm`} style={{backgroundColor: 'var(--theme-deep-green)', color: 'var(--theme-teal)'}}>
             Cholo BD!

@@ -156,6 +156,21 @@ export function useGetHotelDetailRQ(hotelId: string) {
     });
 }
 
+export async function getHotelRoomAvailability(hotelId: string, queryString?: string) {
+    const response = await apiFetch<ApiResponse<any>>(`/hotels/${hotelId}/availability${queryString ? `?${queryString}` : ""}`, { method: "GET" });
+    return response;
+}
+
+export function useGetHotelRoomAvailabilityRQ(hotelId: string, queryString?: string) {
+    return useQuery<ApiResponse<any>>({
+        queryFn: () => getHotelRoomAvailability(hotelId, queryString),
+        queryKey: ["hotels", hotelId, queryString],
+        enabled: !!hotelId,
+        staleTime: 30_000,
+        gcTime: 30_000,
+    });
+}
+
 async function createHotel(data: CreateHotelData) {
     const response = await apiFetch<ApiResponse<any>>(`/hotels/admin`, {
         method: "POST",

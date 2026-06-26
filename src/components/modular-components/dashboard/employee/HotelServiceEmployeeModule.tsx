@@ -18,11 +18,12 @@ import {
 export const HotelServiceEmployeeModule = () => {
   const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
   const userId = authResponse?.data?.userId;
-
-  const { data: userDetailData } = UserApi.useGetUserDetailRQ(userId || "", !!userId);
-  const hotelId = userDetailData?.data?.serviceEntityId;
+  
+  const { data: userDetailData } = UserApi.useGetOwnUserDetailRQ(userId || "", !!userId);
+  const hotelId = userDetailData?.data?.employeeServiceEntityId;
   
   const { data: roomsResponse, isLoading: roomsLoading } = HotelRoomApi.useGetHotelRoomsRQ(hotelId || "");
+  
   const { data: bookingsResponse, isLoading: bookingsLoading } = HotelBookingApi.useGetBookingsRQ(
     hotelId ? `hotelId=${hotelId}` : undefined
   );
@@ -53,16 +54,16 @@ export const HotelServiceEmployeeModule = () => {
         <HotelMetricsDashboard metrics={FAKE_METRICS} isReady={false} className="p-3 rounded-md"/>
 
         {/* Room Status Management */}
-        <HotelRoomStatusManagement rooms={hotelRooms} className="p-3 rounded-md"/>
+        <HotelRoomStatusManagement rooms={hotelRooms} className="p-3 rounded-md md:min-h-[50vh]"/>
 
         {/* Room Bookings Management */}
-        <HotelRoomBookingsManagement bookings={hotelBookings} className="p-3 rounded-md"/>
+        <HotelRoomBookingsManagement bookings={hotelBookings} className="p-3 rounded-md md:min-h-[50vh]"/>
 
         {/* Complaints Management */}
-        <ComplaintsManagement complaints={FAKE_COMPLAINTS} className="p-3 rounded-md"/>
+        <ComplaintsManagement complaints={FAKE_COMPLAINTS} className="p-3 rounded-md md:min-h-[50vh]"/>
 
         {/* Maintenance Tasks Management */}
-        <HotelMaintenanceTasksManagement tasks={FAKE_MAINTENANCE_TASKS} className="p-3 rounded-md"/>
+        <HotelMaintenanceTasksManagement tasks={FAKE_MAINTENANCE_TASKS} className="p-3 rounded-md md:min-h-[50vh]"/>
       </div>
     </section>
   );

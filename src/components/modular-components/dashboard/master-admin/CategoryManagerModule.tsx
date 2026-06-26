@@ -95,7 +95,7 @@ const CategoryManagerModule = () => {
                             <p className="w-[20%]">Category ID</p>
                             <p className="w-[20%]">Actions</p>
                         </div>
-                        <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto\">
+                        <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto">
                             {
                                 isLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
                                 isError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :

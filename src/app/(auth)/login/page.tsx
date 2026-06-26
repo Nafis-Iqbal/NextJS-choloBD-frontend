@@ -132,11 +132,11 @@ function LoginContent() {
     }, [isAuthenticated, router]);
 
     return (
-        <div className="flex flex-col items-left w-[100%] md:w-auto md:min-h-[60vh] md:min-w-[50vh] text-white
-            md:border-x-4 md:border-b-4 md:border-t-2 md:shadow-[0_5px_20px_#00FF99] md:rounded-xl ">
+        <div className="flex flex-col w-[100%] md:w-auto md:min-h-[60vh] md:min-w-[50vh] bg-white text-white
+            md:border-x-4 md:border-b-4 md:border-t-2 md:shadow-[0_5px_20px_gray] md:rounded-xl ">
             <DivGap customHeightGap="h-[20px] rounded-lg"/>
             
-            <Logo textSize="self-center md:self-start p-4 text-4xl md:text-xl lg:text-2xl" position="md:ml-7"/>
+            <Logo position="mx-auto md:ml-7" height={80} width={150}/>
 
             <div className="flex flex-grow flex-col justify-between mx-8 mt-8 space-y-2 font-sans">
                 {
@@ -248,15 +248,28 @@ function LoginContent() {
                 
                 <div className="flex flex-col justify-between mt-3">
                     {
-                        isSignUpPage ? (<p>Already registered? <button className="text-green-500 ml-2" onClick={() => setIsSignUpPage(false)}>Log in!</button></p>) :
-                        (<p>New to Suit Up? <button className="text-green-500 ml-2" onClick={() => {
-                                setIsSignUpPage(true);
-                                setIsEmailSignUp(false);
-                            }
-                        }>Sign up!</button></p>)
+                        isSignUpPage ? 
+                        (<p>Already registered? 
+                            <button className="bg-white font-semibold text-green-600 ml-2" 
+                                onClick={
+                                    () => setIsSignUpPage(false)
+                                }
+                            >Log in!
+                            </button></p>) :
+                        (<p>New to Cholo BD? 
+                            <button className="bg-white font-semibold text-green-600 ml-2" 
+                                onClick={
+                                    () => {
+                                        setIsSignUpPage(true);
+                                        setIsEmailSignUp(false);
+                                    }
+                                }
+                            >Sign up!
+                            </button>
+                        </p>)
                     }
                     
-                    <div className="flex flex-col mb-5 space-y-2">
+                    {/* <div className="flex flex-col mb-5 space-y-2">
                         <div>Developed by <span className="font-bold text-green-500">Nafis Iqbal</span></div>
 
                         <div className="flex justify-between w-[45%]">
@@ -268,7 +281,7 @@ function LoginContent() {
                                 <Image src="./icons8-linkedin.svg" alt="LinkedIn Logo" width={20} height={20}/>
                             </button>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

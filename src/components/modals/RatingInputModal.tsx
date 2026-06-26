@@ -51,18 +51,28 @@ const RatingInputModal = ({
 
     return ReactDOM.createPortal(
         <div
-            className="fixed z-60 inset-0 flex items-center justify-center bg-gray-100/50 font-sans"
+            className="fixed z-60 inset-0 flex items-center justify-center font-sans"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.3)" }}
             onClick={onCancel}
         >
             <motion.div
                 className="p-5 rounded-md shadow-lg md:w-120 text-center border-x-2 border-b-4"
+                style={{
+                    backgroundColor: "var(--theme-card-bg)",
+                    borderColor: "var(--theme-deep-green)",
+                }}
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <p className="text-lg text-green-600 mb-4 font-semibold">{message}</p>
+                <p
+                    className="text-lg mb-4 font-semibold"
+                    style={{ color: "var(--theme-text)" }}
+                >
+                    {message}
+                </p>
 
                 {/* ⭐ Star Selector */}
                 <div className="flex justify-center mb-6 space-x-2">
@@ -82,7 +92,11 @@ const RatingInputModal = ({
                             >
                                 <Star
                                     size={32}
-                                    className={isHighlighted ? "text-yellow-400" : "text-gray-300"}
+                                    style={{
+                                        color: isHighlighted
+                                            ? "var(--theme-star)"
+                                            : "var(--theme-text-subtle)",
+                                    }}
                                     fill={isHighlighted ? "currentColor" : "none"}
                                 />
                             </button>
@@ -93,14 +107,36 @@ const RatingInputModal = ({
                 <div className="flex justify-center space-x-4">
                     <button
                         type="button"
-                        className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-sm font-medium"
+                        className="px-4 py-2 text-white rounded-sm font-medium transition-colors"
+                        style={{
+                            backgroundColor: "var(--theme-teal)",
+                        }}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                "var(--theme-teal-hover)")
+                        }
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                "var(--theme-teal)")
+                        }
                         onClick={onConfirm}
                     >
                         Submit
                     </button>
                     <button
                         type="button"
-                        className="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-sm font-medium"
+                        className="px-4 py-2 text-white rounded-sm font-medium transition-colors"
+                        style={{
+                            backgroundColor: "var(--theme-text-muted)",
+                        }}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                "var(--theme-text)")
+                        }
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                "var(--theme-text-muted)")
+                        }
                         onClick={onCancel}
                     >
                         Cancel

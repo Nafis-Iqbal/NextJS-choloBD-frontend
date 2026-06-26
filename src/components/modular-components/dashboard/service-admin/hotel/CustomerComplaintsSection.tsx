@@ -83,11 +83,11 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
   const getStatusColor = (status: Complaint["status"]) => {
     switch (status) {
       case "pending":
-        return "bg-red-600/30 text-red-300 border border-red-600/50";
+        return "bg-red-600/30 text-red-800 border border-red-600/50";
       case "in-progress":
         return "bg-[color:var(--theme-star)] bg-opacity-20 text-[color:var(--theme-star)]" + " " + "border" + " " + "border-[color:var(--theme-star)]/50";
       case "resolved":
-        return "bg-green-600/30 text-green-300 border border-green-600/50";
+        return "bg-green-600/30 text-green-800 border border-green-600/50";
     }
   };
 
@@ -98,7 +98,7 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
       case "medium":
         return "text-[color:var(--theme-star)]";
       case "high":
-        return "text-red-400";
+        return "text-red-800";
     }
   };
 

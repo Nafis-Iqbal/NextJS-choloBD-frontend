@@ -234,7 +234,7 @@ export const CustomCheckboxInput = forwardRef<HTMLInputElement, CustomCheckboxPr
                     ref={ref}
                     {...rest}
                 />
-                {label && <span className="text-white">{label}</span>}
+                {label && <span style={{ color: 'var(--theme-text)' }}>{label}</span>}
             </label>
 
             {error && (

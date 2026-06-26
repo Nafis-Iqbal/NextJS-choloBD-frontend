@@ -24,11 +24,12 @@ const AddressUpdateModal: React.FC<AddressModalProps> = ({
 
     return ReactDOM.createPortal(
         <div
-            className="fixed z-60 inset-0 flex items-center justify-center bg-black/50 font-sans"
+            className="fixed z-60 inset-0 flex items-center justify-center font-sans"
+            style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
             onClick={onCancel} // Close modal when clicking outside
         >
             <motion.div
-                className="bg-gray-800 rounded-md shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
+                className="theme-card rounded-md shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.5 }}

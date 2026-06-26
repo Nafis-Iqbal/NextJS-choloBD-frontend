@@ -100,24 +100,58 @@ export default function TrackersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pt-20 pb-10 font-sans">
+    <div
+      className="min-h-screen pt-20 pb-10 font-sans"
+      style={{
+        backgroundColor: "var(--theme-bg)",
+        color: "var(--theme-text)",
+      }}
+    >
       <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-4xl font-bold mb-2 text-green-400">Booking Tracker</h1>
-        <p className="text-gray-400 mb-10">Track your bookings across all services</p>
+        <h1
+          className="text-4xl font-bold mb-2"
+          style={{ color: "var(--theme-teal)" }}
+        >
+          Booking Tracker
+        </h1>
+        <p className="mb-10" style={{ color: "var(--theme-text-muted)" }}>
+          Track your bookings across all services
+        </p>
 
         {/* Hotel Booking Tracker */}
         <section className="mb-12">
-          <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-6">Hotel Booking Tracker</h2>
+          <div
+            className="rounded-lg p-6"
+            style={{
+              backgroundColor: "var(--theme-card-bg)",
+              borderColor: "var(--theme-deep-green)",
+              border: "1px solid",
+            }}
+          >
+            <h2 className="text-2xl font-bold mb-6" style={{ color: "var(--theme-text)" }}>
+              Hotel Booking Tracker
+            </h2>
 
             {isAuthenticated ? (
-              <div className="bg-green-900/20 border border-green-700 rounded-lg p-6">
-                <p className="text-gray-200 mb-4">
+              <div
+                className="rounded-lg p-6"
+                style={{
+                  backgroundColor: "var(--theme-section-bg)",
+                  borderColor: "var(--theme-teal)",
+                  border: "1px solid",
+                }}
+              >
+                <p className="mb-4" style={{ color: "var(--theme-text)" }}>
                   You are already logged in! To view your hotel booking details, please visit your dashboard.
                 </p>
                 <Link
                   href={`/dashboard#booked_hotels_section`}
-                  className="inline-block px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition-colors"
+                  style={{
+                    backgroundColor: "var(--theme-teal)",
+                    color: "white",
+                    borderRadius: "0.5rem",
+                  }}
+                  className="inline-block px-6 py-2 font-semibold transition-colors hover:opacity-80"
                 >
                   Go to Dashboard →
                 </Link>
@@ -126,58 +160,101 @@ export default function TrackersPage() {
               <>
                 {/* RESULTS SECTION - ABOVE FORM */}
                 {!hasSearched ? (
-                  <div className="mb-8 bg-blue-900/20 border border-blue-700 rounded-lg p-6 text-center">
-                    <p className="text-blue-300">
+                  <div
+                    className="mb-8 rounded-lg p-6 text-center"
+                    style={{
+                      backgroundColor: "var(--theme-section-bg)",
+                      borderColor: "var(--theme-teal)",
+                      border: "1px solid",
+                      color: "var(--theme-teal)",
+                    }}
+                  >
+                    <p>
                       Fill in the form below to search for your hotel booking
                     </p>
                   </div>
                 ) : isWaitingForResults ? (
-                  <div className="mb-8 bg-gray-700/30 border border-gray-600 rounded-lg p-6 text-center">
-                    <p className="text-gray-300">Searching for your booking...</p>
+                  <div
+                    className="mb-8 rounded-lg p-6 text-center"
+                    style={{
+                      backgroundColor: "var(--theme-section-bg)",
+                      borderColor: "var(--theme-deep-green)",
+                      border: "1px solid",
+                      color: "var(--theme-text-muted)",
+                    }}
+                  >
+                    <p>Searching for your booking...</p>
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="mb-8 space-y-4">
-                    <h3 className="text-xl font-semibold mb-4">Booking Details</h3>
+                    <h3 className="text-xl font-semibold mb-4" style={{ color: "var(--theme-text)" }}>
+                      Booking Details
+                    </h3>
                     {searchResults.map((booking) => (
                       <div
                         key={booking.id}
-                        className="bg-gray-700/50 border border-gray-600 rounded-lg p-4"
+                        className="rounded-lg p-4"
+                        style={{
+                          backgroundColor: "var(--theme-section-bg)",
+                          borderColor: "var(--theme-deep-green)",
+                          border: "1px solid",
+                        }}
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
-                            <p className="text-gray-400 text-sm">Confirmation Code</p>
-                            <p className="text-white font-semibold">{booking.confirmationCode}</p>
+                            <p className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
+                              Confirmation Code
+                            </p>
+                            <p className="font-semibold" style={{ color: "var(--theme-text)" }}>
+                              {booking.confirmationCode}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Hotel</p>
-                            <p className="text-white font-semibold">{booking.hotel?.name || "N/A"}</p>
+                            <p className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
+                              Hotel
+                            </p>
+                            <p className="font-semibold" style={{ color: "var(--theme-text)" }}>
+                              {booking.hotel?.name || "N/A"}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Check-in Date</p>
-                            <p className="text-white font-semibold">
+                            <p className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
+                              Check-in Date
+                            </p>
+                            <p className="font-semibold" style={{ color: "var(--theme-text)" }}>
                               {new Date(booking.checkInDate).toLocaleDateString()}
                             </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Check-out Date</p>
-                            <p className="text-white font-semibold">
+                            <p className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
+                              Check-out Date
+                            </p>
+                            <p className="font-semibold" style={{ color: "var(--theme-text)" }}>
                               {new Date(booking.checkOutDate).toLocaleDateString()}
                             </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Total Price</p>
-                            <p className="text-yellow-400 font-semibold">৳ {booking.totalPrice}</p>
+                            <p className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
+                              Total Price
+                            </p>
+                            <p className="font-semibold" style={{ color: "var(--theme-star)" }}>
+                              ৳ {booking.totalPrice}
+                            </p>
                           </div>
                           <div>
-                            <p className="text-gray-400 text-sm">Status</p>
+                            <p className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
+                              Status
+                            </p>
                             <p
-                              className={`font-semibold ${
-                                booking.status === "CONFIRMED"
-                                  ? "text-green-400"
-                                  : booking.status === "CANCELLED"
-                                  ? "text-red-400"
-                                  : "text-yellow-400"
-                              }`}
+                              className="font-semibold"
+                              style={{
+                                color:
+                                  booking.status === "CONFIRMED"
+                                    ? "var(--theme-teal)"
+                                    : booking.status === "CANCELLED"
+                                    ? "var(--theme-red)"
+                                    : "var(--theme-star)",
+                              }}
                             >
                               {booking.status}
                             </p>
@@ -186,24 +263,41 @@ export default function TrackersPage() {
                         
                         {/* Payment Method Selection - Only shown when status is PENDING */}
                         {booking.status === "PENDING" && (
-                          <div className="mt-4 pt-4 border-t border-gray-600">
+                          <div
+                            className="mt-4 pt-4"
+                            style={{
+                              borderTopColor: "var(--theme-deep-green)",
+                              borderTopWidth: "1px",
+                            }}
+                          >
                             {/* Payment Cost Display */}
-                            <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 mb-4">
-                              <p className="text-gray-400 text-sm mb-2">Payment Amount:</p>
+                            <div
+                              className="rounded-lg p-4 mb-4"
+                              style={{
+                                backgroundColor: "var(--theme-card-bg)",
+                                borderColor: "var(--theme-deep-green)",
+                                border: "1px solid",
+                              }}
+                            >
+                              <p className="text-sm mb-2" style={{ color: "var(--theme-text-subtle)" }}>
+                                Payment Amount:
+                              </p>
                               {(selectedPaymentMethod[booking.id] || "wallet") === "wallet" ? (
-                                  <p className="text-green-400 font-semibold text-lg">
+                                  <p className="font-semibold text-lg" style={{ color: "var(--theme-teal)" }}>
                                     {(booking.totalPrice * 0.8).toFixed(2)} Credits
                                   </p>
                               ) : (
-                                <p className="text-green-400 font-semibold text-lg">
+                                <p className="font-semibold text-lg" style={{ color: "var(--theme-teal)" }}>
                                   ৳ {booking.totalPrice.toLocaleString()}
                                 </p>
                               )}
                             </div>
 
-                            <p className="text-gray-300 text-sm font-semibold mb-3">Select Payment Method:</p>
+                            <p className="text-sm font-semibold mb-3" style={{ color: "var(--theme-text)" }}>
+                              Select Payment Method:
+                            </p>
                             <div className="flex gap-4 mb-4 w-fit">
-                              <label className="flex items-center gap-2 cursor-pointer">
+                              <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
                                 <input
                                   type="radio"
                                   name={`payment-method-${booking.id}`}
@@ -217,9 +311,9 @@ export default function TrackersPage() {
                                   }
                                   className="w-4 h-4"
                                 />
-                                <span className="text-gray-300">Wallet</span>
+                                <span style={{ color: "var(--theme-text)" }}>Wallet</span>
                               </label>
-                              <label className="flex items-center gap-2 cursor-pointer">
+                              <label className="flex items-center gap-2" style={{ cursor: "pointer" }}>
                                 <input
                                   type="radio"
                                   name={`payment-method-${booking.id}`}
@@ -233,7 +327,7 @@ export default function TrackersPage() {
                                   }
                                   className="w-4 h-4"
                                 />
-                                <span className="text-gray-300">Card</span>
+                                <span style={{ color: "var(--theme-text)" }}>Card</span>
                               </label>
                             </div>
 
@@ -245,7 +339,11 @@ export default function TrackersPage() {
                                 );
                                 // TODO: Implement payment redirect logic based on method
                               }}
-                              className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded transition-colors"
+                              style={{
+                                backgroundColor: "var(--theme-teal)",
+                                color: "white",
+                              }}
+                              className="w-full px-4 py-2 font-semibold rounded transition-colors hover:opacity-80"
                             >
                               Pay Now
                             </button>
@@ -255,8 +353,16 @@ export default function TrackersPage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="mb-8 bg-red-900/20 border border-red-700 rounded-lg p-6 text-center">
-                    <p className="text-red-300">
+                  <div
+                    className="mb-8 rounded-lg p-6 text-center"
+                    style={{
+                      backgroundColor: "var(--theme-section-bg)",
+                      borderColor: "var(--theme-red)",
+                      border: "1px solid",
+                      color: "var(--theme-red)",
+                    }}
+                  >
+                    <p>
                       No booking found matching your details. Please check your information and try again.
                     </p>
                   </div>
@@ -266,7 +372,11 @@ export default function TrackersPage() {
                 <form
                   onSubmit={handleHotelSearch}
                   autoComplete="on"
-                  className="space-y-4 border-t border-gray-700 pt-6"
+                  className="space-y-4 pt-6"
+                  style={{
+                    borderTopColor: "var(--theme-deep-green)",
+                    borderTopWidth: "1px",
+                  }}
                 >
                   <CustomTextInput
                     type="text"
@@ -276,10 +386,11 @@ export default function TrackersPage() {
                     value={hotelSearchData.confirmationCode}
                     onChange={handleHotelInputChange}
                     className="w-full"
-                    labelStyle="text-gray-300"
                   />
 
-                  <div className="text-center text-gray-400 font-semibold">OR</div>
+                  <div className="text-center font-semibold" style={{ color: "var(--theme-text-muted)" }}>
+                    OR
+                  </div>
 
                   <div className="w-full">
                     <input
@@ -295,7 +406,12 @@ export default function TrackersPage() {
                         }));
                         setShowValidationHint(false);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded placeholder-gray-400 focus:outline-none focus:border-green-500"
+                      style={{
+                        backgroundColor: "var(--theme-input-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                        color: "var(--theme-text)",
+                      }}
+                      className="w-full px-3 py-2 border rounded"
                     />
                   </div>
 
@@ -314,23 +430,40 @@ export default function TrackersPage() {
                         }));
                         setShowValidationHint(false);
                       }}
-                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 text-white rounded placeholder-gray-400 focus:outline-none focus:border-green-500"
+                      style={{
+                        backgroundColor: "var(--theme-input-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                        color: "var(--theme-text)",
+                      }}
+                      className="w-full px-3 py-2 border rounded"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isWaitingForResults}
-                    className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
+                    style={{
+                      backgroundColor: isWaitingForResults ? "var(--theme-text-subtle)" : "var(--theme-teal)",
+                      color: "white",
+                    }}
+                    className="w-full px-6 py-3 rounded-lg font-semibold transition-colors hover:opacity-80 disabled:cursor-not-allowed"
                   >
                     {isWaitingForResults ? "Searching..." : "Search Booking"}
                   </button>
 
                   {/* How to search - Only shown when validation fails */}
                   {showValidationHint && (
-                    <div className="bg-yellow-900/20 border border-yellow-700 rounded-lg p-4 mt-4">
-                      <p className="text-yellow-300 font-semibold mb-2">How to search:</p>
-                      <ul className="text-yellow-200 text-sm space-y-1">
+                    <div
+                      className="rounded-lg p-4 mt-4"
+                      style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-star)",
+                        border: "1px solid",
+                        color: "var(--theme-star)",
+                      }}
+                    >
+                      <p className="font-semibold mb-2">How to search:</p>
+                      <ul className="text-sm space-y-1">
                         <li>
                           • <span className="font-semibold">Option 1:</span> Enter your{" "}
                           <strong>Confirmation Code</strong> only

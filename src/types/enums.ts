@@ -105,7 +105,9 @@ export enum RoomShift {
 export enum ReviewType {
   HOTEL = "HOTEL",
   TOUR_SPOT = "TOUR_SPOT",
-  ACTIVITY_SPOT = "ACTIVITY_SPOT"
+  ACTIVITY_SPOT = "ACTIVITY_SPOT",
+  TRANSPORT = "TRANSPORT",
+  GUIDE = "GUIDE"
 }
 
 // Service and Booking Enums

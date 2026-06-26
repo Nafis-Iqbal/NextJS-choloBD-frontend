@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react"
-import { Role, UserStatus, PaymentStatus } from "@/types/enums"
+import { Role, UserStatus, PaymentStatus, ServiceType } from "@/types/enums"
 import { UserApi } from "@/services/api"
 import { filterUsersSchema } from "@/validators/userValidators"
 import { queryClient } from "@/services/apiInstance"
@@ -11,7 +11,18 @@ import { CustomSelectInput } from "../../../custom-elements/CustomInputElements"
 import { CustomTextInput } from "../../../custom-elements/CustomInputElements"
 import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
 import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
+import { UserViewListTableRow } from "../../../data-elements/DataTableRowElements"
 import { useRouter } from "next/navigation"
+
+const formatEnumValue = (value: string): string => {
+    return value
+        .replace(/_/g, " ")
+        .toLowerCase()
+        .replace(/^\w/, c => c.toUpperCase())
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ")
+}
 
 type UserFilter = {
     role: Role;
@@ -115,14 +126,20 @@ export const UserManagerModule = () => {
             </div>
             <TableLayout className="md:mr-5">
                 <div className="overflow-x-auto w-full">
-                    <div className="min-w-[900px]">
-                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
-                            <p className="w-[5%]">Sr.</p>
-                            <p className="w-[25%]">User Name</p>
-                            <p className="w-[15%]">Role</p>
-                            <p className="w-[25%]">Email</p>
-                            <p className="w-[15%]">Spent</p>
-                            <p className="w-[15%]">Joined</p>
+                    <div className="min-w-[1800px]">
+                        <div className="flex theme-outline p-2 text-center text-sm font-semibold" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+                            <p className="w-[2%] flex-shrink-0">Sr.</p>
+                            <p className="w-[11%] flex-shrink-0">User Name</p>
+                            <p className="w-[13%] flex-shrink-0">Email</p>
+                            <p className="w-[6%] flex-shrink-0">Role</p>
+                            <p className="w-[9%] flex-shrink-0">Status</p>
+                            <p className="w-[6%] flex-shrink-0">Payment</p>
+                            <p className="w-[13%] flex-shrink-0">Phone</p>
+                            <p className="w-[9%] flex-shrink-0">Service Type</p>
+                            <p className="w-[10%] flex-shrink-0">Company Name</p>
+                            <p className="w-[6%] flex-shrink-0">Wallet</p>
+                            <p className="w-[5%] flex-shrink-0">Verified</p>
+                            <p className="w-[9%] flex-shrink-0">Joined</p>
                         </div>
                         <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto">
                             {
@@ -135,12 +152,18 @@ export const UserManagerModule = () => {
                                         <UserListTableRow 
                                             key={user.id} 
                                             id={index + 1}
-                                            userId={user.id} 
                                             userName={user.userName} 
-                                            role={user.role} 
-                                            email={user.email} 
-                                            spent={5000} 
-                                            joined={user.emailVerified ?? new Date(2025, 0, 31)}
+                                            email={user.email}
+                                            phoneNumber={user.phoneNumber}
+                                            role={user.role}
+                                            walletBalance={user?.wallet?.balance || -1}
+                                            userStatus={user.userStatus}
+                                            paymentStatus={user.paymentStatus}
+                                            serviceType={user.serviceType}
+                                            serviceEntityName={user.serviceEntityName}
+                                            employeeServiceType={user.employeeServiceType}
+                                            employeeServiceEntityName={user.employeeServiceEntityName}
+                                            createdAt={user.createdAt ? new Date(user.createdAt) : new Date()}
                                             navigateOnClick={() => router.push(`/user_profile/${user.id}`)}
                                         />
                                     ))
@@ -232,18 +255,54 @@ export const UserManagerModule = () => {
 }
 
 const UserListTableRow = ({
-    id, userId, userName, role, email, spent, joined, navigateOnClick
+    id, 
+    userName,
+    email, 
+    role, 
+    walletBalance,
+    phoneNumber,
+    
+    serviceType,
+    serviceEntityName,
+    employeeServiceType,
+    employeeServiceEntityName,
+
+    userStatus, 
+    paymentStatus, 
+    createdAt, 
+    navigateOnClick
 } : {
-    id: number, userId: string, userName: string, role: Role, email: string, spent: number, joined: Date, navigateOnClick: () => void
+    id: number, 
+    userName: string, 
+    email: string, 
+    role: Role, 
+    walletBalance: number,
+    phoneNumber?: string,
+
+    serviceType?: ServiceType;
+    serviceEntityName?: string;
+    employeeServiceType?: ServiceType;
+    employeeServiceEntityName?: string;
+
+    userStatus: UserStatus;
+    paymentStatus: PaymentStatus;
+    createdAt: Date, 
+    navigateOnClick: () => void
 }) => {
     return (
-        <div className="flex p-2 w-full border-green-900 hover:bg-gray-600 text-center" onClick={() => navigateOnClick()}>
-            <p className="w-[5%]">{id}</p>
-            <p className="w-[25%] hover:cursor-pointer">{userName}</p>
-            <p className="w-[15%]">{role}</p>
-            <p className="w-[25%]">{email}</p>
-            <p className="w-[15%]">{spent}</p>
-            <p className="w-[15%]">{new Date(joined).toDateString()}</p>
+        <div className="flex p-2 w-full border-green-900 hover:bg-gray-200 text-center hover:cursor-pointer" onClick={() => navigateOnClick()}>
+            <p className="w-[2%] flex-shrink-0">{id}</p>
+            <p className="w-[11%] flex-shrink-0 hover:cursor-pointer">{userName}</p>
+            <p className="w-[13%] flex-shrink-0">{email}</p>
+            <p className="w-[6%] flex-shrink-0">{role}</p>
+            <p className="w-[9%] flex-shrink-0">{userStatus}</p>
+            <p className="w-[6%] flex-shrink-0">{paymentStatus}</p>
+            <p className="w-[13%] flex-shrink-0">{phoneNumber || '-'}</p>
+            <p className="w-[9%] flex-shrink-0">{role === Role.SERVICE_ADMIN ? serviceType : role === Role.EMPLOYEE ? employeeServiceType: '-'}</p>
+            <p className="w-[10%] flex-shrink-0">{role === Role.SERVICE_ADMIN ? serviceEntityName : role === Role.EMPLOYEE ? employeeServiceEntityName: '-'}</p>
+            <p className="w-[6%] flex-shrink-0">{walletBalance} C</p>
+            <p className="w-[5%] flex-shrink-0">-</p>
+            <p className="w-[9%] flex-shrink-0">{new Date(createdAt).toDateString()}</p>
         </div>
     )
 }

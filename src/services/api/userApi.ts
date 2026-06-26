@@ -48,11 +48,13 @@ export async function updateUserRoleStatusService(
   role?: string, 
   userStatus?: UserStatus, 
   userServiceType?: ServiceType,
-  serviceEntityId?: string
+  serviceEntityId?: string,
+  employeeServiceType?: ServiceType,
+  employeeServiceEntityId?: string
 ) {
   const response = await apiFetch<ApiResponse<User>>(`/users/${userId}/role`, {
     method: 'PUT',
-    body: JSON.stringify({ role, userStatus, userServiceType, serviceEntityId }),
+    body: JSON.stringify({ role, userStatus, userServiceType, serviceEntityId, employeeServiceType, employeeServiceEntityId }),
   });
 
   return response;
@@ -60,15 +62,38 @@ export async function updateUserRoleStatusService(
 
 export function useUpdateUserRoleStatusServiceRQ(onSuccessFn: (ApiResponse: any) => void, onErrorFn: () => void) {
     return useMutation({
-        mutationFn: ({userId, role, userStatus, userServiceType, serviceEntityId} : 
-          {userId: string, role?: string, userStatus?: UserStatus, userServiceType?: ServiceType, serviceEntityId?: string}) => 
-            updateUserRoleStatusService(userId, role, userStatus, userServiceType, serviceEntityId),
-        onSuccess: (data) => {
-            onSuccessFn(data);
-        },
-        onError: () => {
-            onErrorFn();
-        }
+        mutationFn: ({
+          userId, 
+          role, 
+          userStatus, 
+          userServiceType, 
+          serviceEntityId, 
+          employeeServiceType, 
+          employeeServiceEntityId
+        }:{
+          userId: string, 
+          role?: string, 
+          userStatus?: UserStatus, 
+          userServiceType?: ServiceType, 
+          serviceEntityId?: string,
+          employeeServiceType?: ServiceType,
+          employeeServiceEntityId?: string
+        }) => 
+          updateUserRoleStatusService(
+            userId, 
+            role, 
+            userStatus, 
+            userServiceType, 
+            serviceEntityId, 
+            employeeServiceType, 
+            employeeServiceEntityId
+          ),
+          onSuccess: (data) => {
+              onSuccessFn(data);
+          },
+          onError: () => {
+              onErrorFn();
+          }
     });
 }
 

@@ -78,16 +78,21 @@ declare global {
     serviceEntityName?: string;
     serviceAddressId?: string; 
 
+    employeeServiceType?: ServiceType;
+    employeeServiceEntityId?: string;
+    employeeServiceEntityName?: string;
+    employeeServiceAddressId?: string;
+
     userStatus: UserStatus;
     paymentStatus: PaymentStatus;
     emailVerified?: Date;
     phoneVerified?: Date;
     createdAt: string;
 
-    wallet?: Wallet;
     spent: number;
     earned: number;
-    
+
+    wallet?: Wallet;
     serviceAddresses?: Address[]
     notifications?: Notification[];
     reviews?: Review[];
@@ -134,6 +139,8 @@ declare global {
     tourSpots?: TourSpot[];
     activitySpots?: ActivitySpot[];
     hotels?: Hotel[];
+    transports?: Transport[];
+    guides?: Guide[];
   }
 
   interface Category {
@@ -265,6 +272,59 @@ declare global {
     hotelRoom: HotelRoom;
   }
 
+  interface TransportBooking {
+    id: string;
+    userId: string;
+    transportId: string | null;
+    transportType: TransportServiceType;
+    departureLocation: string;
+    arrivalLocation: string;
+    departureDateTime: Date;
+    arrivalDateTime: Date;
+    seatNumber: string | null;
+    seatDetails: string | null;
+    passengerCount: number;
+    passengerDetails: Record<string, any> | null;
+    serviceClass: string | null;
+    price: number;
+    totalPrice: number;
+    confirmationCode: string;
+    status: BookingStatus;
+    paymentStatus: PaymentStatus;
+    paymentMethod: string | null;
+    specialRequests: string | null;
+    bookedAt: Date;
+    confirmedAt: Date | null;
+    cancelledAt: Date | null;
+    cancellationReason: string | null;
+    user: User;
+    transport: Transport | null;
+    userTripSegments: UserTripSegment[];
+  }
+
+  interface ActivityBooking {
+    id: string;
+    activitySpotId: string;
+    userId: string;
+    bookingDate: Date;
+    participantCount: number;
+    specialRequirements: string | null;
+    price: number;
+    totalPrice: number;
+    confirmationCode: string;
+    status: BookingStatus;
+    paymentStatus: PaymentStatus;
+    paymentMethod: string | null;
+    specialRequests: string | null;
+    bookedAt: Date;
+    confirmedAt: Date | null;
+    cancelledAt: Date | null;
+    cancellationReason: string | null;
+    activitySpot: ActivitySpot;
+    user: User;
+    userTripSegments: UserTripSegment[];
+  }
+
   // Tourism Spots and Activities
   interface TourSpot {
     id: string;
@@ -372,6 +432,62 @@ declare global {
     category: Category;
   }
 
+  interface Transport {
+    id: string;
+    serviceAdminUserId: string;
+    name: string;
+    description: string;
+    transportType: TransportServiceType;
+    locationId: string | null;
+    contactEmail: string;
+    contactPhone: string;
+    website: string | null;
+    vehicleCount: number;
+    capacity: number | null;
+    licensePlatePrefix: string | null;
+    operatingRoutes: string[];
+    amenities: string[];
+    policies: string[];
+    rating: number;
+    isActive: boolean;
+    isVerified: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    isSeeded: boolean;
+    location: Location | null;
+    addresses: Address[];
+    images: Image[];
+    reviews: Review[];
+  }
+
+interface Guide {
+  id: string;
+  serviceAdminUserId: string;
+  firstName: string;
+  lastName: string;
+  bio: string | null;
+  specializations: TourType[];
+  languages: string[];
+  experienceYears: number;
+  rating: number;
+  pricePerDay: number;
+  contactEmail: string;
+  contactPhone: string;
+  certificationNumber: string | null;
+  licenseNumber: string | null;
+  locationId: string | null;
+  isActive: boolean;
+  isVerified: boolean;
+  availabilityStatus: string;
+  createdAt: Date;
+  updatedAt: Date;
+  isSeeded: boolean;
+  location: Location | null;
+  addresses: Address[];
+  images: Image[];
+  reviews: Review[];
+}
+
   // Reviews and Ratings
   interface Review {
     id: string;
@@ -381,13 +497,20 @@ declare global {
     description: string;
     rating: number;
     userId?: string;
+
     tourSpotId?: string;
     activitySpotId?: string;
     hotelId?: string;
+    transportId?: string;
+    guideId?: string;
+    
     user?: User;
     TourSpot?: TourSpot;
     ActivitySpot?: ActivitySpot;
     Hotel?: Hotel;
+    Transport?: Transport;
+    Guide?: Guide;
+
     createdAt?: Date;
   }
 
@@ -522,12 +645,20 @@ declare global {
     width?: number;
     height?: number;
     fileSize?: number;
+
     userId: string;
     user: User;
-    TourSpot?: TourSpot;
+    
     tourSpotId?: string;
-    ActivitySpot?: ActivitySpot;
     activitySpotId?: string;
+    transportId?: string;
+    guideId?: string;
+
+    TourSpot?: TourSpot;
+    ActivitySpot?: ActivitySpot;
+    Transport?: Transport;
+    Guide?: Guide;
+    
     section?: HeroSection;
   }
 

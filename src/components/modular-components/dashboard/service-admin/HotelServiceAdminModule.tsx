@@ -15,7 +15,7 @@ export const HotelServiceAdminModule = () => {
   const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
   const userId = authResponse?.data?.userId;
 
-  const { data: userDetailData } = UserApi.useGetUserDetailRQ(userId || "", !!userId);
+  const { data: userDetailData } = UserApi.useGetOwnUserDetailRQ(userId || "", !!userId);
   const hotelId = userDetailData?.data?.serviceEntityId;
 
   const { data: hotelData } = HotelApi.useGetHotelDetailRQ(hotelId || "");

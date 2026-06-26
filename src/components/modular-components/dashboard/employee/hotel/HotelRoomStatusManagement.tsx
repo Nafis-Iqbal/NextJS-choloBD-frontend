@@ -21,8 +21,23 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
     }
   );
 
+  const getStatusColorVar = (status: HotelRoomStatus): string => {
+    switch (status) {
+      case HotelRoomStatus.AVAILABLE:
+        return "var(--theme-green, rgb(40, 167, 69))";
+      case HotelRoomStatus.BOOKED:
+        return "var(--theme-yellow, rgb(255, 193, 7))";
+      case HotelRoomStatus.OUT_OF_SERVICE:
+        return "var(--theme-purple, rgb(102, 51, 153))";
+      case HotelRoomStatus.MAINTENANCE:
+        return "var(--theme-red, rgb(220, 53, 69))";
+      default:
+        return "var(--theme-text-muted, rgb(108, 117, 125))";
+    }
+  };
+
   const getStatusColor = (status: HotelRoomStatus) => {
-    const baseStyle = {
+    return {
       paddingLeft: '0.75rem',
       paddingRight: '0.75rem',
       paddingTop: '0.25rem',
@@ -31,19 +46,8 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
       fontSize: '0.75rem',
       fontWeight: '500' as const,
       border: `1px solid`,
+      color: getStatusColorVar(status),
     };
-    switch (status) {
-      case HotelRoomStatus.AVAILABLE:
-        return { ...baseStyle, backgroundColor: 'rgba(40, 167, 69, 0.3)', color: 'rgb(40, 167, 69)', borderColor: 'rgba(40, 167, 69, 0.5)' };
-      case HotelRoomStatus.BOOKED:
-        return { ...baseStyle, backgroundColor: 'rgba(255, 193, 7, 0.3)', color: 'rgb(255, 193, 7)', borderColor: 'rgba(255, 193, 7, 0.5)' };
-      case HotelRoomStatus.OUT_OF_SERVICE:
-        return { ...baseStyle, backgroundColor: 'rgba(102, 51, 153, 0.3)', color: 'rgb(102, 51, 153)', borderColor: 'rgba(102, 51, 153, 0.5)' };
-      case HotelRoomStatus.MAINTENANCE:
-        return { ...baseStyle, backgroundColor: 'rgba(220, 53, 69, 0.3)', color: 'rgb(220, 53, 69)', borderColor: 'rgba(220, 53, 69, 0.5)' };
-      default:
-        return { ...baseStyle, backgroundColor: 'rgba(108, 117, 125, 0.3)', color: 'rgb(108, 117, 125)', borderColor: 'rgba(108, 117, 125, 0.5)' };
-    }
   };
 
   const handleStatusUpdate = (roomId: string, newStatus: HotelRoomStatus) => {
@@ -122,7 +126,7 @@ export const HotelRoomStatusManagement: React.FC<{ rooms: HotelRoom[]; className
                   ))}
                 </div>
                 {saveError && (
-                  <p className="mt-3 text-sm" style={{color: 'var(--theme-red)'}}>{saveError}</p>
+                  <p className="mt-3 text-sm" style={{color: 'var(--theme-red, rgb(220, 53, 69))'}}>{saveError}</p>
                 )}
                 <button
                   onClick={() => handleSaveStatusChange(room.id)}

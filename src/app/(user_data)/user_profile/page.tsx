@@ -56,14 +56,21 @@ function UserProfileListContent() {
                 <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
                     <div className="overflow-x-auto w-full">
                         <div className="min-w-[1200px]">
-                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
-                                <p className="w-[5%]">Sr. No.</p>
-                                <p className="w-[20%]">User Name</p>
-                                <p className="w-[15%]">Profile Image</p>
-                                <p className="w-[20%]">Email</p>
-                                <p className="w-[10%]">Role</p>
-                                <p className="w-[10%]">Spent</p>
-                                <p className="w-[20%]">User ID</p>
+                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center overflow-x-auto">
+                                <p className="w-[3%] text-xs flex-shrink-0">ID</p>
+                                <p className="w-[10%] text-xs flex-shrink-0">Username</p>
+                                <p className="w-[12%] text-xs flex-shrink-0">Email</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Role</p>
+                                <p className="w-[10%] text-xs flex-shrink-0">Status</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Payment</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Phone</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Service Type</p>
+                                <p className="w-[10%] text-xs flex-shrink-0">Service Name</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Emp Type</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Emp Service Name</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Wallet</p>
+                                <p className="w-[8%] text-xs flex-shrink-0">Verified</p>
+                                <p className="w-[10%] text-xs flex-shrink-0">Joined</p>
                             </div>
                             <div className="flex flex-col border-1 border-green-800">
                                 {isFetchLoading && (
@@ -76,17 +83,25 @@ function UserProfileListContent() {
                                         <p className="text-red-500">Error loading users. Please try again.</p>
                                     </div>
                                 )}
-                                {(usersList?.data ?? []).map((user: User, index: number) => {
+                                {(usersList?.data ?? []).map((user: User) => {
                                     return (
                                         <UserViewListTableRow 
                                             key={user.id} 
-                                            id={index + 1} 
-                                            user_name={user.userName || ''} 
-                                            user_id={user.id} 
+                                            id={user.id}
+                                            userName={user.userName || ''}
                                             email={user.email || ''}
+                                            phoneNumber={user.phoneNumber}
                                             role={user.role || 'USER'}
-                                            userImageURL={user.imageUrl || '/image-not-found.png'} 
-                                            totalSpent={user.spent}
+                                            walletBalance={user.earned ? user.earned - (user.spent || 0) : 0}
+                                            userStatus={user.userStatus || 'ACTIVE'}
+                                            paymentStatus={user.paymentStatus || 'PENDING'}
+                                            serviceType={user.serviceType}
+                                            serviceEntityName={user.serviceEntityName}
+                                            employeeServiceType={user.employeeServiceType}
+                                            employeeServiceName={user.employeeServiceEntityName}
+                                            emailVerified={user.emailVerified}
+                                            phoneVerified={user.phoneVerified}
+                                            createdAt={user.createdAt}
                                             onClickNavigate={() => router.push(`/user_profile/${user.id}`)}
                                         />
                                     );
