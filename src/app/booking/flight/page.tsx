@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
+import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 
 type Flight = {
   id: string;

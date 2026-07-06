@@ -8,6 +8,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useInView } from "fra
 import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking } from "react-icons/md";
 import { LocationApi } from "@/services/api";
 import { RoomShift } from "@/types/enums";
+import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 
 type BookingTab = "hotels" | "bus" | "train" | "flight" | "tours" | "activities";
 
@@ -78,7 +79,7 @@ export const HeroSectionBookingWidget = ({
 }) => {
   // Provide fallback to BDHeroImg.jpg if no images provided
   const images = imageList && imageList.length > 0 ? imageList : [{ imageURL: "/BDHeroImg.jpg", imageAlt: "BD Hero" }];
-  console.log("HeroSectionBookingWidget images:", images);
+  
   const [displayedImageId, setDisplayedImageId] = useState<number>(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
   const [activeTab, setActiveTab] = useState<BookingTab>("hotels");
@@ -290,6 +291,7 @@ export const HeroSectionBookingWidget = ({
 
 /* ─────── Hotel Filter Panel ─────── */
 function HotelFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -376,7 +378,7 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
     }
 
     if (!validationFilters.city || !validationFilters.checkIn || !validationFilters.checkOut) {
-      alert("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();
@@ -510,6 +512,7 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
 
 /* ─────── Bus Filter Panel ─────── */
 function BusFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -527,7 +530,7 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.departureCity || !filters.arrivalCity || !filters.departureDate) {
-      alert("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();
@@ -647,6 +650,7 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
 
 /* ─────── Train Filter Panel ─────── */
 function TrainFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -664,7 +668,7 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.departureStation || !filters.arrivalStation || !filters.departureDate) {
-      alert("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();
@@ -784,6 +788,7 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
 
 /* ─────── Flight Filter Panel ─────── */
 function FlightFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -800,7 +805,7 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.departureCity || !filters.arrivalCity || !filters.departureDate) {
-      alert("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();
@@ -909,6 +914,7 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
 
 /* ─────── Tour Filter Panel ─────── */
 function TourFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -969,7 +975,7 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.startDate || !filters.duration) {
-      alert("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();
@@ -1083,6 +1089,7 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
 /* ─────── Activity Filter Panel ─────── */
 function ActivityFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -1142,7 +1149,7 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.date) {
-      alert("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
     const qs = new URLSearchParams();

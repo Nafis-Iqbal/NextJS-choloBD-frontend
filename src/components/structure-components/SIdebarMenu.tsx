@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { forwardRef } from 'react';
 import Link from 'next/link';
 import { redirect, usePathname } from 'next/navigation';
@@ -217,39 +217,6 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
     const currentUserId = authResponse?.data?.userId;
     const currentUserRole = authResponse?.data?.userRole;
 
-    const navigateToPage = (pathURL: string) => {
-        router.push(pathURL);
-        onClose();
-    }
-
-    const navigateBySession = ({adminURL, userURL, masterAdminURL} : {adminURL: string, userURL: string, masterAdminURL?: string}) => {
-        if(isAuthenticated) {
-            if(currentUserRole === "SERVICE_ADMIN" || currentUserRole === "MASTER_ADMIN") {
-                if(masterAdminURL && currentUserRole === "MASTER_ADMIN") router.push(masterAdminURL);
-                else router.push(adminURL);
-            } else {
-                router.push(userURL);
-            }
-        }
-
-        onClose();
-    }
-
-    const sessionConditionedButtonName = ({adminUserButton, userButton, masterAdminUserButton} : {adminUserButton: string, userButton: string, masterAdminUserButton?: string}) => {
-        if(isAuthenticated && (currentUserRole === "SERVICE_ADMIN" || currentUserRole === "MASTER_ADMIN")) {
-            if(masterAdminUserButton && currentUserRole === "MASTER_ADMIN") return masterAdminUserButton;
-            else return adminUserButton;
-        }
-        return userButton;
-    }
-
-    const isButtonInvisible = (sessionTypesToHide: string[]) => {
-        if(isAuthenticated && currentUserRole && sessionTypesToHide.includes(currentUserRole)) {
-            return "hidden";
-        }
-        return "";
-    }
-
     const onLogInPrompt = () => {
         router.push("/login");
         onClose();
@@ -266,6 +233,19 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
     if(!isAuthenticated) return (
         <>
             <style>{scrollBarStyle}</style>
+
+            <AnimatePresence>
+                {isPopOutSidebar && (
+                    <motion.div 
+                        className="fixed inset-0 z-40 w-screen h-screen"
+                        onClick={onClose}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, ease: 'easeInOut' }}
+                    />
+                )}
+            </AnimatePresence>
 
             <div ref={ref} className={isPopOutSidebar ? smallScreenStyle : bigScreenStyle} style={style}>
                 {isPopOutSidebar && (
@@ -304,6 +284,19 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(({classN
     return (
         <>
             <style>{scrollBarStyle}</style>
+
+            <AnimatePresence>
+                {isPopOutSidebar && (
+                    <motion.div 
+                        className="fixed inset-0 z-40 w-screen h-screen"
+                        onClick={onClose}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, ease: 'easeInOut' }}
+                    />
+                )}
+            </AnimatePresence>
 
             <div ref={ref} className={isPopOutSidebar ? smallScreenStyle : bigScreenStyle} style={style}>
                 {isPopOutSidebar && (

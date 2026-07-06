@@ -75,8 +75,8 @@ export const ImageViewerModule = ({
     };
 
     return (
-        <div className={`flex flex-col w-full bg-gray-700 ${className ? className : 'h-full'}`}>
-            <div className="relative flex flex-1 bg-black">
+        <div className={`flex flex-col w-full ${className ? className : 'h-full'}`} style={{ backgroundColor: 'var(--theme-section-bg)' }}>
+            <div className="relative flex flex-1" style={{ backgroundColor: 'var(--theme-bg)' }}>
                 {imageList.length > 0 ? (
                     <div className="relative w-full h-full">
                         <AnimatePresence custom={direction}>
@@ -128,7 +128,12 @@ export const ImageViewerModule = ({
 
                         {/* Navigation Buttons - positioned relative to image area */}
                         <button 
-                            className="absolute top-1/2 left-4 transform -translate-y-1/2 p-3 bg-gray-800 hover:bg-emerald-600 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-gray-800" 
+                            className="absolute top-1/2 left-4 transform -translate-y-1/2 p-3 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
+                            style={{ 
+                                backgroundColor: 'var(--theme-card-bg)',
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal)'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-card-bg)'}
                             onClick={showPreviousImage}
                             hidden={displayedImageId === 0}
                         >
@@ -136,7 +141,12 @@ export const ImageViewerModule = ({
                         </button>
 
                         <button 
-                            className="absolute top-1/2 right-4 transform -translate-y-1/2 p-3 bg-gray-800 hover:bg-emerald-600 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-gray-800" 
+                            className="absolute top-1/2 right-4 transform -translate-y-1/2 p-3 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
+                            style={{ 
+                                backgroundColor: 'var(--theme-card-bg)',
+                            }}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal)'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-card-bg)'}
                             onClick={showNextImage}
                             hidden={displayedImageId === imageList.length - 1}
                         >
@@ -157,15 +167,15 @@ export const ImageViewerModule = ({
                 )}
 
                 {/* Image Selection Dots - positioned at bottom center of image area */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 bg-black/50 px-3 py-2 rounded-full">
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 px-3 py-2 rounded-full" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                     {imageList.map((_, index) => (
                         <button
                             key={index}
-                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                                index === displayedImageId 
-                                    ? 'bg-emerald-500 scale-125' 
-                                    : 'bg-gray-400 hover:bg-gray-300 hover:scale-110'
-                            }`}
+                            className="w-3 h-3 rounded-full transition-all duration-300 hover:scale-110"
+                            style={{
+                                backgroundColor: index === displayedImageId ? 'var(--theme-teal)' : 'var(--theme-text-subtle)',
+                                transform: index === displayedImageId ? 'scale(1.25)' : 'scale(1)',
+                            }}
                             onClick={() => {
                                 setDirection(index > displayedImageId ? "next" : "prev");
                                 setDisplayedImageId(index);

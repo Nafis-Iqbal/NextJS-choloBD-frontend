@@ -12,7 +12,7 @@ import useLogout from "@/hooks/UtilHooks/logoutHooks";
 import { Menu } from "lucide-react";
 import { MotionDropdownMenu } from "./DropdownMenu";
 import { MotionSidebarMenu } from "./SIdebarMenu";
-import { FaUser, FaGift, FaGlobe, FaSignOutAlt, FaBlackTie, FaSearch, FaCaretDown, FaThList } from "react-icons/fa";
+import { FaUser, FaPalette, FaPaintRoller, FaGlobe, FaSignOutAlt, FaUserFriends, FaSearch, FaCaretDown, FaThList, FaCalendarCheck } from "react-icons/fa";
 import IconWithBadge from "../custom-elements/IconWithBadge";
 import BasicButton from "../custom-elements/Buttons";
 import { SearchInputBar } from "./SearchInputBar";
@@ -225,6 +225,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                         {isMenuOpen && 
                             <MotionDropdownMenu 
                                 className="mt-2 top-full -right-1 z-90"
+                                onClose={() => onMenuToggle()}
                                 variants={{
                                 rest: { y: '-100%', transition: { type: 'spring', stiffness: 500, damping: 40, delay: 2.0 } },
                                 animate: { y: '0%', transition: { type: 'spring', stiffness: 200, damping: 20} },
@@ -240,32 +241,52 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     {/* Big Screen Menu, hidden in small screens */}
                     <div className="hidden md:flex justify-end max-h-[100%] w-full mr-2 md:mr-4 lg:mr-8 space-x-6 items-center md:text-lg lg:text-xl text-white font-sans font-semibold bg-transparent">
                         <button
-                            className="relative p-2 group transition-all duration-150 hover:scale-120"
+                            className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125 bg-transparent"
                             onClick={cycleTheme}
                             title={`Theme: ${THEME_LABELS[currentTheme]} — click to cycle`}
                         >
-                            <FaGlobe className="md:text-2xl text-white"/>
-                            <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-sans font-normal
-                                text-white/70 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                                {THEME_LABELS[currentTheme]}
-                            </span>
+                            <FaPalette className="md:text-2xl text-white"/>
+                            <span className="text-xs font-normal">Change Theme</span>
                         </button>
 
-                        <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href="/dashboard">
-                            <IconWithBadge Icon={FaGift} badgeValue={2} iconClassName="text-white md:text-2xl"/>
+                        <Link 
+                            className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" 
+                            href="/community"
+                        >
+                            <IconWithBadge Icon={FaUserFriends} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
+                            <span className="text-xs font-normal">Community</span>
                         </Link>
 
-                        <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href="/dashboard">
+                        <Link 
+                            className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" 
+                            href="/dashboard"
+                        >
                             <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
+                            <span className="text-xs font-normal">Dashboard</span>
                         </Link>
 
-                        {!isAuthenticated ? (<Link className="p-2 transition-all hover:scale-110 text-center text-white" href="/booking/trackers">Booking Tracker</Link>) : <></>}
+                        {!isAuthenticated ? (
+                            <Link 
+                                className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-110 hover:brightness-125" 
+                                href="/booking/trackers"
+                            >
+                                <IconWithBadge Icon={FaCalendarCheck} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
+                                <span className="text-xs font-normal">Booking Tracker</span>
+                            </Link>
+                        ) : <></>}
 
-                        {!isAuthenticated ? (<Link className="p-2 hover:scale-110 text-white" href="/login">Log In</Link>) : 
-                        (
+                        {!isAuthenticated ? (
+                            <Link 
+                                className="p-2 hover:scale-110 text-white" 
+                                href="/login"
+                            >
+                                Log In
+                            </Link>
+                        ) : (
                             <>
-                                <Link className="p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
+                                <Link className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
                                     <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white md:text-2xl"/>
+                                    <span className="text-xs font-normal">Profile</span>
                                 </Link>
 
                                 <div className="flex flex-col items-center justify-center bg-transparent">
@@ -283,6 +304,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                         {isAuthenticated && <FaSignOutAlt className="text-3xl text-white hover:scale-120 cursor-pointer" onClick={onLogOutClick} />}
                     </div>
                 </div>
+
                 <SearchInputBar 
                     className="md:hidden absolute top-full w-full"
                     setInputBarVisibility={setIsSearchBarOpen}

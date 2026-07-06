@@ -20,6 +20,7 @@ function LoginContent() {
     const [isEmailSignUp, setIsEmailSignUp] = useState<boolean>(false);
     const [signInFailureWarning, setSignInFailureWarning] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const [formData, setFormData] = useState<UserData>({
         userName: '',
@@ -48,6 +49,7 @@ function LoginContent() {
 
     const {mutate: createUserMutate} = AuthApi.useCreateUserRQ(
         (responseData) => {
+            setIsLoading(false);
             console.log("Sign Up response data:", responseData);
             if(responseData.status === "success")
             {
@@ -58,12 +60,14 @@ function LoginContent() {
             }
         },
         () => {
+            setIsLoading(false);
             onSignUpFailure();
         }
     );
 
     const {mutate: loginUserMutate} = AuthApi.useLoginUserRQ(
         (responseData) => {
+            setIsLoading(false);
             console.log("Login response data:", responseData);
             if(responseData.status === "success")
             {
@@ -77,6 +81,7 @@ function LoginContent() {
             }
         },
         () => {
+            setIsLoading(false);
             console.log("Login error occurred");
             onSignInFailure('An error occurred during login. Please try again.');
         }
@@ -92,6 +97,7 @@ function LoginContent() {
     };
 
     const onAccountSignUp = () => {
+        setIsLoading(true);
         createUserMutate(formData);
     }
 
@@ -101,6 +107,7 @@ function LoginContent() {
             email: formData.email,
             password: formData.password
         };
+        setIsLoading(true);
         loginUserMutate(loginData);
     }
 
@@ -190,22 +197,43 @@ function LoginContent() {
                                     type="password" name="passwordConfirmation" placeholder="Confirm Password" autoComplete="new-password" onChange={handleChange}
                                 />
 
-                                <button className="w-full p-2 mt-5 mx-auto bg-green-600 hover:bg-green-500 rounded-sm" type="submit">Create Account</button>
+                                <button 
+                                    className="w-full p-2 mt-5 mx-auto bg-green-600 hover:bg-green-500 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    type="submit"
+                                    disabled={isLoading}
+                                >
+                                    Create Account
+                                </button>
+
+                                {isLoading && <div className="text-green-600 text-center mt-2 font-semibold">Loading, Please Wait...</div>}
+                                {!isLoading && signInFailureWarning && (<div className="text-red-600">{errorMessage || 'An error occurred during sign up. Please try again.'}</div>)}
 
                                 <HorizontalDividerWithText className="mt-5">OR</HorizontalDividerWithText>
                             </form>
                         ) : (
                             <>
                                 <div className="flex flex-col space-y-2 items-center">
-                                    <button className="flex justify-center p-2 w-full bg-gray-500 hover:bg-gray-400 rounded-sm" onClick={() => setIsEmailSignUp(true)}>
+                                    <button 
+                                        className="flex justify-center p-2 w-full bg-gray-500 hover:bg-gray-400 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                        onClick={() => setIsEmailSignUp(true)}
+                                        disabled={isLoading}
+                                    >
                                         <Image src="/icons8-email-48.png" alt="Email Logo" width={20} height={20}/>
                                     </button>
 
-                                    <button className="flex justify-center p-2 w-full bg-gray-500 hover:bg-gray-400 rounded-sm" onClick={() => onGoogleSignIn()}>
+                                    <button 
+                                        className="flex justify-center p-2 w-full bg-gray-500 hover:bg-gray-400 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                        onClick={() => onGoogleSignIn()}
+                                        disabled={isLoading}
+                                    >
                                         <Image src="./icons8-google.svg" alt="Google Logo" width={20} height={20}/>
                                     </button>
 
-                                    <button className="flex justify-center p-2 w-full bg-gray-500 hover:bg-gray-400 rounded-sm" onClick={() => onFacebookSignIn()}>
+                                    <button 
+                                        className="flex justify-center p-2 w-full bg-gray-500 hover:bg-gray-400 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                        onClick={() => onFacebookSignIn()}
+                                        disabled={isLoading}
+                                    >
                                         <Image src="./icons8-facebook.svg" alt="Facebook Logo" width={20} height={20}/>
                                     </button>
                                 </div>
@@ -226,19 +254,34 @@ function LoginContent() {
                                 <input className="bg-white border border-gray-300 px-4 py-2 font-sans placeholder-gray-400 text-gray-800 rounded-md
                                     focus:outline-none focus:ring-2 focus:ring-green-600" type="password" name="password" onChange={handleChange}/>
 
-                                {signInFailureWarning && (<div className="text-red-600">{errorMessage || 'An error occurred during sign in. Please try again.'}</div>)}
+                                {isLoading && <div className="text-green-600 text-center mt-2 font-semibold">Loading, Please Wait...</div>}
+                                {!isLoading && signInFailureWarning && (<div className="text-red-600">{errorMessage || 'An error occurred during sign in. Please try again.'}</div>)}
 
-                                <button className="w-full p-2 mx-auto bg-green-600 hover:bg-green-500 rounded-sm" onClick={() => onAccountLogIn()}>Proceed with Email</button>
+                                <button 
+                                    className="w-full p-2 mx-auto bg-green-600 hover:bg-green-500 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    onClick={() => onAccountLogIn()}
+                                    disabled={isLoading}
+                                >
+                                    Proceed with Email
+                                </button>
                             </div>
 
                             <HorizontalDividerWithText className="mt-5">OR</HorizontalDividerWithText>
                             
                             <div className="flex justify-between">
-                                <button className="flex justify-center p-2 w-[45%] bg-gray-500 hover:bg-gray-400 rounded-sm" onClick={() => onGoogleSignIn()}>
+                                <button 
+                                    className="flex justify-center p-2 w-[45%] bg-gray-500 hover:bg-gray-400 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    onClick={() => onGoogleSignIn()}
+                                    disabled={isLoading}
+                                >
                                     <Image src="./icons8-google.svg" alt="Google Logo" width={20} height={20}/>
                                 </button>
 
-                                <button className="flex justify-center p-2 w-[45%] bg-gray-500 hover:bg-gray-400 rounded-sm" onClick={() => onFacebookSignIn()}>
+                                <button 
+                                    className="flex justify-center p-2 w-[45%] bg-gray-500 hover:bg-gray-400 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed" 
+                                    onClick={() => onFacebookSignIn()}
+                                    disabled={isLoading}
+                                >
                                     <Image src="./icons8-facebook.svg" alt="Facebook Logo" width={20} height={20}/>
                                 </button>
                             </div>
@@ -246,25 +289,27 @@ function LoginContent() {
                     )
                 }
                 
-                <div className="flex flex-col justify-between mt-3">
+                <div className="flex flex-col justify-between my-6">
                     {
                         isSignUpPage ? 
                         (<p>Already registered? 
-                            <button className="bg-white font-semibold text-green-600 ml-2" 
-                                onClick={
-                                    () => setIsSignUpPage(false)
-                                }
-                            >Log in!
+                            <button 
+                                className="bg-white font-semibold text-green-600 ml-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                onClick={() => setIsSignUpPage(false)}
+                                disabled={isLoading}
+                            >
+                                Log in!
                             </button></p>) :
                         (<p>New to Cholo BD? 
-                            <button className="bg-white font-semibold text-green-600 ml-2" 
-                                onClick={
-                                    () => {
-                                        setIsSignUpPage(true);
-                                        setIsEmailSignUp(false);
-                                    }
-                                }
-                            >Sign up!
+                            <button 
+                                className="bg-white font-semibold text-green-600 ml-2 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                onClick={() => {
+                                    setIsSignUpPage(true);
+                                    setIsEmailSignUp(false);
+                                }}
+                                disabled={isLoading}
+                            >
+                                Sign up!
                             </button>
                         </p>)
                     }

@@ -1,11 +1,14 @@
 "use client";
 import React from "react";
 import { SectionHeader } from "./SectionHeader";
+import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 
 export const NewsletterSection: React.FC<{className: string}> = ({className}) => {
+  const { openNotificationPopUpMessage } = useGlobalUI();
+  
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    alert("Subscribed! (demo)");
+    openNotificationPopUpMessage("Subscribed! (demo)");
   };
 
   return (

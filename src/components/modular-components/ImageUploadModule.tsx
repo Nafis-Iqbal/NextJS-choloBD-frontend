@@ -156,12 +156,12 @@ export const ImageUploadModule = ({
 
     return (
         <div className={`flex flex-col space-y-2 ${className}`}>
-            <label className={`text-green-300 ${resourceLabelStyle}`}>{resourceLabel}</label>
+            <label className={`theme-text-teal ${resourceLabelStyle}`}>{resourceLabel}</label>
 
             {/* Input Handling */}
             <div className="flex items-center space-x-3">
                 {/* Hidden Native File Input */}
-                <label className="relative bg-gray-300 text-gray-800 px-4 py-1 text-sm rounded-xs cursor-pointer hover:bg-gray-400 transition">
+                <label className="relative theme-btn-teal text-white px-4 py-1 text-sm rounded-xs cursor-pointer transition">
                     Select Images
                     <input
                         type="file"
@@ -173,7 +173,7 @@ export const ImageUploadModule = ({
                 </label>
 
                 {/* Show Selected File Count */}
-                <span className="text-sm text-gray-300">
+                <span className="text-sm theme-text-subtle">
                     {pendingFiles.length + productImages.length} / {MAX_FILES} images selected
                 </span>
 
@@ -183,7 +183,7 @@ export const ImageUploadModule = ({
             
             {/* Display selected images for upload */}
             {(pendingFiles.length > 0 || productImages.length > 0)&& (
-                <div className="flex flex-wrap w-full md:w-[650px] p-2 gap-2 bg-white border-green-600 border-1 rounded-sm">
+                <div className="flex flex-wrap w-full md:w-[650px] p-2 gap-2 theme-bg theme-outline rounded-sm">
                     {pendingFiles.map((file, idx) => (
                         <div className="relative flex w-[80px] h-[80px] md:w-[150px] md:h-[150px] object-cover rounded-md" key={idx}>
                             <Image    
@@ -194,8 +194,11 @@ export const ImageUploadModule = ({
                                 className="w-[80px] h-[80px] md:w-[150px] md:h-[150px] object-cover"
                             />
 
-                            <button className="absolute flex justify-center items-center top-0 right-0 bg-red-500 hover:bg-400 h-[20px] w-[20px]" 
-                                onClick={() => handleRemoveFile(idx)} type="button">
+                            <button 
+                                className="absolute flex justify-center items-center top-0 right-0 theme-btn-teal text-white h-[20px] w-[20px] text-xs" 
+                                style={{backgroundColor: 'var(--theme-red)'}}
+                                onClick={() => handleRemoveFile(idx)} 
+                                type="button">
                                 x
                             </button>
                         </div>
@@ -211,8 +214,11 @@ export const ImageUploadModule = ({
                                 className="w-[80px] h-[80px] md:w-[150px] md:h-[150px] object-cover"
                             />
 
-                            <button className="absolute flex justify-center items-center top-0 right-0 bg-red-500 hover:bg-red-400 h-[20px] w-[20px]" 
-                                onClick={() => handleRemoveUploadedFile(image.id)} type="button">
+                            <button 
+                                className="absolute flex justify-center items-center top-0 right-0 text-white h-[20px] w-[20px] text-xs hover:opacity-80 transition" 
+                                style={{backgroundColor: 'var(--theme-red)'}}
+                                onClick={() => handleRemoveUploadedFile(image.id)} 
+                                type="button">
                                 x
                             </button>
                         </div>

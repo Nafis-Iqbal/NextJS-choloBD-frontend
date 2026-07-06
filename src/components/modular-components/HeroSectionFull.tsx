@@ -12,7 +12,17 @@ interface ImageProps {
     imageStyle?: string;
 }
 
-export const HeroSectionFull = ({ className, imageList }: { imageList: ImageProps[], className?: string }) => {
+export const HeroSectionFull = ({ 
+    className, 
+    imageList, 
+    titleText, 
+    titleTextStyle 
+}: { 
+    imageList: ImageProps[], 
+    className?: string, 
+    titleText?: string,
+    titleTextStyle?: string 
+}) => {
     // Auto-rotation delay in milliseconds - configurable variable
     const AUTO_ROTATION_DELAY = 7000; // 5 seconds
     
@@ -106,27 +116,17 @@ export const HeroSectionFull = ({ className, imageList }: { imageList: ImageProp
                             />
                         </motion.div>
                     </AnimatePresence>
-
-                    {/* Navigation Buttons - positioned relative to image area */}
-                    <button 
-                        className="absolute top-1/2 left-4 transform -translate-y-1/2 p-3 bg-gray-800 hover:bg-emerald-600 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-gray-800" 
-                        onClick={showPreviousImage}
-                        hidden={displayedImageId === 0}
-                    >
-                        <ChevronLeft className="w-6 h-6" />
-                    </button>
-
-                    <button 
-                        className="absolute top-1/2 right-4 transform -translate-y-1/2 p-3 bg-gray-800 hover:bg-emerald-600 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:bg-gray-800" 
-                        onClick={showNextImage}
-                        hidden={displayedImageId === imageList.length - 1}
-                    >
-                        <ChevronRight className="w-6 h-6" />
-                    </button>
                 </div>
 
+                {/* Title Text - positioned at bottom left of image area */}
+                {titleText && (
+                    <h1 className={`${titleTextStyle} absolute bottom-5 md:bottom-20 left-5 md:left-40 text-3xl md:text-5xl font-bold drop-shadow-lg`}>
+                        {titleText}
+                    </h1>
+                )}
+
                 {/* Image Selection Dots - positioned at bottom center of image area */}
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 bg-black/50 px-3 py-2 rounded-full">
+                {/* <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 bg-black/50 px-3 py-2 rounded-full">
                     {imageList.map((_, index) => (
                         <button
                             key={index}
@@ -142,7 +142,7 @@ export const HeroSectionFull = ({ className, imageList }: { imageList: ImageProp
                             }}
                         />
                     ))}
-                </div>
+                </div> */}
             </div>
         </div>
     );

@@ -98,6 +98,10 @@ declare global {
     reviews?: Review[];
     userTripPlans?: UserTripPlan[];
     tripBookings?: TripBooking[];
+    communityPostsCreated?: CommunityPost[];
+    communityImagesUploaded?: Image[];
+    communityPostTags?: CommunityPostTag[];
+    communityPostReactions?: CommunityPostReaction[];
   }
 
   interface Account {
@@ -205,6 +209,7 @@ declare global {
     basedOnPackage?: TourPackage;
     userSegments?: UserTripSegment[];
     tripBookings?: TripBooking[];
+    communityPosts?: CommunityPost[];
   }
 
   interface UserTripSegment {
@@ -645,6 +650,7 @@ interface Guide {
     width?: number;
     height?: number;
     fileSize?: number;
+    uploadedAt?: Date;
 
     userId: string;
     user: User;
@@ -741,6 +747,42 @@ interface Guide {
     checkOutDate?: Date;
     userTripPlan: UserTripPlan;
     user: User;
+  }
+
+  // Community Posts
+  type PostTagStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED';
+
+  interface CommunityPost {
+    id: string;
+    creatorUserId: string;
+    userTripPlanId?: string;
+    userHasReacted?: boolean; // Indicates if the current user has reacted to this post
+    caption?: string;
+    isActive: boolean;
+    wowCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+    creator?: User;
+    userTripPlan?: UserTripPlan;
+    images?: Image[];
+    tags?: CommunityPostTag[];
+  }
+
+  interface CommunityPostTag {
+    id: string;
+    postId: string;
+    taggedUserId: string;
+    status: PostTagStatus;
+    taggedAt: Date;
+    post?: CommunityPost;
+    taggedUser?: User;
+  }
+
+  interface CommunityPostsListResponse {
+    results: CommunityPost[];
+    total: number;
+    page: number;
+    limit: number;
   }
 }
 

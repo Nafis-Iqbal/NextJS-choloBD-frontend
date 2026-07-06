@@ -83,25 +83,17 @@ function UserProfileListContent() {
                                         <p className="text-red-500">Error loading users. Please try again.</p>
                                     </div>
                                 )}
-                                {(usersList?.data ?? []).map((user: User) => {
+                                {(usersList?.data ?? []).map((user: User, index: number) => {
                                     return (
                                         <UserViewListTableRow 
                                             key={user.id} 
-                                            id={user.id}
-                                            userName={user.userName || ''}
+                                            id={index + 1}
+                                            user_name={user.userName || ''}
+                                            user_id={user.id.toString()}
                                             email={user.email || ''}
-                                            phoneNumber={user.phoneNumber}
                                             role={user.role || 'USER'}
-                                            walletBalance={user.earned ? user.earned - (user.spent || 0) : 0}
-                                            userStatus={user.userStatus || 'ACTIVE'}
-                                            paymentStatus={user.paymentStatus || 'PENDING'}
-                                            serviceType={user.serviceType}
-                                            serviceEntityName={user.serviceEntityName}
-                                            employeeServiceType={user.employeeServiceType}
-                                            employeeServiceName={user.employeeServiceEntityName}
-                                            emailVerified={user.emailVerified}
-                                            phoneVerified={user.phoneVerified}
-                                            createdAt={user.createdAt}
+                                            userImageURL={user.imageUrl}
+                                            totalSpent={user.spent || 0}
                                             onClickNavigate={() => router.push(`/user_profile/${user.id}`)}
                                         />
                                     );

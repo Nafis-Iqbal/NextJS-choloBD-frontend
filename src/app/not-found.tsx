@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import DivGap, { Logo } from "@/components/custom-elements/UIUtilities";
-import { FaHome, FaArrowLeft, FaSearch, FaExclamationTriangle } from 'react-icons/fa';
+import { FaHome, FaArrowLeft, FaSearch } from 'react-icons/fa';
 
 export default function NotFound() {
     const router = useRouter();
@@ -13,46 +13,61 @@ export default function NotFound() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col">
+        <div className="min-h-screen bg-inherit theme-text flex flex-col font-sans">
             {/* Header with Logo */}
-            <div className="w-full p-4">
-                <Logo textSize="text-2xl md:text-3xl" position="text-center" />
+            <div className="w-full p-6 border-b theme-outline">
+                <Logo position="text-center" />
             </div>
 
-            <DivGap customHeightGap="h-[20px]" />
-
             {/* Main Content */}
-            <div className="flex-1 flex items-center justify-center px-4">
+            <div className="flex-1 flex items-center justify-center px-4 py-12 font-sans">
                 <div className="text-center max-w-2xl mx-auto">
-                    {/* Error Icon */}
-                    <div className="mb-8">
-                        <FaExclamationTriangle className="mx-auto text-[#00FF99] text-8xl md:text-9xl animate-pulse" />
+                    {/* Large Decorative 404 Section */}
+                    <div className="mb-12 relative">
+                        <div className="inline-block">
+                            <div 
+                                className="text-9xl md:text-10xl font-bold mb-2"
+                                style={{ color: 'var(--theme-teal)' }}
+                            >
+                                4
+                                <span 
+                                    className="inline-block rounded-full w-32 h-32 md:w-40 md:h-40 flex items-center justify-center mx-2"
+                                    style={{ backgroundColor: 'var(--theme-teal)' }}
+                                >
+                                    <span className="text-white">0</span>
+                                </span>
+                                4
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Error Code */}
+                    {/* Main Heading */}
                     <div className="mb-6">
-                        <h1 className="text-8xl md:text-9xl font-bold text-[#00FF99] mb-2">404</h1>
-                        <h2 className="text-2xl md:text-3xl font-semibold text-white">Page Not Found</h2>
-                    </div>
-
-                    {/* Error Message */}
-                    <div className="mb-8">
-                        <p className="text-lg md:text-xl text-gray-300 mb-4">
-                            Oops! The page you're looking for has vanished into the digital void.
-                        </p>
-                        <p className="text-md text-gray-400">
-                            Don't worry, even the best explorers sometimes take a wrong turn.
+                        <h1 className="text-4xl md:text-5xl font-bold theme-text mb-3">
+                            Page Not Found
+                        </h1>
+                        <p className="text-lg theme-text-muted">
+                            Looks like you've wandered off the beaten path
                         </p>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    {/* Description */}
+                    <div className="mb-10 p-6 rounded-lg" style={{ backgroundColor: 'var(--theme-section-bg)' }}>
+                        <p className="text-base md:text-lg theme-text-muted mb-3">
+                            The page you're looking for doesn't exist or has been moved. 
+                        </p>
+                        <p className="text-sm md:text-base theme-text-subtle">
+                            But don't worry – our team is on it, and you can return home to continue exploring.
+                        </p>
+                    </div>
+
+                    {/* Primary Action Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
                         {/* Go Home Button */}
                         <Link 
                             href="/"
-                            className="flex items-center gap-2 px-6 py-3 bg-[#00FF99] text-black font-semibold rounded-lg 
-                                     hover:bg-[#00CC7A] transition-all duration-300 hover:scale-105 
-                                     focus:outline-none focus:ring-2 focus:ring-[#00FF99] focus:ring-offset-2 focus:ring-offset-black"
+                            className="flex items-center gap-2 px-8 py-3 theme-btn-teal font-semibold rounded-lg 
+                                     transition-all duration-300 hover:scale-105 active:scale-95"
                         >
                             <FaHome className="text-lg" />
                             <span>Go Home</span>
@@ -61,60 +76,95 @@ export default function NotFound() {
                         {/* Go Back Button */}
                         <button 
                             onClick={handleGoBack}
-                            className="flex items-center gap-2 px-6 py-3 border-2 border-[#00FF99] text-[#00FF99] font-semibold rounded-lg 
-                                     hover:bg-[#00FF99] hover:text-black transition-all duration-300 hover:scale-105
-                                     focus:outline-none focus:ring-2 focus:ring-[#00FF99] focus:ring-offset-2 focus:ring-offset-black"
+                            className="flex items-center gap-2 px-8 py-3 theme-btn-teal font-semibold rounded-lg 
+                                     transition-all duration-300 hover:scale-105 active:scale-95"
                         >
                             <FaArrowLeft className="text-lg" />
                             <span>Go Back</span>
                         </button>
-
-                        {/* Search Button */}
-                        <Link 
-                            href="/search"
-                            className="flex items-center gap-2 px-6 py-3 border-2 border-gray-600 text-gray-300 font-semibold rounded-lg 
-                                     hover:border-[#00FF99] hover:text-[#00FF99] transition-all duration-300 hover:scale-105
-                                     focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2 focus:ring-offset-black"
-                        >
-                            <FaSearch className="text-lg" />
-                            <span>Search</span>
-                        </Link>
                     </div>
 
-                    <DivGap customHeightGap="h-[30px]" />
-
-                    {/* Helpful Links */}
-                    <div className="border-t border-gray-700 pt-6">
-                        <p className="text-gray-400 mb-4">Looking for something specific?</p>
-                        <div className="flex flex-wrap justify-center gap-4 text-sm">
-                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
+                    {/* Secondary Actions */}
+                    <div className="mb-8">
+                        <p className="text-sm theme-text-subtle mb-4">Or explore these popular pages:</p>
+                        <div className="flex flex-wrap justify-center gap-3">
+                            <Link 
+                                href="/hotels" 
+                                className="px-4 py-2 rounded transition-colors duration-300 theme-text-teal hover:underline text-sm"
+                            >
                                 Hotels
                             </Link>
-                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
-                                Tickets
+                            <span className="theme-text-subtle">•</span>
+                            <Link 
+                                href="/booking/flight" 
+                                className="px-4 py-2 rounded transition-colors duration-300 theme-text-teal hover:underline text-sm"
+                            >
+                                Flights
                             </Link>
-                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
+                            <span className="theme-text-subtle">•</span>
+                            <Link 
+                                href="/tour-spots" 
+                                className="px-4 py-2 rounded transition-colors duration-300 theme-text-teal hover:underline text-sm"
+                            >
                                 Tour Spots
                             </Link>
-                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
+                            <span className="theme-text-subtle">•</span>
+                            <Link 
+                                href="/user_profile" 
+                                className="px-4 py-2 rounded transition-colors duration-300 theme-text-teal hover:underline text-sm"
+                            >
                                 Profile
                             </Link>
-                            <Link href="/" className="text-[#00FF99] hover:underline transition-colors">
-                                Contact
+                        </div>
+                    </div>
+
+                    {/* Additional Help Section */}
+                    <div 
+                        className="mt-12 p-6 rounded-lg border"
+                        style={{ 
+                            backgroundColor: 'var(--theme-card-bg)',
+                            borderColor: 'var(--theme-deep-green)'
+                        }}
+                    >
+                        <p className="theme-text-subtle text-sm mb-3">Need help? Try these actions:</p>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                            <Link 
+                                href="/"
+                                className="flex items-center gap-2 px-4 py-2 text-sm rounded transition-colors duration-300"
+                                style={{ 
+                                    color: 'var(--theme-teal)',
+                                    borderBottom: '1px solid var(--theme-teal)',
+                                }}
+                            >
+                                <FaSearch className="text-sm" />
+                                Search
                             </Link>
+                            <span className="hidden sm:inline theme-text-subtle">|</span>
+                            <Link 
+                                href="/community"
+                                className="theme-text-teal text-sm hover:underline transition-colors"
+                            >
+                                Community
+                            </Link>
+                            <span className="hidden sm:inline theme-text-subtle">|</span>
+                            <a 
+                                href="mailto:support@cholobd.com"
+                                className="theme-text-teal text-sm hover:underline transition-colors"
+                            >
+                                Contact Support
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Footer */}
-            <div className="w-full p-6 text-center border-t border-gray-800">
-                <p className="text-gray-500 text-sm">
-                    Developed by <span className="font-bold text-[#00FF99]">Nafis Iqbal</span>
-                </p>
-                <DivGap customHeightGap="h-[10px]" />
-                <p className="text-gray-600 text-xs">
-                    If you believe this is an error, please contact our support team.
+            <div 
+                className="w-full p-6 text-center border-t"
+                style={{ borderColor: 'var(--theme-deep-green)' }}
+            >
+                <p className="theme-text-muted text-sm">
+                    Made with care for your journey
                 </p>
             </div>
         </div>
