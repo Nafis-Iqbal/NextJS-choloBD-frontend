@@ -54,56 +54,46 @@ function UserProfileListContent() {
                 <p className="text-green-200">All user profiles registered on the site.</p>
 
                 <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="overflow-x-auto w-full">
-                        <div className="min-w-[1200px]">
-                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center overflow-x-auto">
-                                <p className="w-[3%] text-xs flex-shrink-0">ID</p>
-                                <p className="w-[10%] text-xs flex-shrink-0">Username</p>
-                                <p className="w-[12%] text-xs flex-shrink-0">Email</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Role</p>
-                                <p className="w-[10%] text-xs flex-shrink-0">Status</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Payment</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Phone</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Service Type</p>
-                                <p className="w-[10%] text-xs flex-shrink-0">Service Name</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Emp Type</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Emp Service Name</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Wallet</p>
-                                <p className="w-[8%] text-xs flex-shrink-0">Verified</p>
-                                <p className="w-[10%] text-xs flex-shrink-0">Joined</p>
-                            </div>
-                            <div className="flex flex-col border-1 border-green-800">
-                                {isFetchLoading && (
-                                    <div className="flex justify-center p-4">
-                                        <p className="text-green-500">Loading users...</p>
-                                    </div>
-                                )}
-                                {isFetchError && (
-                                    <div className="flex justify-center p-4">
-                                        <p className="text-red-500">Error loading users. Please try again.</p>
-                                    </div>
-                                )}
-                                {(usersList?.data ?? []).map((user: User, index: number) => {
-                                    return (
-                                        <UserViewListTableRow 
-                                            key={user.id} 
-                                            id={index + 1}
-                                            user_name={user.userName || ''}
-                                            user_id={user.id.toString()}
-                                            email={user.email || ''}
-                                            role={user.role || 'USER'}
-                                            userImageURL={user.imageUrl}
-                                            totalSpent={user.spent || 0}
-                                            onClickNavigate={() => router.push(`/user_profile/${user.id}`)}
-                                        />
-                                    );
-                                })}
-                                {!isFetchLoading && !isFetchError && (!usersList?.data || (usersList.data as User[]).length === 0) && (
-                                    <div className="flex justify-center p-4">
-                                        <p className="text-gray-400">No users found.</p>
-                                    </div>
-                                )}
-                            </div>
+                    <div className="w-full">
+                        <div
+                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
+                            style={{
+                                backgroundColor: "var(--theme-card-bg)",
+                                borderColor: "var(--theme-deep-green)",
+                            }}
+                        >
+                            {isFetchLoading && (
+                                <div className="flex justify-center p-4">
+                                    <p className="theme-text-teal">Loading users...</p>
+                                </div>
+                            )}
+                            {isFetchError && (
+                                <div className="flex justify-center p-4">
+                                    <p style={{ color: "var(--theme-red)" }}>
+                                        Error loading users. Please try again.
+                                    </p>
+                                </div>
+                            )}
+                            {(usersList?.data?.results ?? []).map((user: User, index: number) => {
+                                return (
+                                    <UserViewListTableRow
+                                        key={user.id}
+                                        id={index + 1}
+                                        user_name={user.userName || ''}
+                                        user_id={user.id.toString()}
+                                        email={user.email || ''}
+                                        role={user.role || 'USER'}
+                                        userImageURL={user.imageUrl}
+                                        totalSpent={user.spent || 0}
+                                        onClickNavigate={() => router.push(`/user_profile/${user.id}`)}
+                                    />
+                                );
+                            })}
+                            {!isFetchLoading && !isFetchError && (!usersList?.data?.results || usersList.data.results.length === 0) && (
+                                <div className="flex justify-center p-4">
+                                    <p className="theme-text-subtle">No users found.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </TableLayout>

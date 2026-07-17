@@ -39,7 +39,7 @@ buttonProps) => {
 }
 
 export const GreenButton = ({ extraStyle, onClick, children } : buttonProps) => {
-    const buttonStyle = "p-4 m-1 bg-green-400 hover:bg-green-300 disabled:bg-gray-300 text-white text-sm md:text-base" + " " + extraStyle;
+    const buttonStyle = "p-4 m-1 theme-btn-teal disabled:opacity-50 text-sm md:text-base" + " " + extraStyle;
     
     return (
         <button className={buttonStyle} onClick={onClick}>
@@ -70,7 +70,7 @@ export const BlackButton = ({ extraStyle, onClick, children } : buttonProps) => 
 
 export const EditButton = ({className, onClick, children} : {className?: string, onClick: () => void, children?: React.ReactNode}) => {
     return (
-        <button className={`hover:outline-1 cursor-pointer ${className}`} onClick={() => onClick()}>
+        <button className={`hover:outline-1 cursor-pointer bg-transparent ${className}`} onClick={() => onClick()}>
             <Image src="/edit_icon.png" alt="eidt_icon" width={20} height={20}></Image>
             {children}
         </button>

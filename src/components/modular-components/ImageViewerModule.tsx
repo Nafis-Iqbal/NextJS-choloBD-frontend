@@ -74,12 +74,14 @@ export const ImageViewerModule = ({
         }),
     };
 
+    const currentItem = imageList[displayedImageId] ?? imageURLsList[displayedImageId];
+
     return (
         <div className={`flex flex-col w-full ${className ? className : 'h-full'}`} style={{ backgroundColor: 'var(--theme-section-bg)' }}>
-            <div className="relative flex flex-1" style={{ backgroundColor: 'var(--theme-bg)' }}>
+            <div className="relative w-full h-full min-h-0 flex-1" style={{ backgroundColor: 'var(--theme-bg)' }}>
                 {imageList.length > 0 ? (
-                    <div className="relative w-full h-full">
-                        <AnimatePresence custom={direction}>
+                    <div className="relative w-full h-full min-h-[180px]">
+                        <AnimatePresence custom={direction} initial={false}>
                             <motion.div
                                 key={displayedImageId} // Ensures animation on change
                                 custom={direction}
@@ -91,11 +93,10 @@ export const ImageViewerModule = ({
                                     x: { type: "spring", stiffness: 300, damping: 30 },
                                     opacity: { duration: 0.2 },
                                 }}
-                                className="absolute w-full h-full flex flex-col md:flex-row"
+                                className="absolute inset-0 w-full h-full flex flex-col md:flex-row"
                             >
                                 {/* Conditionally render iframe for videos or NextImage for images */}
                                 {(() => {
-                                    const currentItem = imageURLsList[displayedImageId];
                                     const videoUrl = currentItem?.videoURL || currentItem?.imageURL;
                                     
                                     // Check if it's a video URL
@@ -167,6 +168,7 @@ export const ImageViewerModule = ({
                 )}
 
                 {/* Image Selection Dots - positioned at bottom center of image area */}
+                {imageList.length > 1 && (
                 <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center space-x-2 px-3 py-2 rounded-full" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
                     {imageList.map((_, index) => (
                         <button
@@ -183,6 +185,7 @@ export const ImageViewerModule = ({
                         />
                     ))}
                 </div>
+                )}
             </div>
         </div>
     );

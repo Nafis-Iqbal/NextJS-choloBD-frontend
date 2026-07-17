@@ -2,17 +2,17 @@
 "use client";
 
 import Link from "next/link";
-import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
-import { AuthApi, WalletApi } from "@/services/api";
+import { AuthApi, NotificationApi, WalletApi } from "@/services/api";
 import useLogout from "@/hooks/UtilHooks/logoutHooks";
 
 import { Menu } from "lucide-react";
 import { MotionDropdownMenu } from "./DropdownMenu";
 import { MotionSidebarMenu } from "./SIdebarMenu";
-import { FaUser, FaPalette, FaPaintRoller, FaGlobe, FaSignOutAlt, FaUserFriends, FaSearch, FaCaretDown, FaThList, FaCalendarCheck } from "react-icons/fa";
+import NotificationDropdown from "./NotificationDropdown";
+import { FaUser, FaPalette, FaSignOutAlt, FaUserFriends, FaSearch, FaCaretDown, FaThList, FaCalendarCheck } from "react-icons/fa";
 import IconWithBadge from "../custom-elements/IconWithBadge";
 import BasicButton from "../custom-elements/Buttons";
 import { SearchInputBar } from "./SearchInputBar";
@@ -46,8 +46,14 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
     const [isSideBarMenuOpen, setIsSideBarMenuOpen] = useState(false);
+    const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [currentTheme, setCurrentTheme] = useState<Theme>('forest');
     const [navOpacity, setNavOpacity] = useState(0);
+
+    const { data: unreadResponse } = NotificationApi.useGetUnreadNotificationCountRQ(
+        !!isAuthenticated
+    );
+    const notificationCount = unreadResponse?.data?.count ?? 0;
 
     // Load persisted theme on mount
     useEffect(() => {
@@ -81,18 +87,28 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
         setIsMenuOpen(!isMenuOpen);
         setIsSideBarMenuOpen(false);
         setIsSearchBarOpen(false);
+        setIsNotificationOpen(false);
     }
 
     const onSideBarMenuToggle = () => {
         setIsSideBarMenuOpen(!isSideBarMenuOpen);
         setIsSearchBarOpen(false);
         setIsMenuOpen(false);
+        setIsNotificationOpen(false);
     }
 
     const onSearchBarToggle = () => {
         setIsSearchBarOpen(!isSearchBarOpen);
         setIsMenuOpen(false);
         setIsSideBarMenuOpen(false);
+        setIsNotificationOpen(false);
+    }
+
+    const onNotificationToggle = () => {
+        setIsNotificationOpen(!isNotificationOpen);
+        setIsMenuOpen(false);
+        setIsSideBarMenuOpen(false);
+        setIsSearchBarOpen(false);
     }
 
     const onLogOutClick = () => {
@@ -133,7 +149,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
         >
             <div className="relative flex justify-between items-center w-[100%] h-full bg-transparent">
                 {/* Start Section */}
-                <div className="relative flex space-x-2 md:space-x-0 md:justify-between items-center w-[30%] md:w-[65%] h-full bg-transparent">
+                <div className="relative flex space-x-2 md:space-x-0 md:justify-between items-center w-[30%] md:w-[60%] h-full bg-transparent">
                     {/* Small Screen Menu*/}
                     <BasicButton
                         buttonColor="bg-white/20"
@@ -239,21 +255,27 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                     </AnimatePresence>
 
                     {/* Big Screen Menu, hidden in small screens */}
-                    <div className="hidden md:flex justify-end max-h-[100%] w-full mr-2 md:mr-4 lg:mr-8 space-x-6 items-center md:text-lg lg:text-xl text-white font-sans font-semibold bg-transparent">
+                    <div className="hidden md:flex justify-end max-h-[100%] w-full mr-2 md:mr-4 lg:mr-8 space-x-3 items-center md:text-lg lg:text-xl text-white font-sans font-semibold bg-transparent">
                         <button
                             className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125 bg-transparent"
                             onClick={cycleTheme}
                             title={`Theme: ${THEME_LABELS[currentTheme]} — click to cycle`}
                         >
-                            <FaPalette className="md:text-2xl text-white"/>
+                            <FaPalette className="text-xl text-white"/>
                             <span className="text-xs font-normal">Change Theme</span>
                         </button>
+
+                        <NotificationDropdown
+                            isOpen={isNotificationOpen}
+                            onToggle={onNotificationToggle}
+                            onClose={() => setIsNotificationOpen(false)}
+                        />
 
                         <Link 
                             className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" 
                             href="/community"
                         >
-                            <IconWithBadge Icon={FaUserFriends} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
+                            <IconWithBadge Icon={FaUserFriends} badgeValue={2} iconClassName="text-white text-xl scale-110"/>
                             <span className="text-xs font-normal">Community</span>
                         </Link>
 
@@ -261,7 +283,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                             className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" 
                             href="/dashboard"
                         >
-                            <IconWithBadge Icon={FaThList} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
+                            <IconWithBadge Icon={FaThList} badgeValue={notificationCount} iconClassName="text-white text-xl scale-110"/>
                             <span className="text-xs font-normal">Dashboard</span>
                         </Link>
 
@@ -270,7 +292,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                                 className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-110 hover:brightness-125" 
                                 href="/booking/trackers"
                             >
-                                <IconWithBadge Icon={FaCalendarCheck} badgeValue={2} iconClassName="text-white text-xl md:text-2xl scale-110"/>
+                                <IconWithBadge Icon={FaCalendarCheck} badgeValue={2} iconClassName="text-white text-xl scale-110"/>
                                 <span className="text-xs font-normal">Booking Tracker</span>
                             </Link>
                         ) : <></>}
@@ -285,8 +307,8 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                         ) : (
                             <>
                                 <Link className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
-                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white md:text-2xl"/>
-                                    <span className="text-xs font-normal">Profile</span>
+                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white text-2xl"/>
+                                    <span className="text-xs font-normal">Welcome {}!</span>
                                 </Link>
 
                                 <div className="flex flex-col items-center justify-center bg-transparent">

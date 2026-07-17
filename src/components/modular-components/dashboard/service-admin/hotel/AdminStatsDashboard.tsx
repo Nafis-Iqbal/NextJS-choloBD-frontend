@@ -50,7 +50,7 @@ export const AdminStatsDashboard = ({isReady = false, className} : {isReady?: bo
   const stats = FAKE_ADMIN_STATS;
   
   return (
-    <section className={`theme-section mb-8 ${className}`}>
+    <section className={`mb-8 ${className}`}>
       <h2 className="text-2xl font-bold theme-text mb-6">Admin Statistics</h2>
       
       {!isReady ? (

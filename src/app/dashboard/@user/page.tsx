@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { UserApi, AuthApi } from "@/services/api";
+import { Role, ServiceType } from "@/types/enums";
 
 import Image from "next/image"
 import { stripLeadingDateFromISO } from "@/utilities/utilities";
@@ -18,7 +19,7 @@ export default function UserProfileInfoDashboard() {
     const router = useRouter();
 
     const { data: userDetailData} = UserApi.useGetOwnUserDetailRQ(currentUserId || "", isAuthenticated && !!currentUserId);
-    console.log("User Detail Data in Dashboard:", userDetailData);
+    
     if (!isAuthenticated || !currentUserId) {
         return (
             <section className="flex justify-center items-center h-64 theme-section">
@@ -33,28 +34,71 @@ export default function UserProfileInfoDashboard() {
         <section className="flex flex-col p-2 font-sans" id="dashboard_profile">
             <div className="md:ml-6 flex flex-col space-y-2">
                 <div className="flex space-x-4">
-                    <h3 className="theme-text-teal">Your Activities and Profile Info</h3>
+                    <h3 className="theme-text-teal">Profile Info</h3>
 
                     <EditButton onClick={() => router.push(`/user_profile/${currentUserId}`)}></EditButton>
                 </div>
                 
                 <p className="theme-text-subtle">Personalize your account info, preferences.</p>
 
-                <div className="flex flex-col my-8 space-y-5">
-                    <div className="flex relative w-[180px] h-[180px]" style={{ backgroundColor: 'var(--theme-section-bg)' }}>
-                        <Image className="" src={userDetail?.imageUrl || "/NoUserImage.jpeg"}  alt="Profile Picture" fill></Image>
+                <div className="theme-section rounded-xl p-4 sm:p-6 my-8 flex flex-col space-y-5">
+                    <div className="relative w-[160px] h-[160px] sm:w-[180px] sm:h-[180px] overflow-hidden theme-outline shrink-0">
+                        <Image
+                            className="object-cover"
+                            style={{ backgroundColor: "var(--theme-card-bg)" }}
+                            src={userDetail?.imageUrl || "/NoUserImage.jpeg"}
+                            alt="Profile Picture"
+                            fill
+                        />
                     </div>
                     
-                    <p>Known as&nbsp;&nbsp;<span className="text-2xl theme-text-muted">{userDetail?.userName || 'Guest User'}</span></p>
+                    <p className="theme-text-muted">Known as&nbsp;&nbsp;<span className="text-2xl font-semibold theme-text-teal">{userDetail?.userName || "Guest User"}</span></p>
 
-                    <p>Role is&nbsp;&nbsp;<span className="text-3xl theme-text-teal">{currentUserRole}</span></p>                    
+                    <p className="theme-text-muted">Role is&nbsp;&nbsp;<span className="text-3xl font-semibold theme-text-teal">{currentUserRole}</span></p>
 
-                    <h4 className="theme-text-teal">Personal Details</h4>
+                    {userDetail?.role === Role.SERVICE_ADMIN && (
+                        <div className="flex flex-col space-y-3">
+                            <p className="theme-text-muted">
+                                Service is&nbsp;&nbsp;
+                                <span className="text-xl font-medium theme-text-teal">
+                                    {userDetail?.serviceType || "N/A"}
+                                </span>
+                            </p>
+                            <p className="theme-text-muted">
+                                {userDetail?.serviceType === ServiceType.GUIDE_SERVICE
+                                    ? "Guide Profile owner of"
+                                    : "Admin of"}
+                                &nbsp;&nbsp;
+                                <span className="text-xl font-medium theme-text-teal">
+                                    {userDetail?.serviceEntityName || "N/A"}
+                                </span>
+                            </p>
+                        </div>
+                    )}
 
-                    <div className="flex flex-col space-y-5">
-                        <p>Email is&nbsp;&nbsp;<span className="text-xl theme-text-muted">{userDetail?.email}</span></p>
+                    {userDetail?.role === Role.EMPLOYEE && (
+                        <div className="flex flex-col space-y-3">
+                            <p className="theme-text-muted">
+                                Employee of Service Type&nbsp;&nbsp;
+                                <span className="text-xl font-medium theme-text-teal">
+                                    {userDetail?.employeeServiceType || "N/A"}
+                                </span>
+                            </p>
+                            <p className="theme-text-muted">
+                                Employee of Company&nbsp;&nbsp;
+                                <span className="text-xl font-medium theme-text-teal">
+                                    {userDetail?.employeeServiceEntityName || "N/A"}
+                                </span>
+                            </p>
+                        </div>
+                    )}
 
-                        <p>Account created,&nbsp;&nbsp;<span className="text-xl theme-text-muted">{stripLeadingDateFromISO(userDetail?.createdAt) || "N/A"}</span></p>
+                    <h4 className="text-lg font-semibold theme-text-teal pt-1">Personal Details</h4>
+
+                    <div className="flex flex-col space-y-4">
+                        <p className="theme-text-muted">Email is&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal break-all">{userDetail?.email}</span></p>
+
+                        <p className="theme-text-muted">Account created,&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{stripLeadingDateFromISO(userDetail?.createdAt) || "N/A"}</span></p>
                     </div>
                     
                     <AddressManagerModule 
@@ -64,7 +108,7 @@ export default function UserProfileInfoDashboard() {
                     />
 
                     <div className="flex mt-5 space-x-5">
-                        <button className="p-2 theme-btn-teal text-sm md:text-base text-white rounded-sm transition-colors">Change Password</button>
+                        <button className="px-3 py-1.5 theme-btn-teal text-sm md:text-base text-white rounded transition-colors">Change Password</button>
                     </div>
                 </div>
 

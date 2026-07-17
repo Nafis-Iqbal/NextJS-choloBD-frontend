@@ -1,6 +1,7 @@
 import { z } from "zod";
+import { withNullsStripped } from "./schemaUtils";
 
-export const createWalletRechargeOptionSchema = z.object({
+export const createWalletRechargeOptionSchema = withNullsStripped(z.object({
   title: z
     .string()
     .min(1, "Title is required")
@@ -29,4 +30,4 @@ export const createWalletRechargeOptionSchema = z.object({
     .max(100000, "Bonus amount cannot exceed 100,000")
     .optional()
     .default(0)
-});
+}));

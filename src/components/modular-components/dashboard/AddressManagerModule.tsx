@@ -209,7 +209,7 @@ export const AddressManagerModule = ({
     return (
         <div className={`flex flex-col space-y-3 ${className}`}>
             <div className="flex items-baseline space-x-3">
-                <h4 className="theme-text">Shipping Address</h4>
+                <h4 className="theme-text">User Address</h4>
 
                 {!showFullList && !selectOnlyMode && !infoOnlyMode &&
                     <button className="green-button text-sm md:text-base" onClick={() => router.push(`/addresses/${userId}`)}> View All </button>

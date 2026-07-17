@@ -2,13 +2,16 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { HotelRoomApi, HotelApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
-import { createHotelRoomTypeSchema } from "../../validators/hotelValidators";
-import { CustomTextInput, CustomSelectInput } from "../custom-elements/CustomInputElements";
+import { HotelRoomValidators } from "@/validators";
+import {
+    CustomTextInput,
+    CustomSelectInput,
+    CustomCheckboxInput,
+} from "../custom-elements/CustomInputElements";
+import { ImageUploadModule } from "@/components/modular-components/ImageUploadModule";
 import { HotelRoomCategory } from "@/types/enums";
 import { stripNulls, produceValidationErrorMessage } from "@/utilities/utilities";
 
@@ -27,24 +30,21 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
     roomTypeId,
     onCancel
 }) => {
-    console.log(mode, hotelId, roomTypeId);
-    const router = useRouter();
     const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
 
+    const [resourceRoomTypeId, setResourceRoomTypeId] = useState<string>(roomTypeId ?? "");
     const [roomTypeFormData, setRoomTypeFormData] = useState<Partial<HotelRoomType>>({});
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+    const [actionTrigger, setActionTrigger] = useState<boolean>(false);
 
-    // Fetch hotel detail to get room types data in edit mode
     const { data: hotelData } = HotelApi.useGetHotelDetailRQ(hotelId);
-    console.log("hotel data: ", hotelData);
-    // React Query Hooks
+
     const { mutate: createRoomTypeMutate } = HotelRoomApi.useCreateHotelRoomTypeRQ(
         (responseData) => {
             if (responseData.status === "success") {
-                finishWithMessage("Hotel room created successfully.");
+                // Keep modal open so ImageUploadModule can attach images, then close via update success
+                setResourceRoomTypeId(responseData.data?.id || "");
                 queryClient.invalidateQueries({ queryKey: ["hotels", hotelId] });
-
-                onCancel();
             } else {
                 finishWithMessage("Failed to create hotel room. Try again.");
             }
@@ -57,9 +57,12 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
     const { mutate: updateRoomTypeMutate } = HotelRoomApi.useUpdateHotelRoomTypeAdminRQ(
         (responseData) => {
             if (responseData.status === "success") {
-                finishWithMessage("Hotel room updated successfully.");
+                finishWithMessage(
+                    mode === "create"
+                        ? "Hotel room created successfully."
+                        : "Hotel room updated successfully."
+                );
                 queryClient.invalidateQueries({ queryKey: ["hotels", hotelId] });
-
                 onCancel();
             } else {
                 finishWithMessage("Failed to update hotel room. Try again.");
@@ -70,26 +73,42 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
         }
     );
 
+    const { mutate: deleteRoomTypeImagesMutate } = HotelRoomApi.useDeleteHotelRoomTypeImagesRQ(
+        () => console.log("Hotel room type images deleted successfully."),
+        () => {
+            console.log("Failed to delete hotel room type images.");
+        }
+    );
+
+    useEffect(() => {
+        if (roomTypeId) {
+            setResourceRoomTypeId(roomTypeId);
+        }
+    }, [roomTypeId]);
+
     useEffect(() => {
         if (mode === "create") {
-            setRoomTypeFormData({ 
+            setRoomTypeFormData({
                 hotelId,
                 singleBedCount: 1,
                 doubleBedCount: 0,
                 totalCount: 1,
-                pricePerNight: 0
+                pricePerNight: 0,
+                allowShiftBooking: false,
             } as Partial<HotelRoomType>);
         } else if (mode === "edit" && roomTypeId && hotelData?.data?.roomTypes) {
-            // Find the specific room type from the hotel's room types array
-            const selectedRoomType = hotelData.data.roomTypes.find((rt: HotelRoomType) => rt.id === roomTypeId);
-            console.log("Selected Room Type for Editing:", selectedRoomType);
+            const selectedRoomType = hotelData.data.roomTypes.find(
+                (rt: HotelRoomType) => rt.id === roomTypeId
+            );
             if (selectedRoomType) {
                 setRoomTypeFormData({
                     roomType: selectedRoomType.roomType,
                     singleBedCount: selectedRoomType.singleBedCount,
                     doubleBedCount: selectedRoomType.doubleBedCount,
                     totalCount: selectedRoomType.totalCount,
-                    pricePerNight: selectedRoomType.pricePerNight
+                    pricePerNight: selectedRoomType.pricePerNight,
+                    allowShiftBooking: selectedRoomType.allowShiftBooking ?? false,
+                    images: selectedRoomType.images || []
                 } as Partial<HotelRoomType>);
             }
         }
@@ -99,8 +118,12 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
         e.preventDefault();
 
         const sanitizedData = stripNulls(roomTypeFormData);
-        const result = createHotelRoomTypeSchema.safeParse(sanitizedData);
-        
+        const schema =
+            mode === "create"
+                ? HotelRoomValidators.createHotelRoomTypeSchema
+                : HotelRoomValidators.updateHotelRoomTypeSchema;
+        const result = schema.safeParse(sanitizedData);
+
         if (!result.success) {
             const message = produceValidationErrorMessage(result);
             finishWithMessage(`Validation Failed: ${message}. Try Again.`);
@@ -109,57 +132,60 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
 
         showLoadingContent(true);
 
-        // Add hotelId to the data being sent
         const apiData = {
-            ...sanitizedData,
+            ...result.data,
             hotelId
         } as any;
 
         if (mode === "create") {
-            createRoomTypeMutate({
-                data: apiData
+            createRoomTypeMutate({ data: apiData });
+        } else if (resourceRoomTypeId) {
+            updateRoomTypeMutate({
+                id: resourceRoomTypeId,
+                ...result.data
             });
-        } else {
-            if (roomTypeId) {
-                updateRoomTypeMutate({
-                    roomTypeId,
-                    data: apiData
-                });
-            }
         }
+
+        setActionTrigger(true);
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
+        const { name, value } = e.target;
 
         const numericFields = new Set(["singleBedCount", "doubleBedCount", "pricePerNight", "totalCount"]);
 
-        let parsedValue: string | number | boolean | undefined;
+        let parsedValue: string | number | undefined;
 
         if (numericFields.has(name)) {
-            const noLeadingZeros = value.replace(/^0+(?=\d)/, '');
-            parsedValue = noLeadingZeros === '' ? 0 : Number(noLeadingZeros);
+            const noLeadingZeros = value.replace(/^0+(?=\d)/, "");
+            parsedValue = noLeadingZeros === "" ? 0 : Number(noLeadingZeros);
         } else {
             parsedValue = value || undefined;
         }
 
         const updatedData = { ...roomTypeFormData, [name]: parsedValue } as Partial<HotelRoomType>;
-
         setRoomTypeFormData(updatedData);
-        
-        const result = createHotelRoomTypeSchema.safeParse(updatedData);
+
+        const schema =
+            mode === "create"
+                ? HotelRoomValidators.createHotelRoomTypeSchema
+                : HotelRoomValidators.updateHotelRoomTypeSchema;
+        const result = schema.safeParse(updatedData);
+
         if (!result.success) {
-            const fieldErrors = result.error.formErrors.fieldErrors;
-            const fieldError = fieldErrors[name as keyof typeof fieldErrors]?.[0];
+            const fieldErrors = result.error.formErrors.fieldErrors as Record<
+                string,
+                string[] | undefined
+            >;
+            const fieldError = fieldErrors[name]?.[0];
 
             setErrors((prev) => ({ ...prev, [name]: fieldError }));
 
-            // Check if the error is about bed counts and show on both fields
             if (name === "singleBedCount" || name === "doubleBedCount") {
                 const singleBedError = fieldErrors.singleBedCount?.[0];
                 if (singleBedError?.includes("At least one bed")) {
-                    setErrors((prev) => ({ 
-                        ...prev, 
+                    setErrors((prev) => ({
+                        ...prev,
                         singleBedCount: singleBedError,
                         doubleBedCount: singleBedError
                     }));
@@ -167,15 +193,18 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
             }
         } else {
             setErrors((prev) => ({ ...prev, [name]: undefined }));
-            // Clear both bed count errors if validation passes
             if (name === "singleBedCount" || name === "doubleBedCount") {
-                setErrors((prev) => ({ 
-                    ...prev, 
+                setErrors((prev) => ({
+                    ...prev,
                     singleBedCount: undefined,
                     doubleBedCount: undefined
                 }));
             }
         }
+    };
+
+    const roomTypePicUploadURLBuilder = (productId: string) => {
+        return `cholo_bd/hotels/${hotelId}/room-types/${productId}/images`;
     };
 
     const finishWithMessage = (message: string) => {
@@ -188,14 +217,13 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
             <CustomSelectInput
                 className="w-full px-2 md:px-0 md:w-[300px] bg-gray-700 text-white"
                 label="Room Type"
-                labelStyle="text-green-300"
                 name="roomType"
                 value={roomTypeFormData?.roomType || ""}
                 onChange={handleChange}
                 error={errors.roomType}
                 options={[
                     { value: "", label: "Select room type" },
-                    ...Object.values(HotelRoomCategory).map(type => ({
+                    ...Object.values(HotelRoomCategory).map((type) => ({
                         value: type,
                         label: type
                     }))
@@ -208,7 +236,6 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
                     className="w-full"
                     placeholderText="Enter single bed count"
                     label="Single Bed Count"
-                    labelStyle="text-green-300"
                     name="singleBedCount"
                     value={roomTypeFormData?.singleBedCount ?? 0}
                     onChange={handleChange}
@@ -220,7 +247,6 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
                     className="w-full"
                     placeholderText="Enter double bed count"
                     label="Double Bed Count"
-                    labelStyle="text-green-300"
                     name="doubleBedCount"
                     value={roomTypeFormData?.doubleBedCount ?? 0}
                     onChange={handleChange}
@@ -233,10 +259,10 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Total room count"
                 label="Total Room Count"
-                labelStyle="text-green-300"
                 name="totalCount"
-                value={roomTypeFormData.totalCount}                
+                value={roomTypeFormData.totalCount}
                 onChange={handleChange}
+                error={errors.totalCount}
             />
 
             <CustomTextInput
@@ -244,15 +270,43 @@ export const HotelRoomTypeForm: React.FC<HotelRoomFormProps> = ({
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Enter price per night"
                 label="Price Per Night"
-                labelStyle="text-green-300"
                 name="pricePerNight"
                 value={roomTypeFormData?.pricePerNight || ""}
                 onChange={handleChange}
                 error={errors.pricePerNight}
             />
 
-            <button 
-                type="submit" 
+            <CustomCheckboxInput
+                label="Allow Shift Booking"
+                checked={!!roomTypeFormData.allowShiftBooking}
+                onChange={(e) =>
+                    setRoomTypeFormData((prev) => ({
+                        ...prev,
+                        allowShiftBooking: e.target.checked,
+                    }))
+                }
+                className="w-fit"
+            />
+            <p className="theme-text-subtle text-sm -mt-6">
+                Enable if this room type can be booked for morning, afternoon, or night shifts.
+            </p>
+
+            <ImageUploadModule
+                imageUploadMode={mode}
+                MAX_FILES={3}
+                actionTrigger={actionTrigger}
+                resourceId={resourceRoomTypeId}
+                resourceLabel={mode === "edit" ? "Edit Room Type Images" : "Add Room Type Images"}
+                pic_url_Builder={(id) => roomTypePicUploadURLBuilder(id)}
+                updateResourceMutation={updateRoomTypeMutate}
+                deleteResourceMutation={({ id, imageIds }: { id: string; imageIds: string[] }) =>
+                    deleteRoomTypeImagesMutate({ roomTypeId: id, imageIds })
+                }
+                oldResourceImages={roomTypeFormData?.images || []}
+            />
+
+            <button
+                type="submit"
                 className="w-fit px-10 bg-green-600 hover:bg-green-500 text-white p-2 rounded mt-3"
             >
                 {mode === "create" ? "Create Room Type" : "Save Changes"}

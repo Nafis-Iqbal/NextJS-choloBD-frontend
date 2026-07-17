@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { TourType } from "@/types/enums";
+import { withNullsStripped } from "./schemaUtils";
 
-export const createTourSpotSchema = z.object({
+export const createTourSpotSchema = withNullsStripped(z.object({
     name: z.string().min(3, { message: "Name must be at least 3 characters" }).
         max(255, { message: "Name must be at most 255 characters" }),
     description: z.string().optional(),
@@ -11,9 +12,9 @@ export const createTourSpotSchema = z.object({
     seasonalInfo: z.record(z.any()).optional(),
     tourType: z.nativeEnum(TourType).refine((v) => Object.values(TourType).includes(v as any), { message: "Invalid tour type" }),
     isPopular: z.boolean().optional().default(false),
-});
+}));
 
-export const updateTourSpotSchema = z.object({
+export const updateTourSpotSchema = withNullsStripped(z.object({
     name: z.string().min(3, { message: "Name must be at least 3 characters" }).
         max(255, { message: "Name must be at most 255 characters" }).optional(),
     description: z.string().optional(),
@@ -22,4 +23,4 @@ export const updateTourSpotSchema = z.object({
     seasonalInfo: z.record(z.any()).optional().nullable(),
     tourType: z.nativeEnum(TourType).optional().refine((v) => v === undefined || Object.values(TourType).includes(v as any), { message: "Invalid tour type" }),
     isPopular: z.boolean().optional(),
-});
+}));

@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { withNullsStripped } from "./schemaUtils";
 
 // Payment initialization schema
-export const initializePaymentSchema = z.object({
+export const initializePaymentSchema = withNullsStripped(z.object({
     serviceType: z.enum(['HOTEL_BOOKING', 'TRIP_PACKAGE', 'TRANSPORT_SERVICE', 'ACTIVITY_BOOKING', 'GUIDE_SERVICE', 'WALLET_TOP_UP'], {
         required_error: "Service type is required",
         invalid_type_error: "Service type must be one of: HOTEL_BOOKING, TRIP_PACKAGE, TRANSPORT_SERVICE, ACTIVITY_BOOKING, GUIDE_SERVICE, WALLET_TOP_UP"
@@ -30,34 +31,34 @@ export const initializePaymentSchema = z.object({
         message: "Payment amount must be greater than 0",
         path: ["paymentAmount"],
     }
-);
+));
 
 // Payment validation schema
-export const validatePaymentSchema = z.object({
+export const validatePaymentSchema = withNullsStripped(z.object({
     val_id: z.string().min(1, "Validation ID (val_id) is required"),
     orderId: z.string()
-});
+}));
 
 // Refund payment schema
-export const refundPaymentSchema = z.object({
+export const refundPaymentSchema = withNullsStripped(z.object({
     transactionId: z.string().min(1, "Transaction ID is required"),
     refund_amount: z.number().min(1, "Refund amount must be greater than 0"),
     refund_remarks: z.string().optional().default("Refund requested"),
     bank_tran_id: z.string().min(1, "Bank transaction ID is required"),
     refe_id: z.string().min(1, "Reference ID is required")
-});
+}));
 
 // Update transaction status schema
-export const updateTransactionSchema = z.object({
+export const updateTransactionSchema = withNullsStripped(z.object({
     status: z.enum(["PENDING", "COMPLETED", "FAILED", "CANCELLED", "REFUNDED"], {
         required_error: "Status is required",
         invalid_type_error: "Invalid status value"
     }),
     notes: z.string().optional()
-});
+}));
 
 // Get transactions query schema
-export const getTransactionsQuerySchema = z.object({
+export const getTransactionsQuerySchema = withNullsStripped(z.object({
     orderId: z.string().optional(),
     transactionId: z.string().optional(),
     status: z.enum(["PENDING", "COMPLETED", "FAILED", "CANCELLED", "REFUNDED"]).optional(),
@@ -65,20 +66,20 @@ export const getTransactionsQuerySchema = z.object({
     dateTo: z.string().optional(),
     limit: z.number().min(1).max(100).optional().default(10),
     offset: z.number().min(0).optional().default(0)
-});
+}));
 
 // Transaction ID parameter schema
-export const transactionIdParamsSchema = z.object({
+export const transactionIdParamsSchema = withNullsStripped(z.object({
     transactionId: z.string().min(1, "Transaction ID is required")
-});
+}));
 
 // Refund status query schema
-export const refundStatusQuerySchema = z.object({
+export const refundStatusQuerySchema = withNullsStripped(z.object({
     refund_ref_id: z.string().min(1, "Refund reference ID is required")
-});
+}));
 
 // Payment callback schema (for success/fail/cancel)
-export const paymentCallbackSchema = z.object({
+export const paymentCallbackSchema = withNullsStripped(z.object({
     val_id: z.string().optional(),
     tran_id: z.string().optional(),
     amount: z.string().optional(),
@@ -109,6 +110,4 @@ export const paymentCallbackSchema = z.object({
     value_d: z.string().optional(),
     risk_level: z.string().optional(),
     risk_title: z.string().optional()
-});
-
-export {};
+}));

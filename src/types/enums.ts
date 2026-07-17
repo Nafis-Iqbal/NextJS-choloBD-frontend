@@ -23,6 +23,8 @@ export enum UserTripStatus {
 
 export enum BookingStatus {
   PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DECLINED = "DECLINED",
   CONFIRMED = "CONFIRMED",
   CANCELLED = "CANCELLED",
   COMPLETED = "COMPLETED",
@@ -57,6 +59,30 @@ export enum TourType {
   RELIGIOUS = "RELIGIOUS",
   HISTORICAL = "HISTORICAL",
   MIXED = "MIXED"
+}
+
+/** Controlled vocabulary for Guide.languages (stored as string[]). */
+export enum Language {
+  ENGLISH = "ENGLISH",
+  MANDARIN_CHINESE = "MANDARIN_CHINESE",
+  HINDI = "HINDI",
+  SPANISH = "SPANISH",
+  FRENCH = "FRENCH",
+  ARABIC = "ARABIC",
+  BENGALI = "BENGALI",
+  PORTUGUESE = "PORTUGUESE",
+  RUSSIAN = "RUSSIAN",
+  URDU = "URDU",
+  GERMAN = "GERMAN",
+  JAPANESE = "JAPANESE",
+  KOREAN = "KOREAN",
+  ITALIAN = "ITALIAN",
+  DUTCH = "DUTCH",
+  SWEDISH = "SWEDISH",
+  NORWEGIAN = "NORWEGIAN",
+  DANISH = "DANISH",
+  THAI = "THAI",
+  MALAY = "MALAY",
 }
 
 export enum ActivityType {
@@ -107,6 +133,13 @@ export enum ReviewType {
   TOUR_SPOT = "TOUR_SPOT",
   ACTIVITY_SPOT = "ACTIVITY_SPOT",
   TRANSPORT = "TRANSPORT",
+  GUIDE = "GUIDE"
+}
+
+export enum BookmarkType {
+  TOUR_SPOT = "TOUR_SPOT",
+  ACTIVITY_SPOT = "ACTIVITY_SPOT",
+  HOTEL = "HOTEL",
   GUIDE = "GUIDE"
 }
 
@@ -201,6 +234,13 @@ export enum Priority {
   URGENT = "URGENT"
 }
 
+export enum NotificationAudience {
+  USER = "USER",
+  SERVICE_ADMIN = "SERVICE_ADMIN",
+  EMPLOYEE = "EMPLOYEE",
+  MASTER_ADMIN = "MASTER_ADMIN"
+}
+
 export enum SiteStatus {
   ACTIVE = "ACTIVE",
   DOWN = "DOWN"
@@ -248,7 +288,17 @@ export enum ComplaintStatus {
   PENDING = "PENDING",
   UNDER_REVIEW = "UNDER_REVIEW",
   UNSOLVED = "UNSOLVED",
-  SOLVED = "SOLVED",
   CLOSED = "CLOSED"
+}
+
+export enum ComplaintTargetType {
+  HOTEL = "HOTEL",
+  ACTIVITY_SPOT = "ACTIVITY_SPOT",
+  GUIDE = "GUIDE"
+}
+
+export enum ComplaintAddressedTo {
+  SERVICE_ADMIN = "SERVICE_ADMIN",
+  MASTER_ADMIN = "MASTER_ADMIN"
 }
 

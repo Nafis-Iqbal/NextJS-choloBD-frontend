@@ -26,8 +26,8 @@ export default function TourSpotCreationPage() {
     return (
         <div className="flex flex-col p-2 mt-5">
             <div className="flex flex-col space-y-2 font-sans mx-auto">
-                <h3 className="text-green-500">Create New Tour Spot</h3>
-                <p className="text-green-200">Add a new tour spot to your site.</p>
+                <h3 className="theme-label">Create New Tour Spot</h3>
+                <p className="theme-text-muted">Add a new tour spot to your site.</p>
 
                 <TourSpotForm 
                     mode={"create"} 

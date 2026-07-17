@@ -75,9 +75,14 @@ const FAKE_COMPLAINTS: Complaint[] = [
 ];
 
 // Customer Complaints Section
-export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; className?: string }> = ({ hotelProfile, className }) => {
+export const CustomerComplaintsSection: React.FC<{
+  hotelProfile: Hotel;
+  className?: string;
+}> = ({ hotelProfile, className }) => {
   const [selectedComplaint, setSelectedComplaint] = useState<string | null>(null);
-  const [complaintStatus, setComplaintStatus] = useState<Record<string, Complaint["status"]>>({});
+  const [complaintStatus, setComplaintStatus] = useState<
+    Record<string, Complaint["status"]>
+  >({});
   const complaints = FAKE_COMPLAINTS;
 
   const getStatusColor = (status: Complaint["status"]) => {
@@ -85,7 +90,7 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
       case "pending":
         return "bg-red-600/30 text-red-800 border border-red-600/50";
       case "in-progress":
-        return "bg-[color:var(--theme-star)] bg-opacity-20 text-[color:var(--theme-star)]" + " " + "border" + " " + "border-[color:var(--theme-star)]/50";
+        return "bg-[color:var(--theme-star)]/20 text-[color:var(--theme-star)] border border-[color:var(--theme-star)]/50";
       case "resolved":
         return "bg-green-600/30 text-green-800 border border-green-600/50";
     }
@@ -102,97 +107,130 @@ export const CustomerComplaintsSection: React.FC<{ hotelProfile: Hotel; classNam
     }
   };
 
-  const handleStatusUpdate = (complaintId: string, status: Complaint["status"]) => {
+  const handleStatusUpdate = (
+    complaintId: string,
+    status: Complaint["status"]
+  ) => {
     setComplaintStatus((prev) => ({ ...prev, [complaintId]: status }));
   };
 
   return (
-    <section className={`mb-8 ${className}`}>
-      <h2 className="text-2xl font-bold theme-text mb-6">Customer Complaints</h2>
+    <section className={`mb-8 ${className || ""}`}>
+      <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
+        Customer Complaints
+      </h2>
 
       <PlaceholderFeatureWarning moduleName="Customer Complaints Management" />
 
       <div className="space-y-3">
-        {complaints.map((complaint) => (
-          <div
-            key={complaint.id}
-            className="theme-card rounded-lg p-4 transition-colors"
-            style={{ borderColor: 'var(--theme-teal)' }}
-          >
-            <div className="flex flex-col space-x-4 md:flex-row md:items-start md:justify-between">
+        {complaints.map((complaint) => {
+          const currentStatus = complaintStatus[complaint.id] || complaint.status;
 
-              <div className="flex-1">
-                <div className="flex items-start gap-3">
-                  <div className="flex-1">
-                    <p className="theme-text font-semibold">{complaint.guestName}</p>
-                    <p className="theme-text-subtle text-xs">{complaint.email}</p>
-                    <p className={`text-sm font-medium mt-2 ${getPriorityColor(complaint.priority)}`}>
-                      🚨 {complaint.priority.toUpperCase()} - {complaint.complaintType}
-                    </p>
-                    <p className="theme-text-subtle text-sm mt-2">{complaint.description}</p>
-                    {complaint.resolution && (
-                      <p className="theme-text-teal text-sm mt-2">
-                        ✓ Resolution: {complaint.resolution}
+          return (
+            <div
+              key={complaint.id}
+              className="theme-card rounded-lg p-3 sm:p-4 transition-colors overflow-hidden"
+              style={{ borderColor: "var(--theme-teal)" }}
+            >
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between min-w-0">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 sm:gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="theme-text font-semibold break-words">
+                        {complaint.guestName}
                       </p>
-                    )}
-                    <p className="theme-text-subtle text-xs mt-2">{complaint.reportedAt}</p>
+                      <p className="theme-text-subtle text-xs break-all">
+                        {complaint.email}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap ${getStatusColor(currentStatus)}`}
+                    >
+                      {currentStatus.toUpperCase()}
+                    </span>
                   </div>
 
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${getStatusColor(complaintStatus[complaint.id] || complaint.status)}`}>
-                    {(complaintStatus[complaint.id] || complaint.status).toUpperCase()}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                onClick={() =>
-                  setSelectedComplaint(selectedComplaint === complaint.id ? null : complaint.id)
-                }
-                className="mt-3 md:mt-0 px-4 py-1 rounded-lg theme-text text-sm"
-                style={{ backgroundColor: 'var(--theme-card-bg)', color: 'var(--theme-text)' }}
-              >
-                {selectedComplaint === complaint.id ? "Hide" : "Update"}
-              </button>
-            </div>
-
-            {selectedComplaint === complaint.id && (
-              <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--theme-deep-green)' }}>
-                <p className="theme-text-muted text-sm mb-3">Update Status:</p>
-
-                <div className="flex gap-2 flex-wrap mb-4">
-                  {(["pending", "in-progress", "resolved"] as Complaint["status"][]).map((status) => (
-                    <button
-                      key={status}
-                      onClick={() => handleStatusUpdate(complaint.id, status)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        (complaintStatus[complaint.id] || complaint.status) === status
-                          ? "theme-btn-teal"
-                          : "theme-text-muted"
-                      }`}
-                      style={{
-                        backgroundColor: (complaintStatus[complaint.id] || complaint.status) === status 
-                          ? 'var(--theme-teal)' 
-                          : 'var(--theme-card-bg)'
-                      }}
-                    >
-                      {status === "in-progress" ? "In Progress" : status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                  ))}
+                  <p
+                    className={`text-sm font-medium mt-2 break-words ${getPriorityColor(complaint.priority)}`}
+                  >
+                    🚨 {complaint.priority.toUpperCase()} — {complaint.complaintType}
+                  </p>
+                  <p className="theme-text-subtle text-sm mt-2 break-words">
+                    {complaint.description}
+                  </p>
+                  {complaint.resolution && (
+                    <p className="theme-text-teal text-sm mt-2 break-words">
+                      ✓ Resolution: {complaint.resolution}
+                    </p>
+                  )}
+                  <p className="theme-text-subtle text-xs mt-2">
+                    {complaint.reportedAt}
+                  </p>
                 </div>
 
-                <textarea
-                  placeholder="Add resolution notes..."
-                  className="w-full px-4 py-2 rounded-lg theme-input text-sm"
-                  rows={3}
-                />
-
-                <button className="mt-3 w-full py-2 theme-btn-teal rounded-lg font-medium">
-                  Save Update
+                <button
+                  onClick={() =>
+                    setSelectedComplaint(
+                      selectedComplaint === complaint.id ? null : complaint.id
+                    )
+                  }
+                  className="w-full md:w-auto shrink-0 px-4 py-2.5 md:py-1 rounded-lg theme-text text-sm"
+                  style={{
+                    backgroundColor: "var(--theme-card-bg)",
+                    color: "var(--theme-text)",
+                  }}
+                >
+                  {selectedComplaint === complaint.id ? "Hide" : "Update"}
                 </button>
               </div>
-            )}
-          </div>
-        ))}
+
+              {selectedComplaint === complaint.id && (
+                <div
+                  className="mt-4 pt-4 border-t"
+                  style={{ borderColor: "var(--theme-deep-green)" }}
+                >
+                  <p className="theme-text-muted text-sm mb-3">Update Status:</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+                    {(["pending", "in-progress", "resolved"] as Complaint["status"][]).map(
+                      (status) => (
+                        <button
+                          key={status}
+                          onClick={() => handleStatusUpdate(complaint.id, status)}
+                          className={`w-full px-3 py-2.5 sm:py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentStatus === status
+                              ? "theme-btn-teal text-white"
+                              : "theme-text-muted"
+                          }`}
+                          style={{
+                            backgroundColor:
+                              currentStatus === status
+                                ? "var(--theme-teal)"
+                                : "var(--theme-card-bg)",
+                          }}
+                        >
+                          {status === "in-progress"
+                            ? "In Progress"
+                            : status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                      )
+                    )}
+                  </div>
+
+                  <textarea
+                    placeholder="Add resolution notes..."
+                    className="w-full px-4 py-2 rounded-lg theme-input text-sm"
+                    rows={3}
+                  />
+
+                  <button className="mt-3 w-full py-2.5 sm:py-2 theme-btn-teal rounded-lg font-medium">
+                    Save Update
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </section>
   );

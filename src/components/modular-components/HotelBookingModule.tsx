@@ -6,8 +6,14 @@ import { createHotelRoomBookingSchema } from "@/validators/hotelBookingValidator
 import { produceValidationErrorMessage } from "@/utilities/utilities";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { queryClient } from "@/services/apiInstance";
-import { ServiceType, RoomShift } from "@/types/enums";
-import { CustomDateInput, CustomSelectInput } from "@/components/custom-elements/CustomInputElements";
+import { ServiceType, RoomShift, PaymentStatus } from "@/types/enums";
+import {
+	CustomDateInput,
+	CustomSelectInput,
+	CustomTextInput,
+	CustomTextAreaInput,
+} from "@/components/custom-elements/CustomInputElements";
+import { FaCheckCircle } from "react-icons/fa";
 
 interface BookingState {
 	checkInDate: string;
@@ -24,6 +30,7 @@ interface BookingState {
 }
 
 interface HotelBookingPanelProps {
+	hotelName: string;
 	hotelId: string;
 	userId: string;
 	onBookingSuccess?: () => void;
@@ -65,7 +72,8 @@ interface HotelRoomAvailabilityResponse {
 	message: string;
 }
 
-export function HotelBookingPanel({ 
+export function HotelBookingModule({ 
+	hotelName,
 	hotelId, 
 	userId, 
 	onBookingSuccess, 
@@ -98,6 +106,7 @@ export function HotelBookingPanel({
 	const [payingForBooking, setPayingForBooking] = useState(false);
 	const [paymentMethod, setPaymentMethod] = useState<"wallet" | "card" | null>(null);
 	const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+	const [isPaymentComplete, setIsPaymentComplete] = useState(false);
 
 	// Validation checks - must come before availabilityQueryString
 	const isDateValid = useMemo(() => {
@@ -135,6 +144,10 @@ export function HotelBookingPanel({
 			if (responseData.status === "success") {
 				setConfirmationCode(responseData.data?.confirmationCode || "BOOKING_CREATED");
 				setBookingId(responseData.data?.id || null);
+				const alreadyPaid =
+					responseData.data?.paymentStatus === PaymentStatus.PAID;
+				setIsPaymentComplete(alreadyPaid);
+				setPayingForBooking(false);
 				setTimeout(() => onBookingSuccess?.(), 2000);
 			}
 			else {
@@ -182,6 +195,7 @@ export function HotelBookingPanel({
 				openNotificationPopUpMessage(
 					responseData.message || "Payment completed successfully"
 				);
+				setIsPaymentComplete(true);
 				setPayingForBooking(false);
 				setPaymentMethod(null);
 				setTimeout(() => onBookingSuccess?.(), 2000);
@@ -368,6 +382,7 @@ export function HotelBookingPanel({
 		setBookingId(null);
 		setPayingForBooking(false);
 		setPaymentMethod(null);
+		setIsPaymentComplete(false);
 	};
 
 	// Early return if availability data not loaded
@@ -386,9 +401,13 @@ export function HotelBookingPanel({
 			<h2 className="text-3xl font-semibold theme-text-teal mb-2">Hotel Room Booking</h2>
 			<p className="theme-text-muted text-sm mb-6">Complete your hotel room booking</p>
 
+			<h3 className="theme-text-teal font-semibold mb-6">{hotelName}</h3>
+
 			{confirmationCode ? (
 				<div className="theme-outline bg-sub-section rounded-lg p-6 max-w-2xl mx-auto">
-					<h3 className="theme-text font-semibold text-lg mb-2 text-center">Booking Confirmed!</h3>
+					<h3 className="theme-text font-semibold text-lg mb-2 text-center">
+						{isPaymentComplete ? "Booking Paid Successfully!" : "Booking Confirmed!"}
+					</h3>
 					<p className="theme-text-muted mb-4 text-center">Confirmation Code: <span className="font-bold theme-text">{confirmationCode}</span></p>
 					
 					{/* Booking Summary with Payment Option */}
@@ -398,16 +417,30 @@ export function HotelBookingPanel({
 							<span className="theme-text-teal text-xl font-bold">৳ {totalCost.toLocaleString()}</span>
 						</div>
 						
-						<div className="flex space-x-2 w-full">
-							<button
-								onClick={() => {
-									setPayingForBooking(!payingForBooking);
-									setPaymentMethod(null);
-								}}
-								className="flex-1 px-3 py-2 theme-btn-teal text-sm rounded font-medium transition-colors"
-							>
-								Pay Now
-							</button>
+						<div className="flex space-x-2 w-full items-stretch">
+							{isPaymentComplete ? (
+								<div
+									className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded text-sm font-semibold"
+									style={{
+										backgroundColor: "var(--theme-teal)",
+										color: "white",
+									}}
+									aria-label="Payment completed"
+								>
+									<FaCheckCircle className="w-4 h-4" />
+									Paid
+								</div>
+							) : (
+								<button
+									onClick={() => {
+										setPayingForBooking(!payingForBooking);
+										setPaymentMethod(null);
+									}}
+									className="flex-1 px-3 py-2 theme-btn-teal text-sm rounded font-medium transition-colors"
+								>
+									Pay Now
+								</button>
+							)}
 							<button
 								onClick={handleReset}
 								className="flex-1 px-3 py-2 green-button text-sm rounded font-medium transition-all"
@@ -416,8 +449,8 @@ export function HotelBookingPanel({
 							</button>
 						</div>
 
-						{/* Payment Method Selection */}
-						{payingForBooking && (
+						{/* Payment Method Selection — unpaid bookings only */}
+						{!isPaymentComplete && payingForBooking && (
 							<div className="mt-4 p-3 bg-section rounded-lg mx-auto">
 								<p className="theme-text-muted text-xs font-semibold mb-3">Select Payment Method</p>
 								<div className="space-y-2 mb-3">
@@ -582,57 +615,41 @@ export function HotelBookingPanel({
 						<div className="bg-sub-section rounded-lg theme-outline p-5 mb-6">
 						<h3 className="theme-text-teal font-semibold mb-4">Step 3: Guest Information</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-								<input
+								<CustomTextInput
 									type="text"
-									placeholder="Full Name"
+									label="Full Name"
+									name="guestName"
+									placeholderText="Enter full name"
 									value={bookingState.guestName}
 									onChange={(e) => handleGuestInfoChange("guestName", e.target.value)}
-									className="theme-input px-3 py-2 rounded"
-									style={{
-										backgroundColor: 'var(--theme-input-bg)',
-										color: 'var(--theme-text)',
-										borderWidth: '1px',
-										borderColor: 'var(--theme-deep-green)',
-									} as React.CSSProperties}
+									className="w-full"
 								/>
-								<input
+								<CustomTextInput
 									type="email"
-									placeholder="Email Address"
+									label="Email Address"
+									name="guestEmail"
+									placeholderText="Enter email address"
 									value={bookingState.guestEmail}
 									onChange={(e) => handleGuestInfoChange("guestEmail", e.target.value)}
-									className="theme-input px-3 py-2 rounded"
-									style={{
-										backgroundColor: 'var(--theme-input-bg)',
-										color: 'var(--theme-text)',
-										borderWidth: '1px',
-										borderColor: 'var(--theme-deep-green)',
-									} as React.CSSProperties}
+									className="w-full"
 								/>
-								<input
+								<CustomTextInput
 									type="tel"
-									placeholder="Phone Number"
+									label="Phone Number"
+									name="guestPhoneNumber"
+									placeholderText="Enter phone number"
 									value={bookingState.guestPhoneNumber}
 									onChange={(e) => handleGuestInfoChange("guestPhoneNumber", e.target.value)}
-									className="theme-input px-3 py-2 rounded"
-									style={{
-										backgroundColor: 'var(--theme-input-bg)',
-										color: 'var(--theme-text)',
-										borderWidth: '1px',
-										borderColor: 'var(--theme-deep-green)',
-									} as React.CSSProperties}
+									className="w-full"
 								/>
 							</div>
-							<textarea
-								placeholder="Special Requests (Optional)"
+							<CustomTextAreaInput
+								label="Special Requests (Optional)"
+								name="specialRequests"
+								placeholderText="Any special requests for your stay"
 								value={bookingState.specialRequests}
 								onChange={(e) => handleGuestInfoChange("specialRequests", e.target.value)}
-								className="w-full px-3 py-2 rounded resize-none theme-input"
-								style={{
-									backgroundColor: 'var(--theme-input-bg)',
-									color: 'var(--theme-text)',
-									borderWidth: '1px',
-									borderColor: 'var(--theme-deep-green)',
-								} as React.CSSProperties}
+								className="w-full resize-none"
 								rows={3}
 							/>
 						</div>

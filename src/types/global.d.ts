@@ -6,6 +6,7 @@ import {
 
   LocationType,
   TourType,
+  Language,
   ActivityType,
   HotelType,
   ReviewType,
@@ -32,11 +33,14 @@ import {
   CategoryType,
   
   Priority,
+  NotificationAudience,
   SiteStatus,
   HeroSection,
   AdminAction,
   EntityType,
-  ComplaintStatus
+  ComplaintStatus,
+  ComplaintTargetType,
+  ComplaintAddressedTo
 } from './enums';
 
 declare module '*.css';
@@ -317,6 +321,7 @@ declare global {
     price: number;
     totalPrice: number;
     confirmationCode: string;
+    bookingConfirmInstruction: string | null;
     status: BookingStatus;
     paymentStatus: PaymentStatus;
     paymentMethod: string | null;
@@ -330,6 +335,44 @@ declare global {
     userTripSegments: UserTripSegment[];
   }
 
+  interface GuideBooking {
+    id: string;
+    guideId: string;
+    userId: string;
+    bookingDate: Date | string;
+    startTime?: Date | string | null;
+    endTime: Date | string;
+    travelerCount: number;
+    specialRequirements?: string | null;
+    price: number;
+    totalPrice: number;
+    confirmationCode: string;
+    status: BookingStatus;
+    paymentStatus: PaymentStatus;
+    paymentMethod?: string | null;
+    paymentExpiresAt?: Date | string | null;
+    specialRequests?: string | null;
+    bookedAt: Date | string;
+    acceptedAt?: Date | string | null;
+    confirmedAt?: Date | string | null;
+    declinedAt?: Date | string | null;
+    cancelledAt?: Date | string | null;
+    completedAt?: Date | string | null;
+    declinedReason?: string | null;
+    cancellationReason?: string | null;
+    guide?: Guide;
+    user?: User;
+  }
+
+  interface GuideAvailability {
+    workingDays: number[];
+    workingHoursStart: string | null;
+    workingHoursEnd: string | null;
+    unavailableDates?: string[] | null;
+    availabilityStatus: string;
+    requiresStartTime: boolean;
+  }
+
   // Tourism Spots and Activities
   interface TourSpot {
     id: string;
@@ -340,6 +383,9 @@ declare global {
     seasonalInfo?: Record<string, any>;
     tourType: TourType;
     rating?: number;
+    nearbyHotelsCount?: number;
+    nearbyGuidesCount?: number;
+    nearbyActivitySpotsCount?: number;
     isPopular: boolean;
     createdAt: Date;
     location: Location;
@@ -353,12 +399,19 @@ declare global {
     description: string;
     locationId: string;
     addressId?: string;
+    phoneNumber?: string;
+    extraPhoneNumbers?: string[];
     entryCost: number;
+    maxBookingsPerDay?: number;
+    bookingConfirmInstruction?: string | null;
     openingHours?: string;
+    closingHours?: string;
     bestTimeToVisit?: string;
     duration?: string;
     ageRestriction?: string;
     activityType: ActivityType;
+    nearbyHotelsCount?: number;
+    nearbyGuidesCount?: number;
     rating?: number;
     isActive: boolean;
     isPopular: boolean;
@@ -389,6 +442,8 @@ declare global {
     hotelType: HotelType;
     checkInTime?: string;
     checkOutTime?: string;
+    nearbyActivitySpotsCount?: number;
+    nearbyGuidesCount?: number;
     isActive: boolean;
     createdAt: Date;
     location: Location;
@@ -405,9 +460,10 @@ declare global {
     singleBedCount: number;
     doubleBedCount: number;
     pricePerNight: number;
-    nightShiftPrice: number;
-    morningShiftPrice: number;
-    afternoonShiftPrice: number;
+    nightShiftPrice?: number | null;
+    morningShiftPrice?: number | null;
+    afternoonShiftPrice?: number | null;
+    allowShiftBooking: boolean;
     totalCount: number;
     availableCount: number;
     createdAt: Date;
@@ -465,33 +521,43 @@ declare global {
     reviews: Review[];
   }
 
-interface Guide {
-  id: string;
-  serviceAdminUserId: string;
-  firstName: string;
-  lastName: string;
-  bio: string | null;
-  specializations: TourType[];
-  languages: string[];
-  experienceYears: number;
-  rating: number;
-  pricePerDay: number;
-  contactEmail: string;
-  contactPhone: string;
-  certificationNumber: string | null;
-  licenseNumber: string | null;
-  locationId: string | null;
-  isActive: boolean;
-  isVerified: boolean;
-  availabilityStatus: string;
-  createdAt: Date;
-  updatedAt: Date;
-  isSeeded: boolean;
-  location: Location | null;
-  addresses: Address[];
-  images: Image[];
-  reviews: Review[];
-}
+  interface Guide {
+    id: string;
+    serviceAdminUserId: string;
+    firstName: string;
+    lastName: string;
+    bio: string;
+    specializations: TourType[];
+    languages: Language[];
+    toursCompleted: number;
+    experienceYears: number;
+    rating: number;
+    pricePerDay: number;
+    contactEmail: string;
+    phoneNumber: string;
+    certificationNumber: string | null;
+    licenseNumber: string | null;
+    locationId: string;
+    isActive: boolean;
+    isVerified: boolean;
+    availabilityStatus: string;
+    workingDays: number[];
+    workingHoursStart: string | null;
+    workingHoursEnd: string | null;
+    unavailableDates?: string[] | Record<string, unknown> | null;
+    requiresStartTime: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    isSeeded: boolean;
+    location?: Location;
+    addresses?: Address[];
+    images?: Image[];
+    reviews?: Review[];
+    _count?: {
+      reviews: number;
+      bookings: number;
+    };
+  }
 
   // Reviews and Ratings
   interface Review {
@@ -636,9 +702,6 @@ interface Guide {
     rechargeAmount: float;
     rechargeCost:   Float
     bonusAmount:    float;
-
-    createdAt: Date;
-    updatedAt: Date;
   }
 
   // Media and Images
@@ -657,6 +720,8 @@ interface Guide {
     
     tourSpotId?: string;
     activitySpotId?: string;
+    hotelId?: string;
+    hotelRoomTypeId?: string;
     transportId?: string;
     guideId?: string;
 
@@ -697,11 +762,57 @@ interface Guide {
   // Notifications
   interface Notification {
     id: string;
+    title: string;
     content: string;
     isRead: boolean;
     notificationPriority: Priority;
+    notificationAudience: NotificationAudience;
+    relatedEntityType?: string | null;
+    relatedEntityId?: string | null;
     userId: string;
-    user: User;
+    createdAt: Date | string;
+    readAt?: Date | string | null;
+  }
+
+  interface Complaint {
+    id: string;
+    title: string;
+    description: string;
+    status: ComplaintStatus;
+    addressedTo: ComplaintAddressedTo;
+    targetType?: ComplaintTargetType | null;
+    targetEntityId?: string | null;
+    targetEntityName?: string | null;
+    complainantUserId: string;
+    complainantName?: string | null;
+    adminResponse?: string | null;
+    resolvedByUserId?: string | null;
+    resolvedAt?: Date | string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    complainant?: {
+      id: string;
+      userName?: string | null;
+      email?: string;
+      imageUrl?: string | null;
+    };
+    target?: any | null;
+  }
+
+  interface ComplaintComment {
+    id: string;
+    complaintId: string;
+    authorUserId: string;
+    authorName?: string | null;
+    content: string;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+    author?: {
+      id: string;
+      userName?: string | null;
+      imageUrl?: string | null;
+      role?: string;
+    };
   }
 
   // Site Configuration

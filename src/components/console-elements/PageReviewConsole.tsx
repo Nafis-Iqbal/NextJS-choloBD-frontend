@@ -83,9 +83,9 @@ export const PageReviewConsole = ({
     return (
         <div className="flex flex-col justify-between space-y-5 mt-5 w-full md:w-[65%]">
             <div className="flex items-end space-x-3">
-                <h4>Write a review</h4>
+                <h4 className="theme-label">Write a review</h4>
 
-                {userSubmittedReview && <p className="text-green-300 text-xs mb-1">You've already submitted a review</p>}
+                {userSubmittedReview && <p className="theme-text-teal text-xs mb-1">You've already submitted a review</p>}
             </div>
 
             <RatingInputModal
@@ -106,7 +106,7 @@ export const PageReviewConsole = ({
                 setRating={setReviewRating}
             />
 
-            <pre className="">for    <span className="text-lg text-green-500">{pageAssetName}</span></pre>
+            <pre className="theme-text">for    <span className="text-lg theme-text-teal font-semibold">{pageAssetName}</span></pre>
 
             <CustomTextInput 
                 name="title"
@@ -125,7 +125,7 @@ export const PageReviewConsole = ({
 
             <div className="flex justify-end">
                 <button 
-                    className="px-8 py-2 bg-green-700 hover:bg-green-600 rounded-xs disabled:bg-gray-500 disabled:cursor-not-allowed" 
+                    className="px-8 py-2 theme-btn-teal rounded-xs disabled:opacity-50 disabled:cursor-not-allowed" 
                     onClick={onReviewSubmitClicked}
                     disabled={userSubmittedReview}
                 >

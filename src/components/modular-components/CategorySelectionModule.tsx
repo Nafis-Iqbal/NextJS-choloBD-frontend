@@ -58,16 +58,16 @@ export const CategorySelectionModule = ({
   return (
     <div className={`flex flex-col space-y-2 mb-4 ${className}`}>
       {/* Product Categories Header */}
-      <label className={`w-fit ${labelStyle}`}>
+      <label className={`w-fit theme-label ${labelStyle ?? ""}`}>
         {labelName}
       </label>
 
       {/* Selected Categories */}
-      <div className={`h-[100px] gap-2 contain-content rounded-sm bg-gray-400 ${selectedCategories?.length > 0 && ("border-green-700 border-2")}`}>
+      <div className={`h-[100px] gap-2 contain-content rounded-sm theme-section ${selectedCategories?.length > 0 ? "theme-outline-teal border-2" : ""}`}>
         {selectedCategories?.length > 0 &&
           selectedCategories.map((category) => (
             <div
-              className="relative inline-block w-fit items-center p-1 mx-1 mt-1 bg-gray-700 text-sm md:text-base text-white rounded-sm"
+              className="relative inline-block w-fit items-center p-1 mx-1 mt-1 theme-badge text-sm md:text-base rounded-sm"
               key={category.id}
             >
               <div className="flex">
@@ -87,12 +87,13 @@ export const CategorySelectionModule = ({
 
       <div className="flex flex-row h-[100px] justify-between">
         {/* Button Selection Mode */}
-        <div className="h-[100px] w-full contain-content gap-2 rounded-sm bg-gray-600 border-green-900 border">
+        <div className="h-[100px] w-full contain-content gap-2 rounded-sm theme-card theme-outline">
           {categoriesData && categoriesData?.length > 0 &&
             categoriesData.map((category) => (
               <BasicButton
                 key={category.id}
-                buttonColor="bg-green-500 hover:bg-green-400"
+                buttonColor="theme-btn-teal"
+                buttonHoverColor=""
                 buttonTextColor="text-white"
                 extraStyle="mb-1 mt-1 mr-1 text-sm md:text-base p-1 md:p-2"
                 onClick={() => addCategory(category)}

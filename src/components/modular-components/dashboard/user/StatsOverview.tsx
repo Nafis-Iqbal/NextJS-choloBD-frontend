@@ -9,13 +9,19 @@ export type Stats = {
 };
 
 // Stats Overview Section
-export const StatsOverview: React.FC<{ stats: Stats; className?: string }> = ({ stats, className }) => (
+export const StatsOverview: React.FC<{
+  stats: Stats;
+  className?: string;
+  showFakeData?: boolean;
+}> = ({ stats, className, showFakeData = false }) => (
   <section className={`mb-8 ${className || ''}`}>
     <h2 className="text-2xl font-bold theme-text mb-6">Your Stats</h2>
 
-    <PlaceholderFeatureWarning moduleName="User Statistics Overview" />
+    {showFakeData && (
+      <PlaceholderFeatureWarning moduleName="User Statistics Overview" />
+    )}
 
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
       {[
         {
           label: "Tour Plans Built",
@@ -40,7 +46,7 @@ export const StatsOverview: React.FC<{ stats: Stats; className?: string }> = ({ 
       ].map((stat) => (
         <div
           key={stat.label}
-          className="rounded-xl p-6 transition-colors border"
+          className="rounded-xl p-3 sm:p-6 transition-colors border"
           style={{
             backgroundColor: `color-mix(in srgb, var(--theme-card-bg) 60%, var(--theme-teal) 5%)`,
             borderColor: `var(--theme-deep-green)`,
@@ -48,11 +54,11 @@ export const StatsOverview: React.FC<{ stats: Stats; className?: string }> = ({ 
           onMouseEnter={(e) => (e.currentTarget.style.borderColor = `var(--theme-teal)`)}
           onMouseLeave={(e) => (e.currentTarget.style.borderColor = `var(--theme-deep-green)`)}
         >
-          <div className="text-4xl mb-2">{stat.icon}</div>
-          <div className="text-3xl font-bold" style={{ color: `var(--theme-teal)` }}>
+          <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">{stat.icon}</div>
+          <div className="text-xl sm:text-3xl font-bold" style={{ color: `var(--theme-teal)` }}>
             {stat.value}
           </div>
-          <div className="text-sm theme-text-subtle mt-1">{stat.label}</div>
+          <div className="text-xs sm:text-sm theme-text-subtle mt-1">{stat.label}</div>
         </div>
       ))}
     </div>

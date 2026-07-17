@@ -1,4 +1,4 @@
-import { Trip } from "./TripsSection";
+import { Trip } from "./BookmarksSection";
 import { TransportBooking } from "./BookedTransportSection";
 import { Transaction } from "./TransactionHistorySection";
 import { Stats } from "./StatsOverview";

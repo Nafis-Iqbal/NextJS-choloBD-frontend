@@ -230,7 +230,6 @@ export const ActivitySpotForm = ({ mode, activitySpotData = {activityType: Activ
                 type="text"
                 className="w-full md:w-[500px]"
                 label="Address ID - Un-implemented"
-                labelStyle="text-red-400"
                 name="addressId"
                 value={(activitySpotFormData as ActivitySpot).addressId || ""}
                 onChange={() => {}}
@@ -251,11 +250,50 @@ export const ActivitySpotForm = ({ mode, activitySpotData = {activityType: Activ
             <CustomTextInput
                 type="text"
                 className="w-full md:w-[250px]"
+                label="Phone Number"
+                name="phoneNumber"
+                value={(activitySpotFormData as ActivitySpot).phoneNumber || ""}
+                onChange={handleChange}
+                error={errors.phoneNumber}
+            />
+
+            <CustomTextInput
+                type="number"
+                className="w-full md:w-[250px]"
+                label="Max Bookings Per Day"
+                name="maxBookingsPerDay"
+                value={(activitySpotFormData as ActivitySpot).maxBookingsPerDay ?? 20}
+                onChange={handleChange}
+                error={errors.maxBookingsPerDay}
+            />
+
+            <CustomTextAreaInput
+                className="w-full md:w-[500px] md:h-[120px]"
+                label="Booking Confirm Instruction"
+                name="bookingConfirmInstruction"
+                value={(activitySpotFormData as ActivitySpot).bookingConfirmInstruction || ""}
+                onChange={handleChange}
+                error={errors.bookingConfirmInstruction}
+            />
+
+            <CustomTextInput
+                type="text"
+                className="w-full md:w-[250px]"
                 label="Opening Hours"
                 name="openingHours"
                 value={(activitySpotFormData as ActivitySpot).openingHours || ""}
                 onChange={handleChange}
                 error={errors.openingHours}
+            />
+
+            <CustomTextInput
+                type="text"
+                className="w-full md:w-[250px]"
+                label="Closing Hours"
+                name="closingHours"
+                value={(activitySpotFormData as ActivitySpot).closingHours || ""}
+                onChange={handleChange}
+                error={errors.closingHours}
             />
 
             <CustomSelectInput

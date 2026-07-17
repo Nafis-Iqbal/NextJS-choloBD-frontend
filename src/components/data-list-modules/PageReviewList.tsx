@@ -18,10 +18,10 @@ export const PageReviewList = ({noReviewsSubmitted, pageReviews} : {noReviewsSub
     return (
         <>
             <div className="flex justify-between mb-10">
-                <h4 className="text-green-300">User reviews</h4>
+                <h4 className="theme-text-muted">User reviews</h4>
                 {!noReviewsSubmitted && 
                     <button 
-                        className="px-2 text-sm bg-green-700 hover:bg-green-600 self-baseline-last rounded-md"
+                        className="px-2 text-sm theme-btn-teal hover:brightness-90 self-baseline-last rounded-md"
                         onClick={handleSortByRating}
                     >
                         Sort by Rating ({sortOrder === "asc" ? "Low to High" : "High to Low"})
@@ -31,8 +31,8 @@ export const PageReviewList = ({noReviewsSubmitted, pageReviews} : {noReviewsSub
 
             <div className="flex flex-col space-y-5">
                 {noReviewsSubmitted ?  (
-                    <div className="text-gray-500 mb-5">   
-                        <h4 className="text-center text-green-700">No reviews submitted yet.</h4>
+                    <div className="theme-text-subtle mb-5">   
+                        <h4 className="text-center theme-text-muted">No reviews submitted yet.</h4>
                     </div>
                 ) : (Array.isArray(pageReviews) &&
                     sortedReviews.map((review) => (

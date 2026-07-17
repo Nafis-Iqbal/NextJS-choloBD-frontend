@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { RoomShift } from "@/types/enums";
+import { withNullsStripped } from "./schemaUtils";
 
 function toStartOfDay(date: Date) {
   const d = new Date(date);
@@ -14,7 +14,7 @@ function asDate(value: unknown) {
 }
 
 // Validator for creating a hotel room booking
-export const createHotelRoomBookingSchema = z.object({
+export const createHotelRoomBookingSchema = withNullsStripped(z.object({
   hotelId: z.string()
     .uuid({ message: "Hotel ID must be a valid UUID" }),
   
@@ -117,12 +117,12 @@ export const createHotelRoomBookingSchema = z.object({
       });
     }
   }
-});
+}));
 
 export type CreateHotelRoomBookingSchema = z.infer<typeof createHotelRoomBookingSchema>;
 
 // Validator for updating a hotel room booking
-export const updateHotelRoomBookingSchema = z.object({
+export const updateHotelRoomBookingSchema = withNullsStripped(z.object({
   checkInDate: z.union([
     z.string()
       .refine((date) => !Number.isNaN(Date.parse(date)), {
@@ -196,6 +196,6 @@ export const updateHotelRoomBookingSchema = z.object({
       });
     }
   }
-});
+}));
 
 export type UpdateHotelRoomBookingSchema = z.infer<typeof updateHotelRoomBookingSchema>;

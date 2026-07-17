@@ -150,7 +150,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                 className="w-full px-2 md:px-0 md:w-[500px]"
                 placeholderText="Enter location name"
                 label="Location Name"
-                labelStyle="text-green-300"
                 name="name"
                 value={locationFormData?.name || ""}
                 onChange={handleChange}
@@ -158,7 +157,7 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             />
 
             <div className="flex flex-col space-y-2">
-                <label className="text-green-300 font-medium">Description</label>
+                <label className="font-medium theme-label">Description</label>
                 <textarea
                     className="w-full px-2 md:px-0 md:w-[500px] p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="Enter location description (optional)"
@@ -173,7 +172,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
             <CustomSelectInput
                 className="w-full px-2 md:px-0 md:w-[300px] bg-gray-700 text-white"
                 label="Location Type"
-                labelStyle="text-green-300"
                 name="locationType"
                 value={locationFormData?.locationType || ""}
                 onChange={handleChange}
@@ -224,7 +222,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                                 <CustomSelectInput
                                     className="w-full"
                                     label="Division"
-                                    labelStyle="text-green-300"
                                     name="parentLocationDivision"
                                     value={locationFormData?.parentLocationId || ""}
                                     onChange={handleChange}
@@ -255,7 +252,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                                     <CustomSelectInput
                                         className="w-full"
                                         label="District"
-                                        labelStyle="text-green-300"
                                         value={locationFormData?.parentLocationId || ""}
                                         onChange={handleChange}
                                         name="parentLocationDistrict"
@@ -281,7 +277,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                     className="w-full"
                     placeholderText="Enter latitude (optional)"
                     label="Latitude"
-                    labelStyle="text-green-300"
                     name="latitude"
                     value={locationFormData?.latitude || ""}
                     onChange={handleChange}
@@ -293,7 +288,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                     className="w-full"
                     placeholderText="Enter longitude (optional)"
                     label="Longitude"
-                    labelStyle="text-green-300"
                     name="longitude"
                     value={locationFormData?.longitude || ""}
                     onChange={handleChange}
@@ -306,7 +300,6 @@ export const LocationForm: React.FC<LocationFormProps> = ({
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Enter timezone (optional)"
                 label="Timezone"
-                labelStyle="text-green-300"
                 name="timezone"
                 value={locationFormData?.timezone || ""}
                 onChange={handleChange}

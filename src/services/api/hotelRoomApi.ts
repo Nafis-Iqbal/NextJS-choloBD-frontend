@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HotelType, HotelRoomCategory, HotelRoomStatus } from "@/types/enums";
+import { HotelRoomCategory, HotelRoomStatus } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
 
 interface CreateHotelRoomTypeData {
+    hotelId: string;
     roomType: HotelRoomCategory;
     singleBedCount: number;
     doubleBedCount: number;
     pricePerNight: number;
-    isAvailable?: boolean;
+    totalCount?: number;
+    availableCount?: number;
+    imageURLs?: string[];
 }
 
 interface UpdateHotelRoomTypeData {
@@ -16,7 +19,9 @@ interface UpdateHotelRoomTypeData {
     singleBedCount?: number;
     doubleBedCount?: number;
     pricePerNight?: number;
-    isAvailable?: boolean;
+    totalCount?: number;
+    availableCount?: number;
+    imageURLs?: string[];
 }
 
 interface UpdateHotelRoomData {
@@ -24,7 +29,7 @@ interface UpdateHotelRoomData {
 }
 
 async function createHotelRoomType(data: CreateHotelRoomTypeData) {
-    const response = await apiFetch<ApiResponse<HotelRoom>>(`/hotel-rooms/roomTypes`, {
+    const response = await apiFetch<ApiResponse<HotelRoomType>>(`/hotel-rooms/roomTypes`, {
         method: "POST",
         body: JSON.stringify(data),
     });
@@ -40,18 +45,48 @@ export function useCreateHotelRoomTypeRQ(onSuccessFn: (res: any) => void, onErro
     });
 }
 
-async function updateHotelRoomTypeAdmin(roomTypeId: string, data: UpdateHotelRoomTypeData) {
-    const response = await apiFetch<ApiResponse<HotelRoom>>(`/hotel-rooms/roomTypes/${roomTypeId}`, {
+async function updateHotelRoomTypeAdmin(
+    roomTypeData: { id: string } & UpdateHotelRoomTypeData
+) {
+    const { id, ...updateData } = roomTypeData;
+    const response = await apiFetch<ApiResponse<HotelRoomType>>(`/hotel-rooms/roomTypes/${id}`, {
         method: "PUT",
-        body: JSON.stringify(data),
+        body: JSON.stringify(updateData),
     });
     return response;
 }
 
 export function useUpdateHotelRoomTypeAdminRQ(onSuccessFn: (res: any) => void, onErrorFn: () => void) {
     return useMutation({
-        mutationFn: ({ roomTypeId, data }: { roomTypeId: string, data: UpdateHotelRoomTypeData }) =>
-            updateHotelRoomTypeAdmin(roomTypeId, data),
+        mutationFn: updateHotelRoomTypeAdmin,
+        onSuccess: onSuccessFn,
+        onError: onErrorFn,
+    });
+}
+
+async function deleteHotelRoomTypeImages(roomTypeId: string, imageIds: string[]) {
+    const response = await apiFetch<ApiResponse<{ message: string }>>(
+        `/hotel-rooms/roomTypes/${roomTypeId}/images`,
+        {
+            method: "PUT",
+            body: JSON.stringify({ imageIds }),
+        }
+    );
+    return response;
+}
+
+export function useDeleteHotelRoomTypeImagesRQ(
+    onSuccessFn: (response: any) => void,
+    onErrorFn: () => void
+) {
+    return useMutation({
+        mutationFn: ({
+            roomTypeId,
+            imageIds,
+        }: {
+            roomTypeId: string;
+            imageIds: string[];
+        }) => deleteHotelRoomTypeImages(roomTypeId, imageIds),
         onSuccess: onSuccessFn,
         onError: onErrorFn,
     });

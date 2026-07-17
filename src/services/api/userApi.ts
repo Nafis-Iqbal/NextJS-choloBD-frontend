@@ -3,8 +3,15 @@ import { Role, ServiceType, UserStatus } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
 
+export type PaginatedUsers = {
+  results: User[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
 export async function getUsers(queryString?: string) {
-  const response = await apiFetch<ApiResponse<User[]>>(`/users${queryString ? `?${queryString}` : ""}`, {
+  const response = await apiFetch<ApiResponse<PaginatedUsers>>(`/users${queryString ? `?${queryString}` : ""}`, {
     method: 'GET'
   });
 
@@ -12,7 +19,7 @@ export async function getUsers(queryString?: string) {
 }
 
 export function useGetUsersRQ(queryString?: string) {
-    return useQuery<ApiResponse<User[]>>({
+    return useQuery<ApiResponse<PaginatedUsers>>({
         queryFn: () => getUsers(queryString),
         queryKey: ["users", queryString],
         staleTime: queryString ? 0 : 30_000, 
@@ -97,7 +104,7 @@ export function useUpdateUserRoleStatusServiceRQ(onSuccessFn: (ApiResponse: any)
     });
 }
 
-export async function getOwnUserDetail(userId: string) {
+export async function getOwnUserDetail(_userId?: string) {
   const response = await apiFetch<ApiResponse<User>>(`/users/profile`, {
     method: 'GET'
   });
@@ -108,10 +115,12 @@ export async function getOwnUserDetail(userId: string) {
 export function useGetOwnUserDetailRQ(userId: string, enabled: boolean) {
     return useQuery<ApiResponse<User>>({
         queryFn: () => getOwnUserDetail(userId),
-        queryKey: ["users", userId],
+        // Stable key: endpoint always returns the authenticated user (userId is only a gate).
+        // Using ["users", userId] raced with "" → real id and left consumers on stale/empty data.
+        queryKey: ["users", "profile"],
         staleTime: 30_000,
         gcTime: 30 * 1000,
-        enabled
+        enabled: enabled && !!userId,
     });
 }
 

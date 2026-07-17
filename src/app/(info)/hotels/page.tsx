@@ -75,53 +75,46 @@ function HotelListingsPage() {
     return (
         <div className="flex flex-col p-2 font-sans mt-5">
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="text-green-500">Hotels</h3>
+                <h3 className="theme-label">Hotels</h3>
                 {(hotels && hotels.length > 0) ? 
-                    <p className="text-green-200">Showing {hotels?.length} of {hotels?.length} active Hotels. <span className="text-gray-400">(Pagination not implemented yet)</span></p> : 
-                    <p className="text-green-200">No Hotels found.</p>
+                    <p className="theme-text-muted">Showing {hotels?.length} of {hotels?.length} active Hotels. <span className="theme-text-subtle">(Pagination not implemented yet)</span></p> : 
+                    <p className="theme-text-muted">No Hotels found.</p>
                 }
 
                 <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="overflow-x-auto w-full">
-                        <div className="min-w-[900px]">
-                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
-                                <p className="w-[5%]">Sr. No.</p>
-                                <p className="w-[20%]">Hotel Name</p>
-                                <p className="w-[10%]">Location</p>
-                                <p className="w-[20%]">Hotel Image</p>
-                                <p className="w-[10%]">Hotel Type</p>
-                                <p className="w-[10%]">Rating</p>
-                                <p className="w-[5%]">Available Rooms</p>
-                                <p className="w-[10%]">Hotel ID</p>
-                                <p className="w-[10%]">Actions</p>
-                            </div>
-                            <div className="flex flex-col border-1 border-green-800">
-                                {
-                                    isHotelsLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
-                                    isHotelsError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
-                                    (hotels && Array.isArray(hotels) && hotels.length <= 0) ? 
-                                    (<NoContentTableRow displayMessage="No hotels found" tdColSpan={1}/>) :
-                                    
-                                    (hotels ?? []).map((hotel, index) => {
-                                        return (
-                                            <HotelViewListTableRow 
-                                                key={hotel.id} 
-                                                id={index + 1} 
-                                                hotelName={hotel.name || ''}
-                                                hotelLocation={hotel.location?.name || 'N/A'}
-                                                hotel_id={hotel.id} 
-                                                hotelImageURL={hotel.images?.[0]?.url || '/image-not-found.png'} 
-                                                hotelType={hotel.hotelType || 'N/A'}
-                                                rating={hotel.rating || 0}
-                                                totalRooms={hotel.totalRooms}
-                                                onClickNavigate={() => router.push(`/hotels/${hotel.id}`)}
-                                                onEdit={() => router.push(`/hotels/${hotel.id}/edit`)}
-                                                onDelete={() => handleDeleteHotel(hotel.id)}
-                                            />
-                                        );
-                                    })
-                                }
-                            </div>
+                    <div className="w-full">
+                        <div
+                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
+                            style={{
+                                backgroundColor: "var(--theme-card-bg)",
+                                borderColor: "var(--theme-deep-green)",
+                            }}
+                        >
+                            {
+                                isHotelsLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
+                                isHotelsError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
+                                (hotels && Array.isArray(hotels) && hotels.length <= 0) ? 
+                                (<NoContentTableRow displayMessage="No hotels found" tdColSpan={1}/>) :
+                                
+                                (hotels ?? []).map((hotel, index) => {
+                                    return (
+                                        <HotelViewListTableRow 
+                                            key={hotel.id} 
+                                            id={index + 1} 
+                                            hotelName={hotel.name || ''}
+                                            hotelLocation={hotel.location?.name || 'N/A'}
+                                            hotel_id={hotel.id} 
+                                            hotelImageURL={hotel.images?.[0]?.url || '/image-not-found.png'} 
+                                            hotelType={hotel.hotelType || 'N/A'}
+                                            rating={hotel.rating || 0}
+                                            totalRooms={hotel.totalRooms}
+                                            onClickNavigate={() => router.push(`/hotels/${hotel.id}`)}
+                                            onEdit={() => router.push(`/hotels/${hotel.id}/edit`)}
+                                            onDelete={() => handleDeleteHotel(hotel.id)}
+                                        />
+                                    );
+                                })
+                            }
                         </div>
                     </div>
                 </TableLayout>

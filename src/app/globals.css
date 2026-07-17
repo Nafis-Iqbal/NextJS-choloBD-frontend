@@ -74,6 +74,30 @@
     .theme-text-teal   { color: var(--theme-teal); }
     .theme-star        { color: var(--theme-star); }
 
+    /* --- Labels / Titles (for distinct appearance) --- */
+    .theme-label {
+        color: var(--theme-teal);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    /* --- Badges / Tags (for amenities, policies, etc.) --- */
+    .theme-badge {
+        background-color: var(--theme-card-bg);
+        color: var(--theme-teal);
+        border: 1.5px solid var(--theme-teal);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    }
+    .theme-badge:hover {
+        background-color: var(--theme-teal);
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
     /* --- Borders / Outlines --- */
     .theme-outline      { border: 1px solid var(--theme-deep-green); }
     .theme-outline-teal { border: 1px solid var(--theme-teal); }

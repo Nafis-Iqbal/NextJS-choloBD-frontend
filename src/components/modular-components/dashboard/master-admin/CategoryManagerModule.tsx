@@ -88,11 +88,10 @@ const CategoryManagerModule = () => {
                     <div className="min-w-[900px]">
                         <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
                             <p className="w-[5%]">Sr. No.</p>
-                            <p className="w-[20%]">Category Name</p>
-                            <p className="w-[10%]">Type</p>
+                            <p className="w-[30%]">Category Name</p>
+                            <p className="w-[15%]">Type</p>
                             <p className="w-[15%]">Slug</p>
-                            <p className="w-[10%]">Active</p>
-                            <p className="w-[20%]">Category ID</p>
+                            <p className="w-[15%]">Active</p>
                             <p className="w-[20%]">Actions</p>
                         </div>
                         <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto">

@@ -75,51 +75,45 @@ function ActivitySpotListingsPage() {
     return (
         <div className="flex flex-col p-2 font-sans mt-5">
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="text-green-500">Activity Spots</h3>
+                <h3 className="theme-label">Activity Spots</h3>
                 {(activitySpots && activitySpots.length > 0) ? 
-                    <p className="text-green-200">Showing {activitySpots?.length} of {activitySpots?.length} active Activity Spots. <span className="text-gray-400">(Pagination not implemented yet)</span></p> : 
-                    <p className="text-green-200">No activity spots found.</p>
+                    <p className="theme-text-muted">Showing {activitySpots?.length} of {activitySpots?.length} active Activity Spots. <span className="theme-text-subtle">(Pagination not implemented yet)</span></p> : 
+                    <p className="theme-text-muted">No activity spots found.</p>
                 }
 
                 <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="overflow-x-auto w-full">
-                        <div className="min-w-[900px]">
-                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
-                                <p className="w-[5%]">Sr. No.</p>
-                                <p className="w-[20%]">Activity Spot Name</p>
-                                <p className="w-[20%]">Activity Spot Image</p>
-                                <p className="w-[15%]">Activity Type</p>
-                                <p className="w-[10%]">Rating</p>
-                                <p className="w-[10%]">Entry Cost</p>
-                                <p className="w-[10%]">Activity Spot ID</p>
-                                <p className="w-[10%]">Actions</p>
-                            </div>
-                            <div className="flex flex-col border-1 border-green-800">
-                                {
-                                    isActivitySpotsLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
-                                    isActivitySpotsError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
-                                    (activitySpots && Array.isArray(activitySpots) && activitySpots.length <= 0) ? 
-                                    (<NoContentTableRow displayMessage="No activity spots found" tdColSpan={1}/>) :
-                                    
-                                    (activitySpots ?? []).map((activitySpot, index) => {
-                                        return (
-                                            <ActivitySpotViewListTableRow 
-                                                key={activitySpot.id} 
-                                                id={index + 1} 
-                                                activitySpotName={activitySpot.name || ''} 
-                                                activitySpot_id={activitySpot.id} 
-                                                activitySpotImageURL={activitySpot.images?.[0]?.url || '/image-not-found.png'} 
-                                                activityType={activitySpot.activityType || 'N/A'}
-                                                rating={activitySpot.rating}
-                                                entryCost={activitySpot.entryCost || 0}
-                                                onClickNavigate={() => router.push(`/activity-spots/${activitySpot.id}`)}
-                                                onEdit={() => router.push(`/activity-spots/${activitySpot.id}/edit`)}
-                                                onDelete={() => handleDeleteActivitySpot(activitySpot.id)}
-                                            />
-                                        );
-                                    })
-                                }
-                            </div>
+                    <div className="w-full">
+                        <div
+                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
+                            style={{
+                                backgroundColor: "var(--theme-card-bg)",
+                                borderColor: "var(--theme-deep-green)",
+                            }}
+                        >
+                            {
+                                isActivitySpotsLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
+                                isActivitySpotsError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
+                                (activitySpots && Array.isArray(activitySpots) && activitySpots.length <= 0) ?
+                                (<NoContentTableRow displayMessage="No activity spots found" tdColSpan={1}/>) :
+
+                                (activitySpots ?? []).map((activitySpot, index) => {
+                                    return (
+                                        <ActivitySpotViewListTableRow
+                                            key={activitySpot.id}
+                                            id={index + 1}
+                                            activitySpotName={activitySpot.name || ''}
+                                            activitySpot_id={activitySpot.id}
+                                            activitySpotImageURL={activitySpot.images?.[0]?.url || '/image-not-found.png'}
+                                            activityType={activitySpot.activityType || 'N/A'}
+                                            rating={activitySpot.rating}
+                                            entryCost={activitySpot.entryCost || 0}
+                                            onClickNavigate={() => router.push(`/activity-spots/${activitySpot.id}`)}
+                                            onEdit={() => router.push(`/activity-spots/${activitySpot.id}/edit`)}
+                                            onDelete={() => handleDeleteActivitySpot(activitySpot.id)}
+                                        />
+                                    );
+                                })
+                            }
                         </div>
                     </div>
                 </TableLayout>

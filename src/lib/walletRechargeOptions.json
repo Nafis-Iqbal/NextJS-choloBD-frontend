@@ -1,0 +1,62 @@
+[
+  {
+    "id": "opt-001",
+    "title": "Starter Pack",
+    "description": "Perfect for first-time users to explore the platform with basic credits",
+    "rechargeAmount": 500,
+    "rechargeCost": 500,
+    "bonusAmount": 50,
+    "createdAt": "2026-01-15T10:30:00Z",
+    "enabled": true
+  },
+  {
+    "id": "opt-002",
+    "title": "Popular Choice",
+    "description": "Most popular option - great value with generous bonus credits included",
+    "rechargeAmount": 1000,
+    "rechargeCost": 1000,
+    "bonusAmount": 150,
+    "createdAt": "2026-01-15T10:30:00Z",
+    "enabled": true
+  },
+  {
+    "id": "opt-003",
+    "title": "Pro Bundle",
+    "description": "For frequent travelers - significant bonus for loyalty and volume booking",
+    "rechargeAmount": 2500,
+    "rechargeCost": 2500,
+    "bonusAmount": 500,
+    "createdAt": "2026-01-15T10:30:00Z",
+    "enabled": true
+  },
+  {
+    "id": "opt-004",
+    "title": "VIP Premium",
+    "description": "Maximum value package with exclusive bonus - best for power users",
+    "rechargeAmount": 5000,
+    "rechargeCost": 5000,
+    "bonusAmount": 1250,
+    "createdAt": "2026-01-15T10:30:00Z",
+    "enabled": false
+  },
+  {
+    "id": "opt-005",
+    "title": "Quick Top-up",
+    "description": "Quick recharge option for urgent bookings and immediate travel needs",
+    "rechargeAmount": 250,
+    "rechargeCost": 250,
+    "bonusAmount": 25,
+    "createdAt": "2026-01-15T10:30:00Z",
+    "enabled": false
+  },
+  {
+    "id": "opt-006",
+    "title": "Business Plan",
+    "description": "Designed for business travelers and corporate accounts with dedicated support",
+    "rechargeAmount": 10000,
+    "rechargeCost": 10000,
+    "bonusAmount": 3000,
+    "createdAt": "2026-01-15T10:30:00Z",
+    "enabled": false
+  }
+]

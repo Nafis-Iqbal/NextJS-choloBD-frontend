@@ -25,8 +25,8 @@ export default function ActivitySpotCreationPage() {
     return (
         <div className="flex flex-col p-2 mt-5">
             <div className="flex flex-col space-y-2 font-sans mx-auto">
-                <h3 className="text-green-500">Create New Activity Spot</h3>
-                <p className="text-green-200">Add a new activity spot to your site.</p>
+                <h3 className="theme-label">Create New Activity Spot</h3>
+                <p className="theme-text-muted">Add a new activity spot to your site.</p>
 
                 <ActivitySpotForm 
                     mode={"create"}

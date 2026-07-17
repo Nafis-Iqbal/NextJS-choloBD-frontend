@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState } from "react"
+import { useMemo, useState, type ReactNode } from "react"
 import { Role, UserStatus, PaymentStatus, ServiceType } from "@/types/enums"
 import { UserApi } from "@/services/api"
 import { filterUsersSchema } from "@/validators/userValidators"
-import { queryClient } from "@/services/apiInstance"
 
 import TableLayout from "../../../layout-elements/TableLayout"
 import FilterSectionLayout from "../../../layout-elements/FilterSectionLayout"
@@ -11,8 +10,40 @@ import { CustomSelectInput } from "../../../custom-elements/CustomInputElements"
 import { CustomTextInput } from "../../../custom-elements/CustomInputElements"
 import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
 import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
-import { UserViewListTableRow } from "../../../data-elements/DataTableRowElements"
+import { PaginationControls } from "../user/PaginationControls"
 import { useRouter } from "next/navigation"
+
+const PAGE_SIZE = 50;
+
+const infoCardClass =
+    "w-full shrink-0 rounded-sm md:rounded-md p-4 md:p-5 mb-3 border-0 md:border transition-colors min-h-[7.5rem]";
+
+const infoCardStyle = {
+    backgroundColor: "var(--theme-bg)",
+    borderColor: "var(--theme-deep-green)",
+} as const;
+
+const metaChipClass =
+    "inline-flex items-center px-2.5 py-1 rounded-sm text-xs font-medium";
+
+const MetaChip = ({
+    label,
+    value,
+}: {
+    label: string;
+    value: ReactNode;
+}) => (
+    <span
+        className={metaChipClass}
+        style={{
+            backgroundColor: "var(--theme-section-bg)",
+            color: "var(--theme-text-muted)",
+        }}
+    >
+        <span className="theme-text-subtle mr-1">{label}:</span>
+        <span className="theme-text">{value}</span>
+    </span>
+);
 
 const formatEnumValue = (value: string): string => {
     return value
@@ -25,41 +56,65 @@ const formatEnumValue = (value: string): string => {
 }
 
 type UserFilter = {
-    role: Role;
-    user_status: UserStatus;
-    payment_status: PaymentStatus;
+    role: Role | "";
+    user_status: UserStatus | "";
+    payment_status: PaymentStatus | "";
     user_name: string;
     email: string;
-    city: string;
-    minimum_spent: number;
-    minimum_order_count: number;
 }
 
 const defaultFilterValues: UserFilter = {
-    role: Role.USER, 
-    user_status: UserStatus.ACTIVE,
-    payment_status: PaymentStatus.PAID,
-    user_name: '',
-    email: '',
-    city: '',
-    minimum_spent: 0,
-    minimum_order_count: 0
+    role: "",
+    user_status: "",
+    payment_status: "",
+    user_name: "",
+    email: "",
+}
+
+export function buildUserQueryString(
+    filters: Partial<UserFilter> | undefined | null,
+    page = 1,
+    limit = PAGE_SIZE
+) {
+    const params = new URLSearchParams();
+
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+
+    if (!filters) {
+        return params.toString();
+    }
+
+    Object.entries(filters).forEach(([key, value]) => {
+        if (typeof value === "string" && value.trim() !== "") {
+            params.append(key, value.trim());
+        }
+    });
+
+    return params.toString();
 }
 
 export const UserManagerModule = () => {
     const router = useRouter();
-    const [filters, setFilters] = useState<Partial<UserFilter>>(defaultFilterValues);
+    const [filters, setFilters] = useState<UserFilter>(defaultFilterValues);
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
-    const [queryString, setQueryString] = useState<string>();
-    const {data: usersList, isLoading: isFetchLoading, isError: isFetchError, refetch: refetchUserData} = UserApi.useGetUsersRQ(queryString);
+    const [page, setPage] = useState(1);
 
-    useEffect(() => {
-        refetchUserData();
-    }, [queryString]);
+    const queryString = useMemo(
+        () => buildUserQueryString(filters, page, PAGE_SIZE),
+        [filters, page]
+    );
 
-    useEffect(() => {
-        setFilters(defaultFilterValues);
-    }, [])
+    const {
+        data: usersList,
+        isLoading: isFetchLoading,
+        isError: isFetchError,
+    } = UserApi.useGetUsersRQ(queryString);
+
+    const users = usersList?.data?.results ?? [];
+    const total = usersList?.data?.total ?? 0;
+    const limit = usersList?.data?.limit ?? PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(total / limit));
 
     const userRoleOptions = Object.values(Role).map(role => ({
         value: role,
@@ -76,37 +131,23 @@ export const UserManagerModule = () => {
         label: status.replace("_", " ").toLowerCase().replace(/^\w/, c => c.toUpperCase())
     }));
 
-    const onSubmitFilterUserSearch = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        
-        const query = buildUserQueryString(filters);
-        queryClient.invalidateQueries({queryKey: ["users"]});
-
-        setQueryString(query);
+    const handleResetFilters = () => {
+        setFilters(defaultFilterValues);
+        setErrors({});
+        setPage(1);
     }
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
-        const numericFields = new Set(["minimum_spent", "minimum_order_count"]);
-
-        let parsedValue: string | number | undefined;
-
-        if (numericFields.has(name)) {
-            const noLeadingZeros = value.replace(/^0+(?=\d)/, '');
-
-            parsedValue = noLeadingZeros === '' ? undefined : Number(noLeadingZeros);
-        } else {
-            parsedValue = value || undefined;
-        }
-        
         setFilters((prev) => ({
             ...prev,
-            [name]: parsedValue
+            [name]: value
         }));
+        setPage(1);
 
-        const updatedData = { ...filters, [name]: parsedValue };
-        
+        const updatedData = { ...filters, [name]: value || undefined };
+
         const result = filterUsersSchema.safeParse(updatedData);
         if (!result.success) {
             const key = name as keyof typeof result.error.formErrors.fieldErrors;
@@ -120,66 +161,64 @@ export const UserManagerModule = () => {
 
     return (
         <section className="flex flex-col mt-5" id="users_management">
-            <div className="flex mb-2 space-x-5">
+            <div className="flex mb-2 space-x-5 items-center">
                 <h4 className="theme-text">All Users</h4>
-                <button className="text-sm px-1 mt-1 rounded-md self-center theme-btn-teal">View All</button>
+                <p className="text-sm theme-text-subtle">
+                    Showing {users.length} of {total} users
+                </p>
             </div>
             <TableLayout className="md:mr-5">
-                <div className="overflow-x-auto w-full">
-                    <div className="min-w-[1800px]">
-                        <div className="flex theme-outline p-2 text-center text-sm font-semibold" style={{backgroundColor: 'var(--theme-card-bg)'}}>
-                            <p className="w-[2%] flex-shrink-0">Sr.</p>
-                            <p className="w-[11%] flex-shrink-0">User Name</p>
-                            <p className="w-[13%] flex-shrink-0">Email</p>
-                            <p className="w-[6%] flex-shrink-0">Role</p>
-                            <p className="w-[9%] flex-shrink-0">Status</p>
-                            <p className="w-[6%] flex-shrink-0">Payment</p>
-                            <p className="w-[13%] flex-shrink-0">Phone</p>
-                            <p className="w-[9%] flex-shrink-0">Service Type</p>
-                            <p className="w-[10%] flex-shrink-0">Company Name</p>
-                            <p className="w-[6%] flex-shrink-0">Wallet</p>
-                            <p className="w-[5%] flex-shrink-0">Verified</p>
-                            <p className="w-[9%] flex-shrink-0">Joined</p>
-                        </div>
-                        <div className="flex flex-col theme-outline h-[80vh] md:h-[50vh] overflow-y-auto">
-                            {
-                                isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
-                                isFetchError ? (<NoContentTableRow displayMessage="An error occured"  tdColSpan={1}/>) :
-
-                                (usersList?.data && Array.isArray(usersList?.data) && usersList?.data.length <= 0) ? (<NoContentTableRow displayMessage="No users found" tdColSpan={1}/>) :
-                                (Array.isArray(usersList?.data) &&
-                                    usersList?.data?.map((user, index) => (
-                                        <UserListTableRow 
-                                            key={user.id} 
-                                            id={index + 1}
-                                            userName={user.userName} 
-                                            email={user.email}
-                                            phoneNumber={user.phoneNumber}
-                                            role={user.role}
-                                            walletBalance={user?.wallet?.balance || -1}
-                                            userStatus={user.userStatus}
-                                            paymentStatus={user.paymentStatus}
-                                            serviceType={user.serviceType}
-                                            serviceEntityName={user.serviceEntityName}
-                                            employeeServiceType={user.employeeServiceType}
-                                            employeeServiceEntityName={user.employeeServiceEntityName}
-                                            createdAt={user.createdAt ? new Date(user.createdAt) : new Date()}
-                                            navigateOnClick={() => router.push(`/user_profile/${user.id}`)}
-                                        />
-                                    ))
-                                )
-                            }
-                        </div>
+                <div className="w-full">
+                    <div
+                        className="block rounded-sm md:rounded-md border-0 md:border max-h-[80vh] md:max-h-[50vh] overflow-y-auto px-0 py-1 md:p-2"
+                        style={{
+                            backgroundColor: "var(--theme-card-bg)",
+                            borderColor: "var(--theme-deep-green)",
+                        }}
+                    >
+                        {
+                            isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
+                            isFetchError ? (<NoContentTableRow displayMessage="An error occured"  tdColSpan={1}/>) :
+                            users.length === 0 ? (<NoContentTableRow displayMessage="No users found" tdColSpan={1}/>) :
+                            users.map((user, index) => (
+                                <UserListTableRow 
+                                    key={user.id} 
+                                    id={(page - 1) * limit + index + 1}
+                                    userName={user.userName} 
+                                    email={user.email}
+                                    phoneNumber={user.phoneNumber}
+                                    role={user.role}
+                                    walletBalance={user?.wallet?.balance ?? -1}
+                                    userStatus={user.userStatus}
+                                    paymentStatus={user.paymentStatus}
+                                    serviceType={user.serviceType}
+                                    serviceEntityName={user.serviceEntityName}
+                                    employeeServiceType={user.employeeServiceType}
+                                    employeeServiceEntityName={user.employeeServiceEntityName}
+                                    createdAt={user.createdAt ? new Date(user.createdAt) : new Date()}
+                                    navigateOnClick={() => router.push(`/user_profile/${user.id}`)}
+                                />
+                            ))
+                        }
                     </div>
                 </div>
             </TableLayout>
 
-            <FilterSectionLayout className="md:mr-5" onSubmit={onSubmitFilterUserSearch}>
+            {totalPages > 1 && (
+                <PaginationControls
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                    className="md:mr-5"
+                />
+            )}
+
+            <FilterSectionLayout className="md:mr-5" onSubmit={(e) => e.preventDefault()}>
                 <div className="flex flex-wrap gap-4 md:gap-15 justify-left">
                     <CustomSelectInput
-                        options={userRoleOptions}
+                        options={[{ value: "", label: "-- All Roles --" }, ...userRoleOptions]}
                         onChange={handleChange}
-                        value={filters?.role}
+                        value={filters.role}
                         style={{backgroundColor: 'var(--theme-card-bg)'}}
                         className=""
                         name="role"
@@ -187,9 +226,9 @@ export const UserManagerModule = () => {
                     />
 
                     <CustomSelectInput
-                        options={userStatusOptions}
+                        options={[{ value: "", label: "-- All Statuses --" }, ...userStatusOptions]}
                         onChange={handleChange}
-                        value={filters?.user_status}
+                        value={filters.user_status}
                         style={{backgroundColor: 'var(--theme-card-bg)'}}
                         className=""
                         name="user_status"
@@ -197,9 +236,9 @@ export const UserManagerModule = () => {
                     />
 
                     <CustomSelectInput
-                        options={paymentStatusOptions}
+                        options={[{ value: "", label: "-- All Payments --" }, ...paymentStatusOptions]}
                         onChange={handleChange}
-                        value={filters?.payment_status}
+                        value={filters.payment_status}
                         style={{backgroundColor: 'var(--theme-card-bg)'}}
                         className=""
                         name="payment_status"
@@ -211,7 +250,7 @@ export const UserManagerModule = () => {
                     <CustomTextInput 
                         placeholderText="Enter user name"
                         onChange={handleChange}
-                        value={filters?.user_name}
+                        value={filters.user_name}
                         name="user_name"
                         label="User Name"
                         className="w-[150px] md:w-auto"
@@ -220,7 +259,7 @@ export const UserManagerModule = () => {
                     <CustomTextInput 
                         placeholderText="Enter user email"
                         onChange={handleChange}
-                        value={filters?.email}
+                        value={filters.email}
                         name="email"
                         label="Email"
                         error={errors.email}
@@ -228,24 +267,14 @@ export const UserManagerModule = () => {
                     />
                 </div>
 
-                <div className="flex flex-wrap gap-2 md:gap-6 justify-left space-x-6">
-                    <div className="flex space-x-5 md:space-x-10 mt-2 md:mt-0">
-                        <button className="flex self-end items-center px-2 py-1 bg-green-700 hover:bg-green-600
-                            text-white text-base md:text-lg rounded-sm" 
-                            type="submit"
-                        >
-                            Filter Users
-                        </button>
-                    
-                        <button 
-                            className="flex self-end items-center px-2 py-1 bg-green-700 hover:bg-green-600
-                            text-white text-base md:text-lg rounded-sm" 
-                            type="button" 
-                            onClick={() => {setFilters(defaultFilterValues); setErrors({}); setQueryString("")}}
-                        >
-                            Reset Filters
-                        </button>
-                    </div>
+                <div className="flex flex-wrap gap-2 md:gap-6 justify-left">
+                    <button 
+                        className="flex self-end items-center px-2 py-1 theme-btn-teal text-base md:text-lg rounded-sm mt-2" 
+                        type="button" 
+                        onClick={handleResetFilters}
+                    >
+                        Reset Filters
+                    </button>
                 </div>
             </FilterSectionLayout>
 
@@ -289,41 +318,73 @@ const UserListTableRow = ({
     createdAt: Date, 
     navigateOnClick: () => void
 }) => {
+    const resolvedServiceType =
+        role === Role.SERVICE_ADMIN
+            ? serviceType
+            : role === Role.EMPLOYEE
+              ? employeeServiceType
+              : undefined;
+
+    const resolvedCompanyName =
+        role === Role.SERVICE_ADMIN
+            ? serviceEntityName
+            : role === Role.EMPLOYEE
+              ? employeeServiceEntityName
+              : undefined;
+
     return (
-        <div className="flex p-2 w-full border-green-900 hover:bg-gray-200 text-center hover:cursor-pointer" onClick={() => navigateOnClick()}>
-            <p className="w-[2%] flex-shrink-0">{id}</p>
-            <p className="w-[11%] flex-shrink-0 hover:cursor-pointer">{userName}</p>
-            <p className="w-[13%] flex-shrink-0">{email}</p>
-            <p className="w-[6%] flex-shrink-0">{role}</p>
-            <p className="w-[9%] flex-shrink-0">{userStatus}</p>
-            <p className="w-[6%] flex-shrink-0">{paymentStatus}</p>
-            <p className="w-[13%] flex-shrink-0">{phoneNumber || '-'}</p>
-            <p className="w-[9%] flex-shrink-0">{role === Role.SERVICE_ADMIN ? serviceType : role === Role.EMPLOYEE ? employeeServiceType: '-'}</p>
-            <p className="w-[10%] flex-shrink-0">{role === Role.SERVICE_ADMIN ? serviceEntityName : role === Role.EMPLOYEE ? employeeServiceEntityName: '-'}</p>
-            <p className="w-[6%] flex-shrink-0">{walletBalance} C</p>
-            <p className="w-[5%] flex-shrink-0">-</p>
-            <p className="w-[9%] flex-shrink-0">{new Date(createdAt).toDateString()}</p>
-        </div>
+        <article
+            className={`${infoCardClass} cursor-pointer hover:opacity-95`}
+            style={infoCardStyle}
+            onClick={navigateOnClick}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    navigateOnClick();
+                }
+            }}
+            role="button"
+            tabIndex={0}
+        >
+            <div className="flex flex-col gap-3 min-w-0">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-base md:text-lg font-semibold theme-text break-words">
+                                {userName}
+                            </h3>
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                        </div>
+                        <p className="text-sm theme-text-muted break-all mt-1">{email}</p>
+                    </div>
+
+                    <span className="text-xs theme-text-subtle shrink-0">
+                        Joined {new Date(createdAt).toDateString()}
+                    </span>
+                </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                    <MetaChip label="Role" value={formatEnumValue(role)} />
+                    <MetaChip label="Status" value={formatEnumValue(userStatus)} />
+                    <MetaChip label="Payment" value={formatEnumValue(paymentStatus)} />
+                    <MetaChip
+                        label="Wallet"
+                        value={walletBalance >= 0 ? `৳ ${walletBalance.toLocaleString()}` : "N/A"}
+                    />
+                    {phoneNumber && (
+                        <MetaChip label="Phone" value={phoneNumber} />
+                    )}
+                    {resolvedServiceType && (
+                        <MetaChip
+                            label="Service"
+                            value={formatEnumValue(resolvedServiceType)}
+                        />
+                    )}
+                    {resolvedCompanyName && (
+                        <MetaChip label="Company" value={resolvedCompanyName} />
+                    )}
+                </div>
+            </div>
+        </article>
     )
-}
-
-export function buildUserQueryString(filters: Partial<UserFilter> | undefined | null) {
-    if(!filters){
-        return "";
-    }
-
-    const params = new URLSearchParams();
-
-    Object.entries(filters).forEach(([key, value]) => {
-        if (
-        typeof value === "string" ||
-        typeof value === "number"
-        ) {
-        if (value !== "") {
-            params.append(key, String(value));
-        }
-        }
-    });
-
-    return params.toString();
 }

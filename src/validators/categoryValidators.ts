@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { CategoryType } from "@/types/enums";
+import { withNullsStripped } from "./schemaUtils";
 
-export const createCategorySchema = z.object({
+export const createCategorySchema = withNullsStripped(z.object({
 	name: z
 		.string()
 		.min(1, "Category name is required")
@@ -22,9 +23,9 @@ export const createCategorySchema = z.object({
 	isActive: z
 		.boolean()
 		.default(true),
-});
+}));
 
-export const updateCategorySchema = z.object({
+export const updateCategorySchema = withNullsStripped(z.object({
 	name: z
 		.string()
 		.min(2, "Category name must be at least 2 characters")
@@ -39,6 +40,4 @@ export const updateCategorySchema = z.object({
 		.boolean()
 		.default(true).
         optional(),
-});
-
-
+}));

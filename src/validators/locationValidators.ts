@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { LocationType } from "@/types/enums";
+import { withNullsStripped } from "./schemaUtils";
 
-export const createLocationSchema = z.object({
+export const createLocationSchema = withNullsStripped(z.object({
   name: z
     .string()
     .min(1, "Location name is required")
@@ -77,9 +78,9 @@ export const createLocationSchema = z.object({
 }).refine((data) => data.locationType === LocationType.DIVISION || data.division || data.district, {
   message: "At least one of Division or District must be provided",
   path: ["division"],
-});
+}));
 
-export const updateLocationSchema = z.object({
+export const updateLocationSchema = withNullsStripped(z.object({
   name: z
     .string()
     .min(1, "Location name is required")
@@ -143,4 +144,4 @@ export const updateLocationSchema = z.object({
     .string()
     .max(50, "Timezone must be less than 50 characters")
     .optional()
-});
+}));

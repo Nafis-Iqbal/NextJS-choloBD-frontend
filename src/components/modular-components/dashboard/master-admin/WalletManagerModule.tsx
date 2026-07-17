@@ -1,11 +1,9 @@
 import { useState } from "react"
 
-import { WalletApi } from "@/services/api"
-import WalletRechargeOptionModal from "../../../modals/WalletRechargeOptionModal"
+import walletRechargeOptions from "@/lib/walletRechargeOptions.json"
 import TableLayout from "../../../layout-elements/TableLayout"
 import FilterSectionLayout from "../../../layout-elements/FilterSectionLayout"
 import { CustomTextInput} from "../../../custom-elements/CustomInputElements"
-import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
 import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
 
 export const WalletManagerModule = () => {
@@ -15,8 +13,7 @@ export const WalletManagerModule = () => {
         mode: 'create'
     });
 
-    const {data: walletOptionsList, isLoading: isWalletOptionsLoading} = WalletApi.useGetWalletRechargeOptionsRQ();
-    const walletRechargeOptions = walletOptionsList?.data;
+    const walletRechargeOptionsData = walletRechargeOptions;
 
     const toggleRechargeOptionModal = (isOpen: boolean, rechargeOptionId: string, mode: 'create' | 'edit') => {
         setRechargeOptionModal({isOpen, rechargeOptionId, mode});
@@ -24,17 +21,10 @@ export const WalletManagerModule = () => {
 
     return (
         <section className="flex flex-col space-y-2 mt-4" id="wallet_management">
-            <WalletRechargeOptionModal
-                isVisible={rechargeOptionModal.isOpen}
-                rechargeOption_id={rechargeOptionModal.rechargeOptionId}
-                onCancel={() => toggleRechargeOptionModal(false, rechargeOptionModal.rechargeOptionId, 'create')}
-                mode={rechargeOptionModal.mode}
-            />
-
             {/* Wallet Recharge Options Section */}
             <div className="flex space-x-5 mb-2 items-center">
                 <h4 className="theme-text">Wallet Recharge Options</h4>
-                <p className="theme-text-subtle">Will be moved to config files content</p>
+                <p className="theme-text-subtle">(Show only. Content loaded from config file)</p>
             </div>
 
             <TableLayout className="mr-5">
@@ -44,19 +34,15 @@ export const WalletManagerModule = () => {
                             <p className="w-[5%]">Sr.</p>
                             <p className="w-[25%]">Title</p>
                             <p className="w-[30%]">Description</p>
-                            <p className="w-[12%]">Amount (৳)</p>
-                            <p className="w-[12%]">Cost (৳)</p>
+                            <p className="w-[15%]">Amount (৳)</p>
+                            <p className="w-[15%]">Cost (৳)</p>
                             <p className="w-[10%]">Bonus (৳)</p>
-                            <p className="w-[6%]">Actions</p>
                         </div>
                         <div className="flex flex-col theme-outline">
                             {
-                                isWalletOptionsLoading ? (<NoContentTableRow displayMessage="Loading Data"  tdColSpan={1}/>) :
-                                !walletRechargeOptions ? (<NoContentTableRow displayMessage="An error occurred"  tdColSpan={1}/>) :
-
-                                (walletRechargeOptions && Array.isArray(walletRechargeOptions) && walletRechargeOptions.length <= 0) ? (<NoContentTableRow displayMessage="No recharge options found" tdColSpan={1}/>) :
-                                (Array.isArray(walletRechargeOptions) &&
-                                    walletRechargeOptions.map((option, index) => (
+                                (!walletRechargeOptionsData || walletRechargeOptionsData.length === 0) ? (<NoContentTableRow displayMessage="No recharge options found" tdColSpan={1}/>) :
+                                (Array.isArray(walletRechargeOptionsData) &&
+                                    walletRechargeOptionsData.map((option, index) => (
                                         <RechargeOptionListTableRow 
                                             key={option.id} 
                                             id={index + 1}
@@ -66,7 +52,6 @@ export const WalletManagerModule = () => {
                                             rechargeAmount={option.rechargeAmount}
                                             rechargeCost={option.rechargeCost}
                                             bonusAmount={option.bonusAmount}
-                                            createdAt={option.createdAt}
                                             navigateOnClick={() => console.log(`Navigate to recharge option ${option.id}`)}
                                             onEditClick={() => toggleRechargeOptionModal(true, option.id, 'edit')}
                                         />
@@ -99,19 +84,17 @@ export const WalletManagerModule = () => {
             </FilterSectionLayout>
 
             <button 
-                className="mr-5 mt-2 p-2 w-fit bg-green-700 hover:bg-green-600 text-sm md:text-base text-white rounded-sm"
+                className="mr-5 mt-2 p-2 w-fit theme-btn-teal text-sm md:text-base rounded-sm"
                 onClick={() => toggleRechargeOptionModal(true, rechargeOptionModal.rechargeOptionId, 'create')}
             >
                 Add New Recharge Option
             </button>
-
-            <HorizontalDivider className="mr-5 my-10"/>
         </section>
     )
 }
 
 const RechargeOptionListTableRow = ({
-    id, optionId, title, description, rechargeAmount, rechargeCost, bonusAmount, createdAt, navigateOnClick, onEditClick
+    id, optionId, title, description, rechargeAmount, rechargeCost, bonusAmount, navigateOnClick, onEditClick
 } : {
     id: number, 
     optionId: string, 
@@ -120,28 +103,19 @@ const RechargeOptionListTableRow = ({
     rechargeAmount: number, 
     rechargeCost: number, 
     bonusAmount: number, 
-    createdAt: Date, 
     navigateOnClick: () => void,
     onEditClick: () => void
 }) => {
     const truncatedDescription = description.length > 50 ? description.substring(0, 50) + '...' : description;
     
     return (
-        <div className="flex p-2 w-full border-green-900 hover:bg-gray-600 text-center" onClick={() => navigateOnClick()}>
+        <div className="flex p-2 w-full theme-outline hover:bg-gray-100 text-center" onClick={() => navigateOnClick()}>
             <p className="w-[5%]">{id}</p>
             <p className="w-[25%] hover:cursor-pointer px-2">{title}</p>
             <p className="w-[30%] px-2" title={description}>{truncatedDescription}</p>
-            <p className="w-[12%]">৳{rechargeAmount.toLocaleString()}</p>
-            <p className="w-[12%]">৳{rechargeCost.toLocaleString()}</p>
+            <p className="w-[15%]">৳{rechargeAmount.toLocaleString()}</p>
+            <p className="w-[15%]">৳{rechargeCost.toLocaleString()}</p>
             <p className="w-[10%]">৳{bonusAmount.toLocaleString()}</p>
-            <p className="w-[6%]">
-                <button 
-                    className="text-blue-400 hover:text-blue-300 text-sm"
-                    onClick={() => onEditClick()}
-                >
-                    Edit
-                </button>
-            </p>
         </div>
     )
 }

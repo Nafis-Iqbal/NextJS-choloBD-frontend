@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { UserApi, AuthApi, HotelApi } from "@/services/api";
+import { UserApi, AuthApi, HotelApi, ActivitySpotApi, GuideApi } from "@/services/api";
 import { Role, UserStatus, ServiceType } from "@/types/enums";
 import { queryClient } from "@/services/apiInstance";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
@@ -14,6 +14,64 @@ import ConfirmationModal from "@/components/modals/ConfirmationModal";
 import { ImageUploadButton } from "@/components/custom-elements/ImageUploadButton";
 import { EditButton } from "@/components/custom-elements/Buttons";
 import { CustomCheckboxInput, CustomMiniTextInput, CustomSelectInput } from "@/components/custom-elements/CustomInputElements";
+
+type ServiceEntityOption = { id: string; name: string };
+
+function asEntityList<T>(data: unknown): T[] {
+    if (!data) return [];
+    if (Array.isArray(data)) return data as T[];
+    if (
+        typeof data === "object" &&
+        data !== null &&
+        "results" in data &&
+        Array.isArray((data as { results: unknown }).results)
+    ) {
+        return (data as { results: T[] }).results;
+    }
+    return [];
+}
+
+function getEntitiesForServiceType(
+    type: string | null | undefined,
+    hotelsData: unknown,
+    activitySpotsData: unknown,
+    guidesData: unknown
+): ServiceEntityOption[] {
+    switch (type) {
+        case ServiceType.HOTEL_BOOKING:
+            return asEntityList<Hotel>(hotelsData).map((hotel) => ({
+                id: hotel.id,
+                name: hotel.name,
+            }));
+        case ServiceType.ACTIVITY_BOOKING:
+            return asEntityList<ActivitySpot>(activitySpotsData).map((spot) => ({
+                id: spot.id,
+                name: spot.name,
+            }));
+        case ServiceType.GUIDE_SERVICE:
+            return asEntityList<Guide>(guidesData).map((guide) => ({
+                id: guide.id,
+                name: `${guide.firstName} ${guide.lastName}`.trim() || guide.id,
+            }));
+        default:
+            return [];
+    }
+}
+
+function getServiceEntityLabel(type: string | null | undefined): string {
+    switch (type) {
+        case ServiceType.HOTEL_BOOKING:
+            return "Hotel";
+        case ServiceType.ACTIVITY_BOOKING:
+            return "Activity Spot";
+        case ServiceType.GUIDE_SERVICE:
+            return "Guide Profile";
+        case ServiceType.TRANSPORT_SERVICE:
+            return "Transport Service";
+        default:
+            return "Service Entity";
+    }
+}
 
 export default function UserDetailPage() {
     const router = useRouter();
@@ -54,8 +112,22 @@ export default function UserDetailPage() {
     const [isUserUpdateConfirmationVisible, setIsUserUpdateConfirmationVisible] = useState<boolean>(false);
 
     const { data: userDetailData} = UserApi.useGetUserDetailRQ(userId, true);
-    const { data: hotelsData } = HotelApi.useGetAllHotelsRQ(serviceType === "HOTEL_BOOKING" ? "" : undefined);
-    const { data: employeeHotelsData } = HotelApi.useGetAllHotelsRQ(employeeServiceType === "HOTEL_BOOKING" ? "" : undefined);
+
+    const needsHotels =
+        serviceType === ServiceType.HOTEL_BOOKING ||
+        employeeServiceType === ServiceType.HOTEL_BOOKING;
+    const needsActivitySpots =
+        serviceType === ServiceType.ACTIVITY_BOOKING ||
+        employeeServiceType === ServiceType.ACTIVITY_BOOKING;
+    const needsGuides = serviceType === ServiceType.GUIDE_SERVICE;
+
+    const { data: hotelsData } = HotelApi.useGetAllHotelsRQ(needsHotels ? "" : undefined);
+    const { data: activitySpotsData } = ActivitySpotApi.useGetAllActivitySpotsRQ(
+        needsActivitySpots ? "" : undefined
+    );
+    const { data: guidesData } = GuideApi.useGetAllGuidesRQ(
+        needsGuides ? { limit: 100 } : undefined
+    );
 
     const { mutate: updateUserRoleStatus } = UserApi.useUpdateUserRoleStatusServiceRQ(
         (response) => {
@@ -74,12 +146,22 @@ export default function UserDetailPage() {
                     setIsEditingServiceType(false);
                     openNotificationPopUpMessage("Service type assigned successfully!");
                 }
+                else if(isEditingServiceEntity) {
+                    setIsEditingServiceEntity(false);
+                    setServiceEntitySearch("");
+                    openNotificationPopUpMessage("Service entity assigned successfully!");
+                }
                 else if(isEditingEmployeeServiceType) {
                     setIsEditingEmployeeServiceType(false);
                     openNotificationPopUpMessage("Employee service type assigned successfully!");
                 }
+                else if(isEditingEmployeeServiceEntity) {
+                    setIsEditingEmployeeServiceEntity(false);
+                    setEmployeeServiceEntitySearch("");
+                    openNotificationPopUpMessage("Employee service entity assigned successfully!");
+                }
             } 
-            else openNotificationPopUpMessage("Failed to update user. Please try again.");
+            else openNotificationPopUpMessage(response.message || "Failed to update user. Please try again.");
         },
         () => {
             openNotificationPopUpMessage("Failed to update user. An error occurred.");
@@ -107,14 +189,14 @@ export default function UserDetailPage() {
             setUserRole(userDetailData.data.role || "");
             setUserStatus(userDetailData.data.userStatus || "");
             setServiceType(userDetailData.data.serviceType || "");
-            setServiceEntity(userDetailData.data.serviceAddressId || "");
+            setServiceEntity(userDetailData.data.serviceEntityId || "");
             setEmployeeServiceType(userDetailData.data.employeeServiceType || "");
-            setEmployeeServiceEntity(userDetailData.data.employeeServiceAddressId || "");
+            setEmployeeServiceEntity(userDetailData.data.employeeServiceEntityId || "");
         }
     }, [userDetailData]);
 
     useEffect(() => {
-        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined || currentUserRole !== "MASTER_ADMIN")) {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined || (currentUserRole !== "MASTER_ADMIN" && currentUserId !== userId  ))) {
             router.replace("/");
         }
     }, [isLoading, isAuthenticated, currentUserRole, router]);
@@ -151,6 +233,8 @@ export default function UserDetailPage() {
 
     const handleServiceTypeChange = (type: ServiceType) => {
         setServiceType(prev => (prev === type ? null : type));
+        setServiceEntity("");
+        setServiceEntitySearch("");
     };
 
     const onUpdateUserRoleClicked = () => {
@@ -162,12 +246,11 @@ export default function UserDetailPage() {
     }
 
     const onUpdateServiceEntity = () => {
-        // TODO: Call mutation to update service entity
-        updateUserRoleStatus({ userId: userDetail?.id || "", serviceEntityId: serviceEntity || undefined });
-        setIsEditingServiceEntity(false);
-        setServiceEntitySearch("");
-        setServiceEntity("");
-        openNotificationPopUpMessage("Service entity assigned successfully!");
+        if (!serviceEntity) return;
+        updateUserRoleStatus({
+            userId: userDetail?.id || "",
+            serviceEntityId: serviceEntity,
+        });
     }
 
     const onUpdateUserRole = () => {
@@ -192,37 +275,63 @@ export default function UserDetailPage() {
         setServiceEntitySearch(e.target.value);
     };
 
-    const filteredEntities = serviceType === "HOTEL_BOOKING" 
-        ? ((hotelsData?.data || []) as Hotel[]).filter((hotel: Hotel) => 
-            hotel.name.toLowerCase().includes(serviceEntitySearch.toLowerCase())
-        )
-        : [];
+    const serviceEntityOptions = getEntitiesForServiceType(
+        serviceType || userDetailData?.data?.serviceType,
+        hotelsData?.data,
+        activitySpotsData?.data,
+        guidesData?.data
+    );
+
+    const filteredEntities = serviceEntityOptions.filter((entity) =>
+        entity.name.toLowerCase().includes(serviceEntitySearch.toLowerCase())
+    );
 
     const handleEmployeeServiceTypeChange = (type: ServiceType) => {
+        if (type === ServiceType.GUIDE_SERVICE) return;
         setEmployeeServiceType(prev => (prev === type ? null : type));
+        setEmployeeServiceEntity("");
+        setEmployeeServiceEntitySearch("");
     };
 
     const onUpdateEmployeeServiceType = () => {
-        console.log("bichi ase??")
-        updateUserRoleStatus({ userId: userDetail?.id || "", employeeServiceType: employeeServiceType as ServiceType });
+        if (employeeServiceType === ServiceType.GUIDE_SERVICE) {
+            openNotificationPopUpMessage("GUIDE_SERVICE does not support EMPLOYEE assignment.");
+            return;
+        }
+        updateUserRoleStatus({
+            userId: userDetail?.id || "",
+            employeeServiceType: employeeServiceType as ServiceType,
+        });
     }
 
     const handleEmployeeServiceEntitySearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setEmployeeServiceEntitySearch(e.target.value);
     };
 
-    const filteredEmployeeEntities = employeeServiceType === "HOTEL_BOOKING" 
-        ? ((employeeHotelsData?.data || []) as Hotel[]).filter((hotel: Hotel) => 
-            hotel.name.toLowerCase().includes(employeeServiceEntitySearch.toLowerCase())
-        )
-        : [];
+    const employeeServiceEntityOptions = getEntitiesForServiceType(
+        employeeServiceType || userDetailData?.data?.employeeServiceType,
+        hotelsData?.data,
+        activitySpotsData?.data,
+        undefined
+    );
+
+    const filteredEmployeeEntities = employeeServiceEntityOptions.filter((entity) =>
+        entity.name.toLowerCase().includes(employeeServiceEntitySearch.toLowerCase())
+    );
 
     const onUpdateEmployeeServiceEntity = () => {
-        updateUserRoleStatus({ userId: userDetail?.id || "", employeeServiceEntityId: employeeServiceEntity || undefined });
-        setIsEditingEmployeeServiceEntity(false);
-        setEmployeeServiceEntitySearch("");
-        setEmployeeServiceEntity("");
-        openNotificationPopUpMessage("Employee service entity assigned successfully!");
+        if (!employeeServiceEntity) return;
+        if (
+            (employeeServiceType || userDetail?.employeeServiceType) ===
+            ServiceType.GUIDE_SERVICE
+        ) {
+            openNotificationPopUpMessage("GUIDE_SERVICE does not support EMPLOYEE assignment.");
+            return;
+        }
+        updateUserRoleStatus({
+            userId: userDetail?.id || "",
+            employeeServiceEntityId: employeeServiceEntity,
+        });
     }
 
     const cancelUserUpdate = () => {
@@ -240,10 +349,10 @@ export default function UserDetailPage() {
     }
 
     return (
-        <section className="flex flex-col p-2 font-sans overflow-x-hidden" id="user_profile_detail">
-            <div className="ml-2 md:ml-6 flex flex-col space-y-2">
-                <h3 className="theme-text-teal">User Profile Details</h3>
-                <p className="theme-text-muted">View detailed information for {userDetail?.userName || "Unknown"}.</p>
+        <section className="flex flex-col p-3 sm:p-4 font-sans overflow-x-hidden theme-text" id="user_profile_detail">
+            <div className="ml-1 md:ml-6 max-w-4xl flex flex-col">
+                <h3 className="text-2xl font-bold theme-text-teal">User Profile Details</h3>
+                <p className="theme-text-muted mt-1">View detailed information for {userDetail?.userName || "Unknown"}.</p>
 
                 <ConfirmationModal 
                     isVisible={isUserUpdateConfirmationVisible}
@@ -253,10 +362,11 @@ export default function UserDetailPage() {
                     onCancel={cancelUserUpdate} 
                 />
 
-                <div className="flex flex-col mt-8 space-y-5">
-                    <div className="flex relative w-[180px] h-[180px]">
+                <div className="theme-section rounded-xl p-4 sm:p-6 mt-6 flex flex-col space-y-5">
+                    <div className="relative w-[160px] h-[160px] sm:w-[180px] sm:h-[180px] rounded-lg overflow-hidden theme-outline shrink-0">
                         <Image 
-                            className="bg-gray-100 object-cover" 
+                            className="object-cover" 
+                            style={{ backgroundColor: "var(--theme-card-bg)" }}
                             src={userDetail?.imageUrl || "/NoUserImage.jpeg"} 
                             alt="Profile Picture" 
                             fill
@@ -264,7 +374,7 @@ export default function UserDetailPage() {
 
                         {isOwnProfile && 
                             <ImageUploadButton
-                                className="absolute bottom-0 right-0" 
+                                className="absolute bottom-1 right-1" 
                                 imageSrc="/edit_icon.png"
                                 resourceId={userDetail?.id || ""}
                                 pic_url_Builder={profilePicUploadURLBuilder}
@@ -273,9 +383,9 @@ export default function UserDetailPage() {
                         }
                     </div>
                     
-                    <div className="relative flex flex-col space-y-2 md:space-y-0 md:flex-row md:items-center space-x-3">
-                        <div className="flex space-x-2">
-                            <p>Known as&nbsp;&nbsp;<span className="text-2xl theme-text-teal">{userDetail?.userName || 'N/A'}</span></p>
+                    <div className="relative flex flex-col space-y-2 md:space-y-0 md:flex-row md:items-center md:gap-3">
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <p className="theme-text-muted">Known as&nbsp;&nbsp;<span className="text-2xl font-semibold theme-text-teal">{userDetail?.userName || 'N/A'}</span></p>
 
                             {isOwnProfile && !isEditingUserName && 
                                 <EditButton 
@@ -287,7 +397,7 @@ export default function UserDetailPage() {
                         </div>
 
                         {isEditingUserName &&
-                            <div className="flex p-2 space-x-2 md:space-x-4 theme-card">
+                            <div className="flex flex-wrap items-center p-2 gap-2 md:gap-4 theme-card rounded-md">
                                 <CustomMiniTextInput 
                                     type="text"
                                     name="user_name"
@@ -295,32 +405,32 @@ export default function UserDetailPage() {
                                     onChange={handleUserNameChange}
                                 />
 
-                                <button className="p-2 theme-btn-teal rounded" onClick={onUpdateUserName}>Update</button>
-                                <button className="p-2 bg-red-700 hover:bg-red-600 rounded" onClick={() => setIsEditingUserName(false)}>Cancel</button>
+                                <button className="px-3 py-1.5 theme-btn-teal rounded text-sm" onClick={onUpdateUserName}>Update</button>
+                                <button className="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-sm" onClick={() => setIsEditingUserName(false)}>Cancel</button>
                             </div>
                         }
 
                         {userDetail?.userStatus === "BANNED" || userDetail?.userStatus === "RESTRICTED" ? (
-                            <p className="theme-text-muted">This user is currently banned or restricted.</p>
+                            <p className="text-sm text-red-500">This user is currently banned or restricted.</p>
                         ) : null}
                     </div>
 
-                    <p>User ID&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.id || ""}</span></p>
+                    <p className="theme-text-muted">User ID&nbsp;&nbsp;<span className="text-base sm:text-xl font-medium theme-text-teal break-all">{userDetail?.id || ""}</span></p>
 
-                    <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8">
-                        <p>First Name&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.firstName || 'N/A'}</span></p>
-                        <p>Last Name&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.lastName || 'N/A'}</span></p>
+                    <div className="flex flex-col md:flex-row gap-2 md:gap-8">
+                        <p className="theme-text-muted">First Name&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.firstName || 'N/A'}</span></p>
+                        <p className="theme-text-muted">Last Name&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.lastName || 'N/A'}</span></p>
                     </div>
 
-                    <div className="flex space-x-5 items-end">
-                        <p>Role is&nbsp;&nbsp;<span className="text-3xl theme-text-teal">{userDetail?.role || 'USER'}</span></p>
+                    <div className="flex flex-wrap gap-3 items-end">
+                        <p className="theme-text-muted">Role is&nbsp;&nbsp;<span className="text-3xl font-semibold theme-text-teal">{userDetail?.role || 'USER'}</span></p>
 
                         {userDetail?.role !== "MASTER_ADMIN" && !isEditingUserRole && currentUserRole === "MASTER_ADMIN" && 
-                            <button className="p-2 theme-btn-teal rounded-xs text-white" onClick={() => setIsEditingUserRole(true)}>Change Role</button>
+                            <button className="px-3 py-1.5 theme-btn-teal rounded text-sm text-white" onClick={() => setIsEditingUserRole(true)}>Change Role</button>
                         }
 
                         {isEditingUserRole &&
-                            <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row space-x-0 md:space-x-4 p-2 theme-card rounded">
+                            <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center p-2 theme-card rounded-md w-full md:w-auto">
                                 <CustomCheckboxInput
                                     label="Master Admin"
                                     checked={userRole === "MASTER_ADMIN"}
@@ -342,8 +452,8 @@ export default function UserDetailPage() {
                                     className="p-2 rounded-xs"
                                 />
 
-                                <button className="p-2 theme-btn-teal rounded" onClick={onUpdateUserRoleClicked}>Update</button>
-                                <button className="p-2 bg-red-700 hover:bg-red-600 rounded" onClick={() => setIsEditingUserRole(false)}>Cancel</button>
+                                <button className="px-3 py-1.5 theme-btn-teal rounded text-sm" onClick={onUpdateUserRoleClicked}>Update</button>
+                                <button className="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-sm" onClick={() => setIsEditingUserRole(false)}>Cancel</button>
                             </div>
                         }
                     </div>
@@ -351,16 +461,16 @@ export default function UserDetailPage() {
                     {/* Admin Level Service Entity Edit */}
                     {userDetail?.role === "SERVICE_ADMIN" && (
                         <>
-                            <div className="flex space-x-5 items-end">
-                                <p>Service is <span className="text-xl theme-text-teal">{userDetail?.serviceType || "N/A"}</span></p>
+                            <div className="flex flex-wrap gap-3 items-end">
+                                <p className="theme-text-muted">Service is&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.serviceType || "N/A"}</span></p>
                                 
                                 {!isEditingServiceType && currentUserRole === "MASTER_ADMIN" && 
-                                    <button className="p-2 theme-btn-teal text-white rounded-xs" onClick={() => setIsEditingServiceType(true)}>{userDetail?.serviceType ? "Change Service Type" : "Assign Service Type"}</button>
+                                    <button className="px-3 py-1.5 theme-btn-teal text-white rounded text-sm" onClick={() => setIsEditingServiceType(true)}>{userDetail?.serviceType ? "Change Service Type" : "Assign Service Type"}</button>
                                 }
                             </div>
 
                             {isEditingServiceType &&
-                                <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row space-x-0 md:space-x-4 p-2 theme-card rounded">
+                                <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center p-2 theme-card rounded-md">
                                     <CustomCheckboxInput
                                         label="Hotel Booking"
                                         checked={serviceType === ServiceType.HOTEL_BOOKING}
@@ -389,77 +499,101 @@ export default function UserDetailPage() {
                                         className="p-2 rounded-xs"
                                     />
 
-                                    <button className="p-2 theme-btn-teal rounded" onClick={onUpdateServiceType}>Update</button>
-                                    <button className="p-2 bg-red-700 hover:bg-red-600 rounded" onClick={() => setIsEditingServiceType(false)}>Cancel</button>
+                                    <button className="px-3 py-1.5 theme-btn-teal rounded text-sm" onClick={onUpdateServiceType}>Update</button>
+                                    <button className="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-sm" onClick={() => setIsEditingServiceType(false)}>Cancel</button>
                                 </div>
                             }
                             
-                            <div className="flex space-x-5 items-end">
-                                <p>Admin of <span className="text-xl theme-text-teal">{userDetail?.serviceEntityName || "N/A"}</span></p>
+                            <div className="flex flex-wrap gap-3 items-end">
+                                <p className="theme-text-muted">
+                                    {serviceType === ServiceType.GUIDE_SERVICE ? "Guide Profile owner of " : "Admin of"}&nbsp;&nbsp;
+                                    <span className="text-xl font-medium theme-text-teal">{userDetail?.serviceEntityName || "N/A"}</span>
+                                </p>
                                 
                                 {!isEditingServiceEntity && currentUserRole === "MASTER_ADMIN" && 
-                                    <button className="p-2 theme-btn-teal text-white rounded-xs" onClick={() => setIsEditingServiceEntity(true)}>{userDetail?.serviceEntityName ? "Change Service Entity" : "Assign Service Entity"}</button>
+                                    <button className="px-3 py-1.5 theme-btn-teal text-white rounded text-sm" onClick={() => setIsEditingServiceEntity(true)}>{userDetail?.serviceEntityName ? "Change Service Entity" : "Assign Service Entity"}</button>
                                 }
                             </div>
 
                             {isEditingServiceEntity &&
-                                <div className="flex flex-col space-y-4 p-4 theme-card rounded-lg">
-                                    <div className="flex flex-col space-y-2">
-                                        <label className="theme-text-teal font-medium">Search Service Entity</label>
-                                        <div className="relative">
-                                            <CustomMiniTextInput
-                                                type="text"
-                                                placeholder="Search by name..."
-                                                value={serviceEntitySearch}
-                                                onChange={handleServiceEntitySearch}
-                                                className="w-full"
-                                            />
-                                            
-                                            {serviceEntitySearch && filteredEntities.length > 0 && (
-                                                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-500 rounded-sm shadow-lg z-20">
-                                                    {filteredEntities.slice(0, 4).map((entity: Hotel) => (
-                                                        <div
-                                                            key={entity.id}
-                                                            onClick={() => setServiceEntity(entity.id)}
-                                                            className="px-3 py-2 text-black hover:bg-gray-100 cursor-pointer border-b border-gray-500 last:border-b-0"
-                                                        >
-                                                            {entity.name}
+                                <div className="flex flex-col space-y-4 p-3 theme-card rounded-md">
+                                    {!serviceType && !userDetail?.serviceType ? (
+                                        <p className="theme-text-subtle text-sm">
+                                            Assign a service type before selecting a service entity.
+                                        </p>
+                                    ) : (serviceType || userDetail?.serviceType) === ServiceType.TRANSPORT_SERVICE ? (
+                                        <p className="theme-text-subtle text-sm">
+                                            Transport service listing is not available yet. Assign the transport entity ID via API when ready.
+                                        </p>
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="theme-label text-sm">
+                                                    Search {getServiceEntityLabel(serviceType || userDetail?.serviceType)}
+                                                </label>
+                                                <div className="relative">
+                                                    <CustomMiniTextInput
+                                                        type="text"
+                                                        placeholder="Search by name..."
+                                                        value={serviceEntitySearch}
+                                                        onChange={handleServiceEntitySearch}
+                                                        className="w-full"
+                                                    />
+                                                    
+                                                    {serviceEntitySearch && filteredEntities.length > 0 && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 theme-card rounded-sm shadow-lg z-20 overflow-hidden">
+                                                            {filteredEntities.slice(0, 4).map((entity) => (
+                                                                <div
+                                                                    key={entity.id}
+                                                                    onClick={() => {
+                                                                        setServiceEntity(entity.id);
+                                                                        setServiceEntitySearch(entity.name);
+                                                                    }}
+                                                                    className="px-3 py-2 theme-text cursor-pointer border-b last:border-b-0 hover:opacity-80"
+                                                                    style={{ borderColor: "var(--theme-deep-green)" }}
+                                                                >
+                                                                    {entity.name}
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                    ))}
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                            </div>
 
-                                    <div className="flex flex-col space-y-2">
-                                        <CustomSelectInput
-                                            label="Select a Service Company"
-                                            value={serviceEntity || ""}
-                                            onChange={(e) => setServiceEntity(e.target.value || null)}
-                                            options={[
-                                                { label: "-- Select a Company --", value: "" },
-                                                ...(hotelsData?.data || []).map((entity: Hotel) => ({
-                                                    label: entity.name,
-                                                    value: entity.id
-                                                }))
-                                            ]}
-                                        />
-                                    </div>
+                                            <div className="flex flex-col space-y-2">
+                                                <CustomSelectInput
+                                                    label={`Select a ${getServiceEntityLabel(serviceType || userDetail?.serviceType)}`}
+                                                    value={serviceEntity || ""}
+                                                    onChange={(e) => setServiceEntity(e.target.value || null)}
+                                                    options={[
+                                                        { label: `-- Select a ${getServiceEntityLabel(serviceType || userDetail?.serviceType)} --`, value: "" },
+                                                        ...serviceEntityOptions.map((entity) => ({
+                                                            label: entity.name,
+                                                            value: entity.id
+                                                        }))
+                                                    ]}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
 
-                                    <div className="flex space-x-4">
+                                    <div className="flex flex-wrap gap-3">
                                         <button 
-                                            className="p-2 theme-btn-teal text-white rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed"
-                                            disabled={!serviceEntity}
+                                            className="px-3 py-1.5 theme-btn-teal text-white rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={
+                                                !serviceEntity ||
+                                                (serviceType || userDetail?.serviceType) === ServiceType.TRANSPORT_SERVICE
+                                            }
                                             onClick={() => onUpdateServiceEntity()}
                                         >
                                             Update
                                         </button>
                                         <button 
-                                            className="p-2 bg-red-700 hover:bg-red-600 text-white rounded-md"
+                                            className="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-sm"
                                             onClick={() => {
                                                 setIsEditingServiceEntity(false);
                                                 setServiceEntitySearch("");
-                                                setServiceEntity("");
+                                                setServiceEntity(userDetail?.serviceEntityId || "");
                                             }}
                                         >
                                             Cancel
@@ -473,16 +607,16 @@ export default function UserDetailPage() {
                     {/* Employee Level Service Entity Edit */}
                     {userDetail?.role === "EMPLOYEE" && (
                         <>
-                            <div className="flex space-x-5 items-end">
-                                <p>Employee of Service Type <span className="text-xl theme-text-teal">{userDetail?.employeeServiceType || "N/A"}</span></p>
+                            <div className="flex flex-wrap gap-3 items-end">
+                                <p className="theme-text-muted">Employee of Service Type&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.employeeServiceType || "N/A"}</span></p>
                                 
                                 {!isEditingEmployeeServiceType && currentUserRole === "MASTER_ADMIN" && 
-                                    <button className="p-2 theme-btn-teal text-white rounded-xs" onClick={() => setIsEditingEmployeeServiceType(true)}>{userDetail?.employeeServiceType ? "Change Service Type of Employee" : "Assign Service Type to Employee"}</button>
+                                    <button className="px-3 py-1.5 theme-btn-teal text-white rounded text-sm" onClick={() => setIsEditingEmployeeServiceType(true)}>{userDetail?.employeeServiceType ? "Change Service Type of Employee" : "Assign Service Type to Employee"}</button>
                                 }
                             </div>
 
                             {isEditingEmployeeServiceType &&
-                                <div className="flex flex-col space-y-2 md:space-y-0 md:flex-row space-x-0 md:space-x-4 p-2 theme-card rounded">
+                                <div className="flex flex-col gap-2 md:flex-row md:flex-wrap md:items-center p-2 theme-card rounded-md">
                                     <CustomCheckboxInput
                                         label="Hotel Booking"
                                         checked={employeeServiceType === ServiceType.HOTEL_BOOKING}
@@ -504,57 +638,110 @@ export default function UserDetailPage() {
                                         className="p-2 rounded-xs"
                                     />
 
-                                    <CustomCheckboxInput
-                                        label="Guide Service"
-                                        checked={employeeServiceType === ServiceType.GUIDE_SERVICE}
-                                        onChange={() => handleEmployeeServiceTypeChange(ServiceType.GUIDE_SERVICE)}
-                                        className="p-2 rounded-xs"
-                                    />
+                                    <p className="theme-text-subtle text-xs w-full md:w-auto">
+                                        Guide Service has no employee tier.
+                                    </p>
 
-                                    <button className="p-2 theme-btn-teal rounded" onClick={onUpdateEmployeeServiceType}>Update</button>
-                                    <button className="p-2 bg-red-700 hover:bg-red-600 rounded" onClick={() => setIsEditingEmployeeServiceType(false)}>Cancel</button>
+                                    <button className="px-3 py-1.5 theme-btn-teal rounded text-sm" onClick={onUpdateEmployeeServiceType}>Update</button>
+                                    <button className="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-sm" onClick={() => setIsEditingEmployeeServiceType(false)}>Cancel</button>
                                 </div>
                             }
 
-                            <div className="flex space-x-5 items-end">
-                                <p>Employee of Company <span className="text-xl theme-text-teal">{userDetail?.employeeServiceEntityName || "N/A"}</span></p>
+                            <div className="flex flex-wrap gap-3 items-end">
+                                <p className="theme-text-muted">Employee of Company&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.employeeServiceEntityName || "N/A"}</span></p>
                                 
                                 {!isEditingEmployeeServiceEntity && currentUserRole === "MASTER_ADMIN" && 
-                                    <button className="p-2 theme-btn-teal text-white rounded-xs" onClick={() => setIsEditingEmployeeServiceEntity(true)}>{userDetail?.employeeServiceEntityName ? "Change Employee Company" : "Assign Company to Employee"}</button>
+                                    <button className="px-3 py-1.5 theme-btn-teal text-white rounded text-sm" onClick={() => setIsEditingEmployeeServiceEntity(true)}>{userDetail?.employeeServiceEntityName ? "Change Employee Company" : "Assign Company to Employee"}</button>
                                 }
                             </div>
 
                             {isEditingEmployeeServiceEntity &&
-                                <div className="flex flex-col space-y-4 p-4 theme-card rounded-lg">
-                                    <div className="flex flex-col space-y-2">
-                                        <CustomSelectInput
-                                            label="Search Comapany to Assign for Employee"
-                                            value={employeeServiceEntity || ""}
-                                            onChange={(e) => setEmployeeServiceEntity(e.target.value || null)}
-                                            options={[
-                                                { label: "-- Select a Company --", value: "" },
-                                                ...(employeeHotelsData?.data || []).map((entity: Hotel) => ({
-                                                    label: entity.name,
-                                                    value: entity.id
-                                                }))
-                                            ]}
-                                        />
-                                    </div>
+                                <div className="flex flex-col space-y-4 p-3 theme-card rounded-md">
+                                    {!(employeeServiceType || userDetail?.employeeServiceType) ? (
+                                        <p className="theme-text-subtle text-sm">
+                                            Assign an employee service type before selecting a company.
+                                        </p>
+                                    ) : (employeeServiceType || userDetail?.employeeServiceType) === ServiceType.GUIDE_SERVICE ? (
+                                        <p className="theme-text-subtle text-sm">
+                                            GUIDE_SERVICE does not support EMPLOYEE assignment. Guides are managed by a SERVICE_ADMIN only.
+                                        </p>
+                                    ) : (employeeServiceType || userDetail?.employeeServiceType) === ServiceType.TRANSPORT_SERVICE ? (
+                                        <p className="theme-text-subtle text-sm">
+                                            Transport service listing is not available yet. Assign the transport entity ID via API when ready.
+                                        </p>
+                                    ) : (
+                                        <>
+                                            <div className="flex flex-col space-y-2">
+                                                <label className="theme-label text-sm">
+                                                    Search {getServiceEntityLabel(employeeServiceType || userDetail?.employeeServiceType)}
+                                                </label>
+                                                <div className="relative">
+                                                    <CustomMiniTextInput
+                                                        type="text"
+                                                        placeholder="Search by name..."
+                                                        value={employeeServiceEntitySearch}
+                                                        onChange={handleEmployeeServiceEntitySearch}
+                                                        className="w-full"
+                                                    />
 
-                                    <div className="flex space-x-4">
+                                                    {employeeServiceEntitySearch && filteredEmployeeEntities.length > 0 && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 theme-card rounded-sm shadow-lg z-20 overflow-hidden">
+                                                            {filteredEmployeeEntities.slice(0, 4).map((entity) => (
+                                                                <div
+                                                                    key={entity.id}
+                                                                    onClick={() => {
+                                                                        setEmployeeServiceEntity(entity.id);
+                                                                        setEmployeeServiceEntitySearch(entity.name);
+                                                                    }}
+                                                                    className="px-3 py-2 theme-text cursor-pointer border-b last:border-b-0 hover:opacity-80"
+                                                                    style={{ borderColor: "var(--theme-deep-green)" }}
+                                                                >
+                                                                    {entity.name}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col space-y-2">
+                                                <CustomSelectInput
+                                                    label={`Select a ${getServiceEntityLabel(employeeServiceType || userDetail?.employeeServiceType)} for Employee`}
+                                                    value={employeeServiceEntity || ""}
+                                                    onChange={(e) => setEmployeeServiceEntity(e.target.value || null)}
+                                                    options={[
+                                                        {
+                                                            label: `-- Select a ${getServiceEntityLabel(employeeServiceType || userDetail?.employeeServiceType)} --`,
+                                                            value: "",
+                                                        },
+                                                        ...employeeServiceEntityOptions.map((entity) => ({
+                                                            label: entity.name,
+                                                            value: entity.id,
+                                                        })),
+                                                    ]}
+                                                />
+                                            </div>
+                                        </>
+                                    )}
+
+                                    <div className="flex flex-wrap gap-3">
                                         <button 
-                                            className="p-2 theme-btn-teal text-white rounded-md disabled:bg-gray-500 disabled:cursor-not-allowed"
-                                            disabled={!employeeServiceEntity}
+                                            className="px-3 py-1.5 theme-btn-teal text-white rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                            disabled={
+                                                !employeeServiceEntity ||
+                                                (employeeServiceType || userDetail?.employeeServiceType) === ServiceType.GUIDE_SERVICE ||
+                                                (employeeServiceType || userDetail?.employeeServiceType) === ServiceType.TRANSPORT_SERVICE
+                                            }
                                             onClick={() => onUpdateEmployeeServiceEntity()}
                                         >
                                             Update
                                         </button>
                                         <button 
-                                            className="p-2 bg-red-700 hover:bg-red-600 text-white rounded-md"
+                                            className="px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white rounded text-sm"
                                             onClick={() => {
                                                 setIsEditingEmployeeServiceEntity(false);
                                                 setEmployeeServiceEntitySearch("");
-                                                setEmployeeServiceEntity("");
+                                                setEmployeeServiceEntity(userDetail?.employeeServiceEntityId || "");
                                             }}
                                         >
                                             Cancel
@@ -565,53 +752,53 @@ export default function UserDetailPage() {
                         </>
                     )}
 
-                    <p>Email Verified&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.emailVerified ? 'Yes' : 'No'}</span></p>
+                    <p className="theme-text-muted">Email Verified&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.emailVerified ? 'Yes' : 'No'}</span></p>
 
-                    <h4 className="theme-text-teal">Personal Details</h4>
+                    <h4 className="text-lg font-semibold theme-text-teal pt-2">Personal Details</h4>
                     
-                    <div className="flex flex-col space-y-5">
-                        <p>Email is&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.email || 'N/A'}</span></p>
+                    <div className="flex flex-col space-y-4">
+                        <p className="theme-text-muted">Email is&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal break-all">{userDetail?.email || 'N/A'}</span></p>
 
-                        <p>Phone Number&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.phoneNumber || 'N/A'}</span></p>
+                        <p className="theme-text-muted">Phone Number&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.phoneNumber || 'N/A'}</span></p>
 
-                        <p>Phone Verified&nbsp;&nbsp;<span className="text-xl theme-text-teal">{userDetail?.phoneVerified ? 'Yes' : 'No'}</span></p>
+                        <p className="theme-text-muted">Phone Verified&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.phoneVerified ? 'Yes' : 'No'}</span></p>
 
                         {userDetail?.emailVerified && (
-                            <p>Email verified on&nbsp;&nbsp;<span className="text-xl theme-text-teal">
+                            <p className="theme-text-muted">Email verified on&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">
                                 {new Date(userDetail?.emailVerified).toDateString()}
                             </span></p>
                         )}
 
                         {userDetail?.phoneVerified && (
-                            <p>Phone verified on&nbsp;&nbsp;<span className="text-xl theme-text-teal">
+                            <p className="theme-text-muted">Phone verified on&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">
                                 {new Date(userDetail?.phoneVerified).toDateString()}
                             </span></p>
                         )}
 
-                        <p>Account created,&nbsp;&nbsp;<span className="text-xl theme-text-teal">{(new Date(userDetail?.createdAt)).toDateString()}</span></p>
+                        <p className="theme-text-muted">Account created,&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">{userDetail?.createdAt ? (new Date(userDetail.createdAt)).toDateString() : "N/A"}</span></p>
                     </div>
 
-                    <h4 className="theme-text-teal">Account Status & Financial Info</h4>
+                    <h4 className="text-lg font-semibold theme-text-teal pt-2">Account Status & Financial Info</h4>
                     
-                    <div className="flex flex-col space-y-5">
-                        <p>User Status&nbsp;&nbsp;<span className={`text-xl font-semibold ${userDetail?.userStatus === 'ACTIVE' ? 'theme-text-teal' : userDetail?.userStatus === 'BANNED' ? 'text-red-400' : 'text-yellow-400'}`}>{userDetail?.userStatus || 'N/A'}</span></p>
+                    <div className="flex flex-col space-y-4">
+                        <p className="theme-text-muted">User Status&nbsp;&nbsp;<span className={`text-xl font-semibold ${userDetail?.userStatus === 'ACTIVE' ? 'theme-text-teal' : userDetail?.userStatus === 'BANNED' ? 'text-red-500' : 'text-yellow-600'}`}>{userDetail?.userStatus || 'N/A'}</span></p>
 
-                        <p>Payment Status&nbsp;&nbsp;<span className={`text-xl font-semibold ${userDetail?.paymentStatus === 'PAID' ? 'theme-text-teal' : 'text-yellow-400'}`}>{userDetail?.paymentStatus || 'N/A'}</span></p>
+                        <p className="theme-text-muted">Payment Status&nbsp;&nbsp;<span className={`text-xl font-semibold ${userDetail?.paymentStatus === 'PAID' ? 'theme-text-teal' : 'text-yellow-600'}`}>{userDetail?.paymentStatus || 'N/A'}</span></p>
 
-                        <div className="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8">
-                            <p>Total Earned&nbsp;&nbsp;<span className="text-xl theme-text-teal">৳{userDetail?.earned || 0}</span></p>
-                            <p>Total Spent&nbsp;&nbsp;<span className="text-xl text-orange-400">৳{userDetail?.spent || 0}</span></p>
+                        <div className="flex flex-col md:flex-row gap-2 md:gap-8">
+                            <p className="theme-text-muted">Total Earned&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">৳{userDetail?.earned || 0}</span></p>
+                            <p className="theme-text-muted">Total Spent&nbsp;&nbsp;<span className="text-xl font-medium text-orange-500">৳{userDetail?.spent || 0}</span></p>
                         </div>
 
                         {userDetail?.wallet && (
-                            <p>Wallet Balance&nbsp;&nbsp;<span className="text-xl text-blue-400">৳{userDetail.wallet.balance || 0}</span></p>
+                            <p className="theme-text-muted">Wallet Balance&nbsp;&nbsp;<span className="text-xl font-medium theme-text-teal">৳{userDetail.wallet.balance || 0}</span></p>
                         )}
                     </div>
                     
-                    <div className="flex space-x-4">
+                    <div className="flex flex-wrap gap-3 pt-1">
                         {showBanUnbanOption && !showAllowOption &&
                             <button 
-                                className="p-2 w-fit bg-red-600 hover:bg-red-500 text-white rounded-xs"
+                                className="px-3 py-1.5 w-fit bg-red-600 hover:bg-red-500 text-white rounded text-sm"
                                 onClick={onBanUserClicked}
                             >
                                 Ban User
@@ -620,7 +807,7 @@ export default function UserDetailPage() {
 
                         {showBanUnbanOption && showAllowOption &&
                             <button 
-                                className="p-2 w-fit theme-btn-teal text-white rounded-xs"
+                                className="px-3 py-1.5 w-fit theme-btn-teal text-white rounded text-sm"
                                 onClick={onBanUserClicked}
                             >
                                 Unban User

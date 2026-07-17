@@ -28,8 +28,8 @@ export const ReviewModule = async ({pageAssetType, assetId, assetName} : Props) 
     const averageRating = reviews.reduce((acc, review) => acc + review.rating, 0) / (reviews.length || 1);
 
     return (
-        <div className="flex flex-col p-2 border-[0.5px] border-green-800">
-            <h3 className="text-green-500 mt-5 pl-2">Reviews</h3>
+        <div className="flex flex-col p-2 theme-outline">
+            <h3 className="theme-text-teal mt-5 pl-2">Reviews</h3>
 
             <div className="flex flex-col md:flex-row justify-between px-2">
                 <PageReviewConsole
@@ -40,9 +40,9 @@ export const ReviewModule = async ({pageAssetType, assetId, assetName} : Props) 
                 />
 
                 <div className="flex flex-col w-full md:w-[30%] space-y-1 mt-5">
-                    <h4 className="font-semibold text-green-500">Customer Reviews</h4>
-                    <h4 className="text-green-200">{averageRating} stars out of 5</h4>
-                    <p>{reviews.length} user ratings</p>
+                    <h4 className="font-semibold theme-text-teal">Customer Reviews</h4>
+                    <h4 className="theme-text-muted">{averageRating} stars out of 5</h4>
+                    <p className="theme-text">{reviews.length} user ratings</p>
 
                     <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 5).length} rating={5}></RatingStats>
                     <RatingStats totalReviews={reviews.length} expectedReviews={reviews.filter(review => review.rating === 4).length} rating={4}></RatingStats>

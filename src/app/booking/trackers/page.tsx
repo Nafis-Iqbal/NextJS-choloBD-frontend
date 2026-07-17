@@ -490,6 +490,11 @@ export default function TrackersPage() {
         <section className="mb-12">
           <FeatureUnderDevelopment moduleName="Activity Booking Tracker"/>
         </section>
+
+        {/* Guide Booking Tracker - Under Development */}
+        <section className="mb-12">
+          <FeatureUnderDevelopment moduleName="Guide Booking Tracker"/>
+        </section>
       </div>
     </div>
   );

@@ -27,13 +27,13 @@ export const HotelProfileSection: React.FC<{ profile: HotelProfile; className?: 
         <h2 className="text-2xl font-bold theme-text">Hotel Profile</h2>
         <button
           onClick={() => router.push(`/hotels/${profile.id}/edit`)}
-          className="px-4 py-2 rounded-lg theme-btn-teal font-medium"
+          className="px-2 md:px-4 py-2 rounded-lg theme-btn-teal font-medium"
         >
           ✎ Edit
         </button>
       </div>
 
-      <div className="theme-card rounded-xl p-6">
+      <div className="theme-card rounded-xl p-4 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <h3 className="theme-text font-semibold text-lg mb-4">{profile.name}</h3>
@@ -84,7 +84,7 @@ export const HotelProfileSection: React.FC<{ profile: HotelProfile; className?: 
             {profile.amenities.map((amenity) => (
               <span
                 key={amenity}
-                className="px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--theme-teal)', color: 'white' }}
+                className="px-3 py-1 rounded-full text-sm md:text-base" style={{ backgroundColor: 'var(--theme-teal)', color: 'white' }}
               >
                 ✓ {amenity}
               </span>

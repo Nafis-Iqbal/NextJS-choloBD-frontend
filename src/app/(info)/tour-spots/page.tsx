@@ -74,53 +74,46 @@ function TourSpotListingsPage() {
     return (
         <div className="flex flex-col p-2 font-sans mt-5">
             <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="text-green-500">Tour Spots</h3>
+                <h3 className="theme-label">Tour Spots</h3>
                 {(tourSpots && tourSpots.length > 0) ? 
-                    <p className="text-green-200">Showing {tourSpots?.length} of {tourSpots?.length} active Tour Spots. <span className="text-gray-400">(Pagination not implemented yet)</span></p> : 
-                    <p className="text-green-200">No Tour Spots found.</p>
+                    <p className="theme-text-muted">Showing {tourSpots?.length} of {tourSpots?.length} active Tour Spots. <span className="theme-text-subtle">(Pagination not implemented yet)</span></p> : 
+                    <p className="theme-text-muted">No Tour Spots found.</p>
                 }
 
                 <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="overflow-x-auto w-full">
-                        <div className="min-w-[900px]">
-                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
-                                <p className="w-[5%]">Sr. No.</p>
-                                <p className="w-[15%]">Tour Spot Name</p>
-                                <p className="w-[15%]">Tour Spot Location</p>
-                                <p className="w-[20%]">Tour Spot Image</p>
-                                <p className="w-[10%]">Spot Type</p>
-                                <p className="w-[5%]">Rating</p>
-                                <p className="w-[10%]">Is Popular</p>
-                                <p className="w-[10%]">Tour Spot ID</p>
-                                <p className="w-[10%]">Actions</p>
-                            </div>
-                            <div className="flex flex-col border-1 border-green-800">
-                                {
-                                    isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
-                                    isFetchError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
-                                    (tourSpots && Array.isArray(tourSpots) && tourSpots.length <= 0) ? 
-                                    (<NoContentTableRow displayMessage="No activity spots found" tdColSpan={1}/>) :
+                    <div className="w-full">
+                        <div
+                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
+                            style={{
+                                backgroundColor: "var(--theme-card-bg)",
+                                borderColor: "var(--theme-deep-green)",
+                            }}
+                        >
+                            {
+                                isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
+                                isFetchError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
+                                (tourSpots && Array.isArray(tourSpots) && tourSpots.length <= 0) ?
+                                (<NoContentTableRow displayMessage="No activity spots found" tdColSpan={1}/>) :
 
-                                    (tourSpots ?? []).map((tourSpot, index) => {
-                                        return (
-                                            <TourSpotViewListTableRow 
-                                                key={tourSpot.id} 
-                                                id={index + 1} 
-                                                tourSpotName={tourSpot.name || ''} 
-                                                tourSpotLocation={tourSpot?.location?.name || 'N/A'}
-                                                tourSpot_id={tourSpot.id} 
-                                                tourSpotImageURL={tourSpot.images?.[0]?.url || '/image-not-found.png'} 
-                                                tourType={tourSpot.tourType || 'N/A'}
-                                                rating={tourSpot.rating}
-                                                isPopular={tourSpot.isPopular || false}
-                                                onClickNavigate={() => router.push(`/tour-spots/${tourSpot.id}`)}
-                                                onEdit={() => router.push(`/tour-spots/${tourSpot.id}/edit`)}
-                                                onDelete={() => handleDeleteTourSpot(tourSpot.id)}
-                                            />
-                                        );
-                                    })
-                                }
-                            </div>
+                                (tourSpots ?? []).map((tourSpot, index) => {
+                                    return (
+                                        <TourSpotViewListTableRow
+                                            key={tourSpot.id}
+                                            id={index + 1}
+                                            tourSpotName={tourSpot.name || ''}
+                                            tourSpotLocation={tourSpot?.location?.name || 'N/A'}
+                                            tourSpot_id={tourSpot.id}
+                                            tourSpotImageURL={tourSpot.images?.[0]?.url || '/image-not-found.png'}
+                                            tourType={tourSpot.tourType || 'N/A'}
+                                            rating={tourSpot.rating}
+                                            isPopular={tourSpot.isPopular || false}
+                                            onClickNavigate={() => router.push(`/tour-spots/${tourSpot.id}`)}
+                                            onEdit={() => router.push(`/tour-spots/${tourSpot.id}/edit`)}
+                                            onDelete={() => handleDeleteTourSpot(tourSpot.id)}
+                                        />
+                                    );
+                                })
+                            }
                         </div>
                     </div>
                 </TableLayout>

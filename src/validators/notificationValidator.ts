@@ -1,5 +1,6 @@
-import {z} from "zod";
+import { z } from "zod";
+import { withNullsStripped } from "./schemaUtils";
 
-export const updateNotificationStatusSchema = z.object({
+export const updateNotificationStatusSchema = withNullsStripped(z.object({
     orderStatus: z.boolean()
-}).strict()
+}).strict());

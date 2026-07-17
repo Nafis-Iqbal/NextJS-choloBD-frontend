@@ -82,26 +82,31 @@ const quickActionsMenu: SidebarMenuConfig = {
         { label: "Track Seat Bookings", href: "/booking/trackers" }
     ],
     USER: [
-        { label: "Track Seat Bookings", href: "/booking/trackers" }
+        { label: "Track Seat Bookings", href: "/booking/trackers" },
+        { label: "Notifications", href: "#notifications", isPlaceholder: true }
     ]
 };
 
 const personalizeMenu: SidebarMenuConfig = {
     MASTER_ADMIN: [
+        { label: "Notifications", href: "#notifications", disabled: true },
         { label: "Profile Info", href: "/dashboard#dashboard_profile" },
         { label: "Activity History", href: "/dashboard#activity_history" },
         { label: "Settings", href: "#", disabled: true }
     ],
     SERVICE_ADMIN: [
+        { label: "Notifications", href: "#notifications", disabled: true },
         { label: "Profile Info", href: "/dashboard#dashboard_profile" },
         { label: "Settings", href: "#", disabled: true },
         { label: "Activity History", href: "/dashboard#activity_history" }
     ],
     EMPLOYEE: [
+        { label: "Notifications", href: "#notifications", disabled: true },
         { label: "Profile Info", href: "/dashboard#dashboard_profile" },
         { label: "Settings", href: "#", disabled: true }
     ],
     USER: [
+        { label: "Notifications", href: "#notifications", disabled: true },
         { label: "Profile Info", href: "/dashboard#dashboard_profile" },
         { label: "Activity History", href: "/dashboard#activity_history" },
         { label: "Settings", href: "#", disabled: true }

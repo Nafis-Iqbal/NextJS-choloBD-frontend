@@ -233,7 +233,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 className="w-full px-2 md:px-0 md:w-[500px]"
                 placeholderText="Enter hotel name"
                 label="Hotel Name"
-                labelStyle="text-green-300"
                 name="name"
                 value={hotelFormData?.name || ""}
                 onChange={handleChange}
@@ -244,7 +243,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 className="w-full px-2 md:px-0 md:w-[500px] md:h-[150px]"
                 placeholderText="Enter hotel description"
                 label="Description"
-                labelStyle="text-green-300"
                 name="description"
                 value={hotelFormData?.description || ""}
                 onChange={handleChange}
@@ -272,7 +270,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Enter phone number"
                 label="Phone Number"
-                labelStyle="text-green-300"
                 name="phoneNumber"
                 value={hotelFormData?.phoneNumber || ""}
                 onChange={handleChange}
@@ -284,7 +281,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 className="w-full px-2 md:px-0 md:w-[300px]"
                 placeholderText="Enter email address"
                 label="Email"
-                labelStyle="text-green-300"
                 name="email"
                 value={hotelFormData?.email || ""}
                 onChange={handleChange}
@@ -296,7 +292,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 className="w-full px-2 md:px-0 md:w-[400px]"
                 placeholderText="Enter website URL"
                 label="Website"
-                labelStyle="text-green-300"
                 name="website"
                 value={hotelFormData?.website || ""}
                 onChange={handleChange}
@@ -324,7 +319,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 type="text"
                 className="w-full md:w-[500px]"
                 label="Address ID - Un-implemented"
-                labelStyle="text-red-400"
                 name="addressId"
                 value={hotelFormData.addressId || ""}
                 onChange={() => {}}
@@ -356,7 +350,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 placeholderText="Enter check-in time (e.g., 2:00 PM)"
                 label="Check-in Time"
                 secondaryLabel="(24hrs format)"
-                labelStyle="text-green-300"
                 name="checkInTime"
                 value={hotelFormData?.checkInTime || ""}
                 onChange={handleChange}
@@ -369,7 +362,6 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 placeholderText="Enter check-out time (e.g., 11:00 AM)"
                 label="Check-out Time"
                 secondaryLabel="(24hrs format)"
-                labelStyle="text-green-300"
                 name="checkOutTime"
                 value={hotelFormData?.checkOutTime || ""}
                 onChange={handleChange}

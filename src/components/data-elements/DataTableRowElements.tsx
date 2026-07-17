@@ -5,7 +5,40 @@ import { FaTrash, FaHeart } from "react-icons/fa"
 import { EditButton } from "../custom-elements/Buttons"
 import { motion } from "framer-motion"
 import { ImageViewerModule } from "../modular-components/ImageViewerModule"
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
+
+const infoCardClass =
+    "w-full shrink-0 rounded-sm md:rounded-md p-4 md:p-5 mb-3 border-0 md:border transition-colors min-h-[7.5rem]";
+
+const infoCardStyle = {
+    backgroundColor: "var(--theme-bg)",
+    borderColor: "var(--theme-deep-green)",
+} as const;
+
+const metaChipClass =
+    "inline-flex items-center px-2.5 py-1 rounded-sm text-xs font-medium";
+
+const imageFrameClass =
+    "relative w-full sm:w-32 sm:min-w-[8rem] aspect-[4/3] sm:aspect-square rounded-sm overflow-hidden shrink-0 border-0 md:border bg-transparent p-0";
+
+const MetaChip = ({
+    label,
+    value,
+}: {
+    label: string;
+    value: ReactNode;
+}) => (
+    <span
+        className={metaChipClass}
+        style={{
+            backgroundColor: "var(--theme-section-bg)",
+            color: "var(--theme-text-muted)",
+        }}
+    >
+        <span className="theme-text-subtle mr-1">{label}:</span>
+        <span className="theme-text">{value}</span>
+    </span>
+);
 
 export const UserViewListTableRow = ({
     id, 
@@ -28,15 +61,58 @@ export const UserViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[120px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{user_name}</button>
-            <NextImage className="w-[15%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={userImageURL || '/image-not-found.png'} alt={user_name}/>
-            <p className="w-[20%]">{email}</p>
-            <p className="w-[10%]">{role}</p>
-            <p className="w-[10%]">{totalSpent}</p>
-            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{user_id}</button>
-        </div>
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={userImageURL || "/image-not-found.png"}
+                        alt={user_name}
+                    />
+                </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <button
+                            type="button"
+                            onClick={onClickNavigate}
+                            className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0"
+                        >
+                            {user_name}
+                        </button>
+                        <span className="text-xs theme-text-subtle shrink-0">#{id}</span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                        <MetaChip label="Role" value={role} />
+                        {totalSpent != null && (
+                            <MetaChip
+                                label="Spent"
+                                value={`৳ ${totalSpent.toLocaleString()}`}
+                            />
+                        )}
+                    </div>
+
+                    <p className="text-sm theme-text-muted break-all">{email}</p>
+                    <button
+                        type="button"
+                        onClick={onClickNavigate}
+                        className="text-xs theme-text-subtle hover:theme-text-teal break-all bg-transparent p-0 text-left"
+                    >
+                        ID: {user_id}
+                    </button>
+                </div>
+            </div>
+        </article>
     )
 }
 
@@ -63,14 +139,14 @@ export const CategoryViewListTableRow = ({
     return (
         <div className="flex items-center p-2 w-full h-[100px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
             <p className="w-[5%]">{id}</p>
-            <p className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{categoryName}</p>
-            <p className="w-[10%]">{categoryType}</p>
+            <p className="w-[30%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{categoryName}</p>
+            <p className="w-[15%]">{categoryType}</p>
             <p className="w-[15%]">{slug}</p>
-            <p className="w-[10%]">{isActive !== null ? ((isActive === true) ? "Yes" : "No") : "N/A"}</p>
-            <p className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{category_id}</p>
+            <p className="w-[15%]">{isActive !== null ? ((isActive === true) ? "Yes" : "No") : "N/A"}</p>
             <div className="w-[20%] flex items-center justify-center space-x-2">
                 <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
+                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>
+                    <FaTrash className="cursor-pointer"/>
                 </button>
             </div>
         </div>
@@ -133,23 +209,80 @@ export const TourSpotViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%]">{id}</p>
-            <button className="w-[15%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpotName}</button>
-            <p className="w-[15%]">{tourSpotLocation}</p>
-            <NextImage className="w-[20%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={tourSpotImageURL || '/image-not-found.png'} alt={tourSpotName}/>
-            <p className="w-[10%]">{tourType}</p>
-            <div className="w-[5%]">
-                {rating ? <StarRating rating={rating} /> : <span>N/A</span>}
-            </div>
-            <p className="w-[10%]">{isPopular !== null ? ((isPopular === true) ? "Yes" : "No") : "N/A"}</p>
-            <button className="w-[10%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{tourSpot_id}</button>
-            <div className="w-[10%] flex items-center justify-center space-x-2">
-                <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={tourSpotImageURL || "/image-not-found.png"}
+                        alt={tourSpotName}
+                    />
                 </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                            <button
+                                type="button"
+                                onClick={onClickNavigate}
+                                className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0 break-words"
+                            >
+                                {tourSpotName}
+                            </button>
+                            <p className="text-sm theme-text-muted mt-0.5 break-words">
+                                📍 {tourSpotLocation}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                            <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="p-1.5 rounded-sm hover:scale-110"
+                                style={{
+                                    backgroundColor: "var(--theme-red)",
+                                    color: "var(--theme-text)",
+                                }}
+                                aria-label="Delete tour spot"
+                            >
+                                <FaTrash className="cursor-pointer" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <MetaChip label="Type" value={tourType} />
+                        <MetaChip
+                            label="Popular"
+                            value={isPopular !== null ? (isPopular ? "Yes" : "No") : "N/A"}
+                        />
+                        <span className="inline-flex items-center">
+                            {rating ? <StarRating rating={rating} /> : (
+                                <span className="text-xs theme-text-subtle">No rating</span>
+                            )}
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClickNavigate}
+                        className="text-xs theme-text-subtle hover:theme-text-teal break-all bg-transparent p-0 text-left"
+                    >
+                        ID: {tourSpot_id}
+                    </button>
+                </div>
             </div>
-        </div>
+        </article>
     )
 }
 
@@ -178,22 +311,77 @@ export const ActivitySpotViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpotName}</button>
-            <NextImage className="w-[20%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={activitySpotImageURL || '/image-not-found.png'} alt={activitySpotName}/>
-            <p className="w-[15%]">{activityType}</p>
-            <div className="w-[10%]">
-                {rating ? <StarRating rating={rating} /> : <span>N/A</span>}
-            </div>
-            <p className="w-[10%]">{entryCost ?? "N/A"}</p>
-            <button className="w-[10%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{activitySpot_id}</button>
-            <div className="w-[10%] flex items-center justify-center space-x-2">
-                <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={activitySpotImageURL || "/image-not-found.png"}
+                        alt={activitySpotName}
+                    />
                 </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                            <button
+                                type="button"
+                                onClick={onClickNavigate}
+                                className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0 break-words"
+                            >
+                                {activitySpotName}
+                            </button>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                            <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="p-1.5 rounded-sm hover:scale-110"
+                                style={{
+                                    backgroundColor: "var(--theme-red)",
+                                    color: "var(--theme-text)",
+                                }}
+                                aria-label="Delete activity spot"
+                            >
+                                <FaTrash className="cursor-pointer" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <MetaChip label="Type" value={activityType} />
+                        <MetaChip
+                            label="Entry"
+                            value={entryCost != null ? `৳ ${entryCost}` : "N/A"}
+                        />
+                        <span className="inline-flex items-center">
+                            {rating ? <StarRating rating={rating} /> : (
+                                <span className="text-xs theme-text-subtle">No rating</span>
+                            )}
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClickNavigate}
+                        className="text-xs theme-text-subtle hover:theme-text-teal break-all bg-transparent p-0 text-left"
+                    >
+                        ID: {activitySpot_id}
+                    </button>
+                </div>
             </div>
-        </div>
+        </article>
     )
 }
 
@@ -224,23 +412,191 @@ export const HotelViewListTableRow = ({
 }) => 
 {
     return (
-        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotelName}</button>
-            <p className="w-[10%]">{hotelLocation}</p>
-            <NextImage className="w-[20%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={hotelImageURL || '/image-not-found.png'} alt={hotelName}/>
-            <p className="w-[10%]">{hotelType}</p>
-            <div className="w-[10%]">
-                <StarRating rating={rating} />
-            </div>
-            <p className="w-[5%]">{totalRooms ?? "N/A"}</p>
-            <button className="w-[10%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{hotel_id}</button>
-            <div className="w-[10%] flex items-center justify-center space-x-2">
-                <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>                    <FaTrash className="cursor-pointer"/>
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={hotelImageURL || "/image-not-found.png"}
+                        alt={hotelName}
+                    />
                 </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                            <button
+                                type="button"
+                                onClick={onClickNavigate}
+                                className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0 break-words"
+                            >
+                                {hotelName}
+                            </button>
+                            <p className="text-sm theme-text-muted mt-0.5 break-words">
+                                📍 {hotelLocation}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                            <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="p-1.5 rounded-sm hover:scale-110"
+                                style={{
+                                    backgroundColor: "var(--theme-red)",
+                                    color: "var(--theme-text)",
+                                }}
+                                aria-label="Delete hotel"
+                            >
+                                <FaTrash className="cursor-pointer" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <MetaChip label="Type" value={hotelType} />
+                        <MetaChip
+                            label="Rooms"
+                            value={totalRooms ?? "N/A"}
+                        />
+                        <span className="inline-flex items-center">
+                            <StarRating rating={rating} />
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClickNavigate}
+                        className="text-xs theme-text-subtle hover:theme-text-teal break-all bg-transparent p-0 text-left"
+                    >
+                        ID: {hotel_id}
+                    </button>
+                </div>
             </div>
-        </div>
+        </article>
+    )
+}
+
+export const GuideViewListTableRow = ({
+    id,
+    guideName,
+    guideLocation,
+    guide_id,
+    guideImageURL,
+    specializations,
+    rating,
+    pricePerDay,
+    isVerified,
+    onClickNavigate,
+    onEdit,
+    onDelete
+} : {
+    id: number,
+    guideName: string,
+    guideLocation: string,
+    guide_id: string,
+    guideImageURL?: string,
+    specializations: string,
+    rating: number,
+    pricePerDay?: number,
+    isVerified?: boolean,
+    onClickNavigate: () => void,
+    onEdit: () => void,
+    onDelete: () => void
+}) =>
+{
+    return (
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={guideImageURL || "/image-not-found.png"}
+                        alt={guideName}
+                    />
+                </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                            <button
+                                type="button"
+                                onClick={onClickNavigate}
+                                className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0 break-words"
+                            >
+                                {guideName}
+                            </button>
+                            <p className="text-sm theme-text-muted mt-0.5 break-words">
+                                📍 {guideLocation}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                            <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="p-1.5 rounded-sm hover:scale-110"
+                                style={{
+                                    backgroundColor: "var(--theme-red)",
+                                    color: "var(--theme-text)",
+                                }}
+                                aria-label="Delete guide"
+                            >
+                                <FaTrash className="cursor-pointer" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {specializations && (
+                        <p className="text-sm theme-text-muted break-words">
+                            {specializations}
+                        </p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <MetaChip
+                            label="Rate"
+                            value={pricePerDay != null ? `৳${pricePerDay}/day` : "N/A"}
+                        />
+                        <MetaChip
+                            label="Verified"
+                            value={isVerified ? "Yes" : "No"}
+                        />
+                        <span className="inline-flex items-center">
+                            <StarRating rating={rating} />
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClickNavigate}
+                        className="text-xs theme-text-subtle hover:theme-text-teal break-all bg-transparent p-0 text-left"
+                    >
+                        ID: {guide_id}
+                    </button>
+                </div>
+            </div>
+        </article>
     )
 }
 
@@ -295,7 +651,7 @@ export const AddressDataBlock = ({
 }) => {
     return (
         <div 
-            className={`relative flex flex-col p-3 border-1 border-green-800 md:text-lg ${className}`} 
+            className={`relative flex flex-col p-3 theme-outline md:text-lg ${className}`} 
             onClick={addressSelectMode ? onChangeDefault : undefined}
         >
             <div className="flex flex-col space-x-0 space-y-1 md:flex-row md:space-x-3 md:space-y-0">
@@ -304,14 +660,14 @@ export const AddressDataBlock = ({
             </div>
 
             <div className="flex space-x-3">
-                <p className="text-green-300">Country:&nbsp; <span className="text-white">{AddressInfo.country}</span></p>
-                <p className="text-green-300">City:&nbsp; <span className="text-white">{AddressInfo.city}</span></p>
-                <p className="text-green-300">State:&nbsp; <span className="text-white">{AddressInfo.state}</span></p>
+                <p className="theme-text-teal">Country:&nbsp; <span className="theme-text">{AddressInfo.country}</span></p>
+                <p className="theme-text-teal">City:&nbsp; <span className="theme-text">{AddressInfo.city}</span></p>
+                <p className="theme-text-teal">State:&nbsp; <span className="theme-text">{AddressInfo.state}</span></p>
             </div>
             
             <div className="flex space-x-3">
-                <p className="text-green-300">Postal Code:&nbsp; <span className="text-white">{AddressInfo.postalCode}</span></p>
-                <p className="text-green-300">Phone Number:&nbsp; <span className="text-white">{AddressInfo.phoneNumber}</span></p>
+                <p className="theme-text-teal">Postal Code:&nbsp; <span className="theme-text">{AddressInfo.postalCode}</span></p>
+                <p className="theme-text-teal">Phone Number:&nbsp; <span className="theme-text">{AddressInfo.phoneNumber}</span></p>
             </div>
 
             {showActions && (
@@ -330,7 +686,7 @@ export const AddressDataBlock = ({
                     {(selectedAddressId !== AddressInfo.id && !addressSelectMode) && 
                         <button
                             onClick={onChangeDefault}
-                            className="px-3 py-1 bg-blue-400 hover:bg-blue-300 text-white text-xs md:text-sm rounded-sm"
+                            className="px-3 py-1 theme-btn-teal text-xs md:text-sm rounded-sm"
                         >
                             {noEditMode ? "Select" : "Set as Default"}
                         </button>
@@ -338,42 +694,12 @@ export const AddressDataBlock = ({
                 </div>
             )}
 
-            {(!noEditMode && selectedAddressId === AddressInfo.id) && <div className="absolute top-2 right-2 p-1 text-xs md:text-sm border-1 border-green-500 text-green-500 rounded-sm">
+            {(!noEditMode && selectedAddressId === AddressInfo.id) && <div className="absolute top-2 right-2 p-1 text-xs md:text-sm theme-outline-teal theme-text-teal rounded-sm">
                 Selected
             </div>}
         </div>
     );
 };
-
-export const ProductViewListTableRow = ({
-    id, 
-    productName, 
-    product_id, 
-    productImageURL, 
-    productCategoryType, 
-    price,
-    onClickNavigate
-} : {
-    id: number, 
-    productName: string, 
-    product_id: string, 
-    productImageURL: string, 
-    productCategoryType: string, 
-    price: number,
-    onClickNavigate: () => void
-}) => 
-{
-    return (
-        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%]">{id}</p>
-            <button className="w-[20%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{productName}</button>
-            <NextImage className="w-[35%] h-full cursor-pointer" style={{backgroundColor: 'var(--theme-card-bg)'}} nextImageClassName="object-contain" src={productImageURL} alt={productName}/>
-            <p className="w-[15%]">{productCategoryType}</p>
-            <p className="w-[10%]">{price}</p>
-            <button className="w-[15%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer" onClick={() => onClickNavigate()}>{product_id}</button>
-        </div>
-    )
-}
 
 export const TourPackageViewListTableRow = ({
     id,
@@ -924,4 +1250,71 @@ export const CommunityPostCompact = ({
     );
 };
 
-export default ProductViewListTableRow;
+export type SearchAssetType = 'tourSpot' | 'activitySpot' | 'hotel' | 'guide';
+
+/** Responsive public search result card — used by /search page */
+export const SearchResultBlock = ({
+    assetType,
+    title,
+    subtitle,
+    imageUrl,
+    rating,
+    metaLeft,
+    metaRight,
+    href,
+}: {
+    assetType: SearchAssetType;
+    title: string;
+    subtitle?: string;
+    imageUrl?: string;
+    rating?: number;
+    metaLeft?: string;
+    metaRight?: string;
+    href: string;
+}) => {
+    const typeLabel =
+        assetType === 'tourSpot' ? 'Tour Spot' :
+        assetType === 'activitySpot' ? 'Activity' :
+        assetType === 'hotel' ? 'Hotel' : 'Guide';
+
+    return (
+        <Link
+            href={href}
+            className="flex flex-col sm:flex-row w-full overflow-hidden rounded-md theme-card theme-outline hover:opacity-95 transition-all duration-200"
+        >
+            <div
+                className="relative w-full sm:w-[140px] md:w-[180px] h-[160px] sm:h-auto sm:min-h-[120px] shrink-0"
+                style={{ backgroundColor: 'var(--theme-section-bg)' }}
+            >
+                <NextImage
+                    className="w-full h-full"
+                    nextImageClassName="object-cover"
+                    src={imageUrl || '/image-not-found.png'}
+                    alt={title}
+                />
+            </div>
+
+            <div className="flex flex-1 flex-col justify-between gap-2 p-3 sm:p-4 min-w-0">
+                <div className="flex flex-col gap-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="theme-badge text-xs px-2 py-0.5">{typeLabel}</span>
+                        {rating != null && rating > 0 && (
+                            <div className="flex items-center gap-1">
+                                <StarRating rating={rating} />
+                            </div>
+                        )}
+                    </div>
+                    <h4 className="theme-label text-base md:text-lg truncate">{title}</h4>
+                    {subtitle && (
+                        <p className="theme-text-muted text-sm truncate">{subtitle}</p>
+                    )}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+                    {metaLeft && <span className="theme-text-subtle">{metaLeft}</span>}
+                    {metaRight && <span className="theme-text-teal font-medium">{metaRight}</span>}
+                </div>
+            </div>
+        </Link>
+    );
+};

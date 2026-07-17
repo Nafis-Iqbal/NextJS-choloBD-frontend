@@ -5,12 +5,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { NextImage } from "../custom-elements/UIUtilities";
 import { CustomDatePicker } from "../custom-elements/CustomInputElements";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
-import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking } from "react-icons/md";
-import { LocationApi } from "@/services/api";
-import { RoomShift } from "@/types/enums";
+import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking, MdPersonPin } from "react-icons/md";
+import { AuthApi, LocationApi } from "@/services/api";
+import { ActivityType, Language, RoomShift, TourType } from "@/types/enums";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 
-type BookingTab = "hotels" | "bus" | "train" | "flight" | "tours" | "activities";
+type BookingTab = "hotels" | "bus" | "train" | "flight" | "tours" | "activities" | "guides";
 
 interface ImageProps {
   imageURL: string;
@@ -68,6 +68,16 @@ interface ActivityFilters {
   date: string;
   participants: string;
   activityType: string;
+}
+
+interface GuideFilters {
+  location: string;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  travelers: string;
+  specialization: string;
+  language: string;
 }
 
 export const HeroSectionBookingWidget = ({
@@ -134,6 +144,7 @@ export const HeroSectionBookingWidget = ({
     { id: "flight", label: "Flight", icon: <MdFlightTakeoff className="text-xl" /> },
     { id: "tours", label: "Tours", icon: <MdTour className="text-xl" /> },
     { id: "activities", label: "Activities", icon: <MdHiking className="text-xl" /> },
+    { id: "guides", label: "Guides", icon: <MdPersonPin className="text-xl" /> },
   ];
 
   const handleTabChange = (newTab: BookingTab) => {
@@ -281,6 +292,7 @@ export const HeroSectionBookingWidget = ({
               {activeTab === "flight" && <FlightFilterPanel locations={allLocations} />}
               {activeTab === "tours" && <TourFilterPanel locations={allLocations} />}
               {activeTab === "activities" && <ActivityFilterPanel locations={allLocations} />}
+              {activeTab === "guides" && <GuideFilterPanel locations={allLocations} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -915,6 +927,8 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
 /* ─────── Tour Filter Panel ─────── */
 function TourFilterPanel({ locations }: { locations: Location[] }) {
   const { openNotificationPopUpMessage } = useGlobalUI();
+  const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+  const isAuthenticated = authResponse?.data?.isAuthenticated;
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -989,7 +1003,14 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Plan a Tour</h3>
+      <div className="flex items-center gap-3 mb-6 bg-transparent">
+        <h3 className="text-lg md:text-xl font-bold text-black">Plan a Tour</h3>
+        {!isAuthenticated && (
+          <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+            Requires sign up
+          </div>
+        )}
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Tour Type</label>
@@ -1088,11 +1109,21 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 }
 
 /* ─────── Activity Filter Panel ─────── */
+function formatActivityTypeLabel(value: string) {
+  return value
+    .split("_")
+    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
 function ActivityFilterPanel({ locations }: { locations: Location[] }) {
   const { openNotificationPopUpMessage } = useGlobalUI();
+  const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+  const isAuthenticated = authResponse?.data?.isAuthenticated;
+
   const getTodayDate = () => {
     const today = new Date();
-    return today.toISOString().split('T')[0];
+    return today.toISOString().split("T")[0];
   };
 
   const [filters, setFilters] = useState<ActivityFilters>({
@@ -1107,8 +1138,8 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const locationSuggestions = locations
-    .filter(loc => loc.locationType === "DISTRICT")
-    .filter(loc => {
+    .filter((loc) => loc.locationType === "DISTRICT")
+    .filter((loc) => {
       const term = locationSearch.trim().toLowerCase();
       if (!term) return false;
       const name = loc.name?.toLowerCase() || "";
@@ -1117,27 +1148,27 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
       return name.includes(term) || city.includes(term) || division.includes(term);
     })
     .sort((a, b) => {
-        const term = locationSearch.trim().toLowerCase();
+      const term = locationSearch.trim().toLowerCase();
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const score = (loc: any) => {
-            const name = loc.name?.toLowerCase() || "";
-            const city = loc.city?.toLowerCase() || "";
-            const division = loc.division?.toLowerCase() || "";
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const score = (loc: any) => {
+        const name = loc.name?.toLowerCase() || "";
+        const city = loc.city?.toLowerCase() || "";
+        const division = loc.division?.toLowerCase() || "";
 
-            if (name === term)return 300;
-            if (name.startsWith(term)) return 250;
+        if (name === term) return 300;
+        if (name.startsWith(term)) return 250;
 
-            if (city === term) return 200;
-            if (city.startsWith(term)) return 150;
+        if (city === term) return 200;
+        if (city.startsWith(term)) return 150;
 
-            if (division === term) return 100;
-            if (division.startsWith(term)) return 50;
+        if (division === term) return 100;
+        if (division.startsWith(term)) return 50;
 
-            return 10;
-        };
+        return 10;
+      };
 
-        return score(b) - score(a);
+      return score(b) - score(a);
     })
     .slice(0, 5);
 
@@ -1149,20 +1180,37 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.date) {
-      openNotificationPopUpMessage("Please fill in all required fields");
+      openNotificationPopUpMessage("Please fill in location and activity date");
       return;
     }
+
+    const bookingDate = new Date(filters.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    bookingDate.setHours(0, 0, 0, 0);
+    if (bookingDate < today) {
+      openNotificationPopUpMessage("Activity date cannot be in the past");
+      return;
+    }
+
     const qs = new URLSearchParams();
     qs.set("location", filters.location);
-    qs.set("date", filters.date);
+    qs.set("bookingDate", filters.date);
     qs.set("participants", filters.participants);
-    if (filters.activityType) qs.set("type", filters.activityType);
-    window.location.href = `/activity-spots?${qs.toString()}`;
+    if (filters.activityType) qs.set("activityType", filters.activityType);
+    window.location.href = `/booking/activity?${qs.toString()}`;
   };
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Find Activities</h3>
+      <div className="flex items-center gap-3 mb-6">
+        <h3 className="text-lg md:text-xl font-bold text-black">Find Activities</h3>
+        {!isAuthenticated && (
+          <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+            Requires sign in
+          </div>
+        )}
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Activity Type</label>
@@ -1172,11 +1220,11 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
             className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
           >
             <option value="">-- Any Activity Type --</option>
-            <option value="adventure">Adventure Sports</option>
-            <option value="water">Water Sports</option>
-            <option value="trek">Trekking</option>
-            <option value="cultural">Cultural</option>
-            <option value="extreme">Extreme Sports</option>
+            {Object.values(ActivityType).map((type) => (
+              <option key={type} value={type}>
+                {formatActivityTypeLabel(type)}
+              </option>
+            ))}
           </select>
         </div>
         <div className="flex flex-col">
@@ -1241,7 +1289,248 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
       >
         Book QR Activities
       </button>
-      <p className="text-xs text-gray-600 text-center mt-3">Seamless experiences — pay once, enjoy everything with QR.</p>
+      <p className="text-xs text-gray-600 text-center mt-3">
+        Seamless experiences — pay once, enjoy everything with QR.
+      </p>
+    </div>
+  );
+}
+
+function formatTourTypeLabel(value: string) {
+  return value
+    .split("_")
+    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+function formatLanguageLabel(value: string) {
+  return value
+    .split("_")
+    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/* ─────── Guide Filter Panel ─────── */
+function GuideFilterPanel({ locations }: { locations: Location[] }) {
+  const { openNotificationPopUpMessage } = useGlobalUI();
+  const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+  const isAuthenticated = authResponse?.data?.isAuthenticated;
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  const [filters, setFilters] = useState<GuideFilters>({
+    location: "",
+    bookingDate: getTodayDate(),
+    startTime: "09:00",
+    endTime: "17:00",
+    travelers: "1",
+    specialization: TourType.ADVENTURE,
+    language: Language.BENGALI,
+  });
+
+  const [locationSearch, setLocationSearch] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  const locationSuggestions = locations
+    .filter((loc) => loc.locationType === "DISTRICT")
+    .filter((loc) => {
+      const term = locationSearch.trim().toLowerCase();
+      if (!term) return false;
+      const name = loc.name?.toLowerCase() || "";
+      const city = loc.city?.toLowerCase() || "";
+      const division = loc.division?.toLowerCase() || "";
+      return name.includes(term) || city.includes(term) || division.includes(term);
+    })
+    .sort((a, b) => {
+      const term = locationSearch.trim().toLowerCase();
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const score = (loc: any) => {
+        const name = loc.name?.toLowerCase() || "";
+        const city = loc.city?.toLowerCase() || "";
+        const division = loc.division?.toLowerCase() || "";
+
+        if (name === term) return 300;
+        if (name.startsWith(term)) return 250;
+
+        if (city === term) return 200;
+        if (city.startsWith(term)) return 150;
+
+        if (division === term) return 100;
+        if (division.startsWith(term)) return 50;
+
+        return 10;
+      };
+
+      return score(b) - score(a);
+    })
+    .slice(0, 5);
+
+  const handleLocationSelect = (locationName: string) => {
+    setFilters({ ...filters, location: locationName });
+    setLocationSearch(locationName);
+    setShowSuggestions(false);
+  };
+
+  const handleSearch = () => {
+    if (!filters.location || !filters.bookingDate || !filters.endTime) {
+      openNotificationPopUpMessage("Please fill in location, date, and end time");
+      return;
+    }
+
+    if (filters.startTime) {
+      const start = new Date(`${filters.bookingDate}T${filters.startTime}:00`);
+      const end = new Date(`${filters.bookingDate}T${filters.endTime}:00`);
+      if (end.getTime() <= start.getTime()) {
+        openNotificationPopUpMessage("End time must be after start time");
+        return;
+      }
+    }
+
+    const qs = new URLSearchParams();
+    qs.set("location", filters.location);
+    qs.set("bookingDate", filters.bookingDate);
+    qs.set("endTime", filters.endTime);
+    qs.set("travelers", filters.travelers);
+    if (filters.startTime) qs.set("startTime", filters.startTime);
+    if (filters.specialization) qs.set("specialization", filters.specialization);
+    if (filters.language) qs.set("language", filters.language);
+    window.location.href = `/booking/guide?${qs.toString()}`;
+  };
+
+  return (
+    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mb-6 bg-transparent">
+        <h3 className="text-lg md:text-xl font-bold text-black">Request a Local Guide</h3>
+        {!isAuthenticated && (
+          <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
+            Requires sign up
+          </div>
+        )}
+      </div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Location</label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search location..."
+              value={locationSearch}
+              onChange={(e) => {
+                setLocationSearch(e.target.value);
+                setFilters({ ...filters, location: e.target.value });
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+            />
+            {showSuggestions && locationSuggestions.length > 0 && (
+              <div
+                ref={suggestionsRef}
+                className="absolute top-full left-0 right-0 bg-white border border-gray-300 border-t-0 rounded-b-lg shadow-lg z-10 max-h-48 overflow-y-auto"
+              >
+                {locationSuggestions.map((location) => (
+                  <div
+                    key={location.id}
+                    onClick={() => handleLocationSelect(location.name)}
+                    className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-gray-800 text-sm"
+                  >
+                    {location.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Tour Date</label>
+          <CustomDatePicker
+            value={filters.bookingDate}
+            onChange={(value) => setFilters({ ...filters, bookingDate: value })}
+            placeholder="Select Tour Date"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Start Time (optional)</label>
+          <input
+            type="time"
+            value={filters.startTime}
+            onChange={(e) => setFilters({ ...filters, startTime: e.target.value })}
+            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">End Time</label>
+          <input
+            type="time"
+            value={filters.endTime}
+            onChange={(e) => setFilters({ ...filters, endTime: e.target.value })}
+            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          />
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Travelers</label>
+          <select
+            value={filters.travelers}
+            onChange={(e) => setFilters({ ...filters, travelers: e.target.value })}
+            className="max-w-xs w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            {[1, 2, 3, 4, 5, 6, 8, 10].map((count) => (
+              <option key={count} value={count}>
+                {count} Traveler{count > 1 ? "s" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Specialization</label>
+          <select
+            value={filters.specialization}
+            onChange={(e) => setFilters({ ...filters, specialization: e.target.value })}
+            className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            <option value="">-- Any Specialization --</option>
+            {Object.values(TourType).map((type) => (
+              <option key={type} value={type}>
+                {formatTourTypeLabel(type)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col">
+          <label className="text-sm font-semibold text-gray-700 mb-2">Language</label>
+          <select
+            value={filters.language}
+            onChange={(e) => setFilters({ ...filters, language: e.target.value })}
+            className="max-w-xs w-full text-sm md:text-base px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--theme-teal)] text-black"
+          >
+            <option value="">-- Any Language --</option>
+            {Object.values(Language).map((language) => (
+              <option key={language} value={language}>
+                {formatLanguageLabel(language)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      <button
+        onClick={handleSearch}
+        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
+      >
+        Find Local Guides
+      </button>
+      <p className="text-xs text-gray-600 text-center mt-3">
+        Submit a request — guides accept before payment. Contact details unlock after confirmation.
+      </p>
     </div>
   );
 }

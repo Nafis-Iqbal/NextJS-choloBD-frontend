@@ -20,3 +20,22 @@ export function useGetCombinedSubstringSearchResultRQ({queryString, enabled = tr
     enabled
   });
 }
+
+export async function getSearchByTypeResult(queryString?: string) {
+  const response = await apiFetch<ApiResponse<any>>(`/search/type${queryString ? `?${queryString}` : ""}`, {
+    method: 'GET'
+  });
+
+  return response;
+}
+
+export function useGetSearchByTypeResultRQ({queryString, enabled = true} : {queryString?: string, enabled: boolean}) {
+  return useQuery<ApiResponse<any>>({
+    queryFn: () => getSearchByTypeResult(queryString),
+    queryKey: ["type-search", queryString],
+    staleTime: queryString ? 0 : 30_000,
+    gcTime: 30 * 1000,
+    refetchOnMount: queryString ? "always" : false,
+    enabled
+  });
+}
