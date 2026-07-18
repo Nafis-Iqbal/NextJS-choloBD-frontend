@@ -762,7 +762,6 @@ declare global {
   // Notifications
   interface Notification {
     id: string;
-    title: string;
     content: string;
     isRead: boolean;
     notificationPriority: Priority;

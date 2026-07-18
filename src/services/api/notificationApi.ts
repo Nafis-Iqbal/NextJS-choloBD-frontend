@@ -13,7 +13,6 @@ interface GetNotificationsParams {
 
 interface CreateNotificationData {
     userId: string;
-    title: string;
     content: string;
     notificationAudience: NotificationAudience;
     notificationPriority?: Priority;

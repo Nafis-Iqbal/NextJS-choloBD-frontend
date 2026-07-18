@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ComplaintApi } from "@/services/api";
 import {
     ComplaintAddressedTo,
@@ -74,6 +75,7 @@ const getTargetDisplayName = (complaint: Complaint): string => {
 
 const getComplainantName = (complaint: Complaint): string => {
     return (
+        complaint.complainantName ||
         complaint.complainant?.userName ||
         complaint.complainant?.email ||
         "Unknown user"
@@ -211,7 +213,7 @@ export const ComplaintManagerModule = ({
 
     const title = isMasterAdminQueue
         ? "Platform Complaints"
-        : `${propTargetType ? formatEnumValue(propTargetType) + " " : ""}Entity Complaints`;
+        : `${propTargetType ? formatEnumValue(propTargetType) + " " : ""}Customer Complaints`;
 
     return (
         <section
@@ -222,7 +224,7 @@ export const ComplaintManagerModule = ({
                 <h4 className="theme-text">{title}</h4>
             </div>
 
-            <TableLayout className="mr-5">
+            <TableLayout className="">
                 <div className="overflow-x-auto w-full">
                     <div className="min-w-[800px]">
                         <div
@@ -265,6 +267,7 @@ export const ComplaintManagerModule = ({
                                 complaints.map((complaint) => (
                                     <ComplaintListTableRow
                                         key={complaint.id}
+                                        complaintId={complaint.id}
                                         title={complaint.title}
                                         description={complaint.description}
                                         target={
@@ -342,6 +345,7 @@ export const ComplaintManagerModule = ({
 };
 
 const ComplaintListTableRow = ({
+    complaintId,
     title,
     description,
     target,
@@ -349,6 +353,7 @@ const ComplaintListTableRow = ({
     complaintStatus,
     createdAt,
 }: {
+    complaintId: string;
     title: string;
     description: string;
     target?: string;
@@ -356,15 +361,32 @@ const ComplaintListTableRow = ({
     complaintStatus: ComplaintStatus;
     createdAt: Date | string;
 }) => {
+    const router = useRouter();
     const showTarget = target !== undefined;
 
     return (
         <div
-            className="flex p-2 w-full theme-outline text-left"
+            role="link"
+            tabIndex={0}
+            onClick={() => router.push(`/complaint/${complaintId}`)}
+            onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    router.push(`/complaint/${complaintId}`);
+                }
+            }}
+            className="flex p-2 w-full theme-outline text-left cursor-pointer transition-colors"
             style={{
                 borderColor: "var(--theme-deep-green)",
                 borderBottomWidth: "1px",
             }}
+            onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--theme-card-bg)";
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "transparent";
+            }}
+            title="Open complaint details"
         >
             <p
                 className={`${showTarget ? "w-[18%]" : "w-[22%]"} truncate pr-2`}
@@ -390,7 +412,9 @@ const ComplaintListTableRow = ({
                 {complainingUserName}
             </p>
             <p className="w-[12%] pr-2">{formatEnumValue(complaintStatus)}</p>
-            <p className="w-[12%] theme-text-subtle">{formatCreatedAt(createdAt)}</p>
+            <p className="w-[12%] theme-text-subtle">
+                {formatCreatedAt(createdAt)}
+            </p>
         </div>
     );
 };

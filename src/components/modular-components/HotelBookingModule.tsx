@@ -14,6 +14,7 @@ import {
 	CustomTextAreaInput,
 } from "@/components/custom-elements/CustomInputElements";
 import { FaCheckCircle } from "react-icons/fa";
+import { ImageViewerModule } from "@/components/modular-components/ImageViewerModule";
 
 interface BookingState {
 	checkInDate: string;
@@ -60,6 +61,7 @@ interface AvailableRoomType {
 	morningShiftPrice: number;
 	afternoonShiftPrice: number;
 	allowShiftBooking: boolean;
+	images: Image[];
 }
 
 interface HotelRoomAvailabilityResponse {
@@ -765,6 +767,18 @@ function RoomCard({ roomData, roomCount, nights, shift, onRoomSelection }: RoomC
 	const availableCount = roomData.availableRooms || 0;
 	const totalCount = roomData.totalRooms || 0;
 
+	const imageList = (roomData.images || [])
+		.map((image) => {
+			const imageURL = (image.url || "").trim();
+			if (!imageURL) return null;
+			return {
+				imageURL,
+				imageAlt: image.altText || `${roomTypeLabel} room image`,
+				imageStyle: "object-cover object-center",
+			};
+		})
+		.filter((image): image is { imageURL: string; imageAlt: string; imageStyle: string } => !!image);
+
 	// Check if price is available (not negative or zero)
 	const isPriceAvailable = pricePerUnit > 0;
 
@@ -805,6 +819,14 @@ function RoomCard({ roomData, roomCount, nights, shift, onRoomSelection }: RoomC
 				</div>
 				<p className="theme-text-subtle text-xs mt-2">Sleeps multiple guests • {totalCount} rooms total</p>
 			</div>
+
+			{/* Room Images */}
+			<ImageViewerModule
+				key={`${roomData.roomTypeId}-images`}
+				className="h-40 w-full rounded-lg overflow-hidden theme-outline mb-4"
+				imagePlacementStyle="object-cover object-center"
+				imageList={imageList}
+			/>
 
 			{/* Price Section */}
 			<div className="bg-section rounded-lg p-3 mb-4 theme-outline">

@@ -250,7 +250,7 @@ export function useUpdateComplaintStatusRQ(
     });
 }
 
-/** PATCH /complaints/:complaintId/close — complainant withdraw while PENDING */
+/** PATCH /complaints/:complaintId/close — complainant withdraw while OPEN */
 async function closeComplaint(complaintId: string) {
     const response = await apiFetch<ApiResponse<Complaint>>(
         `/complaints/${complaintId}/close`,

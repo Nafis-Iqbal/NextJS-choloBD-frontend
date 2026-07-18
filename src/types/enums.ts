@@ -285,8 +285,7 @@ export enum EntityType {
 }
 
 export enum ComplaintStatus {
-  PENDING = "PENDING",
-  UNDER_REVIEW = "UNDER_REVIEW",
+  OPEN = "OPEN",
   UNSOLVED = "UNSOLVED",
   CLOSED = "CLOSED"
 }

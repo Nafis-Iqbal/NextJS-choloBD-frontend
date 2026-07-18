@@ -39,6 +39,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
     const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
+    const currentUserName = authResponse?.data?.userName;
 
     const { data: walletResponse } = WalletApi.useGetMyWalletRQ();
     const walletBalance = walletResponse?.data?.balance || 0;
@@ -307,8 +308,10 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                         ) : (
                             <>
                                 <Link className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
-                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white text-2xl"/>
-                                    <span className="text-xs font-normal">Welcome {}!</span>
+                                    <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white text-xl"/>
+                                    {currentUserName && (
+                                        <span className="text-xs font-normal">{currentUserName.length > 7 ? `${currentUserName.slice(0, 7)}.` : currentUserName}!</span>
+                                    )}
                                 </Link>
 
                                 <div className="flex flex-col items-center justify-center bg-transparent">

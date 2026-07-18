@@ -14,6 +14,7 @@ import { ActivityBookingHistorySection } from "./ActivityBookingHistorySection";
 import { GuideBookingHistorySection } from "./GuideBookingHistorySection";
 import { TransportBookingHistorySection } from "./TransportBookingHistorySection";
 import { TransactionHistorySection, type Transaction } from "./TransactionHistorySection";
+import { SubmittedComplaintsSection } from "./SubmittedComplaintsSection";
 import {
   FAKE_ONGOING_TRIPS,
   FAKE_UPCOMING_TRIPS,
@@ -469,6 +470,8 @@ export const UserActivityHistoryModule: React.FC<UserActivityHistoryModuleProps>
             </div>
           </div>
         </div>
+
+        <SubmittedComplaintsSection />
       </div>
     </div>
   );

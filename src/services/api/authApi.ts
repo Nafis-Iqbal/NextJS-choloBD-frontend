@@ -7,6 +7,7 @@ async function getCurrentUserAuthentication() {
   const response = await apiFetch<ApiResponse<{ 
     isAuthenticated: boolean 
     userId: string,
+    userName: string,
     userRole: Role,
     userServiceType?: ServiceType
   }>>(`/auth/authenticate`, {
@@ -20,6 +21,7 @@ export function useGetUserAuthenticationRQ(enabled: boolean) {
     return useQuery<ApiResponse<{ 
       isAuthenticated: boolean 
       userId: string,
+      userName: string,
       userRole: Role,
       userServiceType?: ServiceType
     }>>({
