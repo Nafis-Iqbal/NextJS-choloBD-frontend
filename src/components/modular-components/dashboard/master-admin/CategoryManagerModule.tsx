@@ -12,7 +12,7 @@ import { CategoryViewListTableRow } from "../../../data-elements/DataTableRowEle
 import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow";
 import { HorizontalDivider } from "../../../custom-elements/UIUtilities";
 
-const CategoryManagerModule = () => {
+const CategoryManagerModule = ({ className = "" }: { className?: string }) => {
     const {showLoadingContent, openNotificationPopUpMessage} = useGlobalUI();
     // Navigation handled by parent or route links; avoid forcing router here
 
@@ -66,7 +66,7 @@ const CategoryManagerModule = () => {
     }
 
     return (
-        <div className="flex flex-col space-y-2 mt-4" id="category_management">
+        <div className={`flex flex-col space-y-2 mt-4 ${className}`} id="category_management">
             <CategoryUpdateModal
                 isVisible={isCategoryModalOpen}
                 mode = {mode}
@@ -80,13 +80,14 @@ const CategoryManagerModule = () => {
                 onCancel={() => setCategoryDeleteConfirmationVisible(false)}
                 message="Are you sure you want to delete this category? This action cannot be undone."
             />
-            
-            <h4 className="theme-text">Category Manager</h4>
 
             <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                <div className="overflow-x-auto w-full">
-                    <div className="min-w-[900px]">
-                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+                <div className="w-full md:overflow-x-auto">
+                    <div className="w-full md:min-w-[900px]">
+                        <div
+                            className="hidden md:flex theme-outline p-2 text-center"
+                            style={{backgroundColor: 'var(--theme-card-bg)'}}
+                        >
                             <p className="w-[5%]">Sr. No.</p>
                             <p className="w-[30%]">Category Name</p>
                             <p className="w-[15%]">Type</p>

@@ -63,7 +63,8 @@ const RoomTypeStatCard: React.FC<{ stat: RoomTypeStat }> = ({ stat }) => {
 export const RoomTypeStatsSection: React.FC<{
   roomTypes: HotelRoomType[];
   className?: string;
-}> = ({ roomTypes, className }) => {
+  id?: string;
+}> = ({ roomTypes, className, id }) => {
   const roomTypeStats = useMemo(() => {
     return Object.values(HotelRoomCategory)
       .map((type: string) => {
@@ -102,7 +103,7 @@ export const RoomTypeStatsSection: React.FC<{
   }, [roomTypeStats]);
 
   return (
-    <section className={`mb-8 ${className || ""}`}>
+    <section className={`mb-8 ${className || ""}`} id={id}>
       <h2 className="text-2xl sm:text-3xl font-bold theme-text mb-4 sm:mb-6">
         Room Type Statistics
       </h2>

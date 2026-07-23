@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AuthApi } from "@/services/api";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +19,8 @@ interface DashboardTab {
     id: ManagementTabId;
     label: string;
     description: string;
+    /** Matches sidebar /dashboard#... hashes and module root ids */
+    hash: string;
 }
 
 const MANAGEMENT_TABS: DashboardTab[] = [
@@ -26,23 +28,53 @@ const MANAGEMENT_TABS: DashboardTab[] = [
         id: "locations",
         label: "Locations",
         description: "Create and manage platform locations",
+        hash: "locations_management",
     },
     {
         id: "categories",
         label: "Categories",
         description: "Manage amenity, policy, and content categories",
+        hash: "category_management",
     },
     {
         id: "users",
         label: "Users",
         description: "View and manage platform users",
+        hash: "users_management",
     },
     {
         id: "complaints",
         label: "User Complaints",
         description: "Review and resolve consumer complaints, about hotels, activity-spots, & guides.",
+        hash: "complain_management",
     },
 ];
+
+const HASH_TO_TAB: Record<string, ManagementTabId> = Object.fromEntries(
+    MANAGEMENT_TABS.map((tab) => [tab.hash, tab.id])
+) as Record<string, ManagementTabId>;
+
+function getLocationHash(): string {
+    if (typeof window === "undefined") return "";
+    return window.location.hash.replace(/^#/, "");
+}
+
+function scrollToHashTarget(hash: string): boolean {
+    if (!hash) return false;
+    const el = document.getElementById(hash);
+    if (!el) return false;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    return true;
+}
+
+function preserveViewportScroll() {
+    const y = window.scrollY;
+    const restore = () => window.scrollTo(0, y);
+    restore();
+    requestAnimationFrame(restore);
+    window.setTimeout(restore, 0);
+    window.setTimeout(restore, 50);
+}
 
 function TabSwitchContainer({
     title,
@@ -60,7 +92,7 @@ function TabSwitchContainer({
     const currentTab = tabs.find((tab) => tab.id === activeTab) || tabs[0];
 
     return (
-        <div className="w-full theme-text mt-8 mb-4">
+        <div className="w-full theme-text mt-8 mb-4" id="management_tabs">
             <h3 className="theme-text-teal font-semibold mr-5 mb-4">{title}</h3>
 
             <div className="rounded-xl theme-outline bg-section overflow-hidden">
@@ -117,7 +149,7 @@ function TabSwitchContainer({
 
                 <div className="py-4 px-2 md:p-6" role="tabpanel">
                     <div
-                        className="mb-5 pb-4 border-b"
+                        className="mb-2 pb-2"
                         style={{ borderColor: "var(--theme-deep-green)" }}
                     >
                         <h2 className="text-2xl font-bold theme-text-teal">
@@ -144,6 +176,97 @@ export default function MasterAdminDashboard() {
 
     const [managementTab, setManagementTab] =
         useState<ManagementTabId>("locations");
+    const pendingMenuScrollHashRef = useRef<string | null>(null);
+
+    const applyHashFromUrl = useCallback((options?: { scroll?: boolean }) => {
+        const hash = getLocationHash();
+        if (!hash || !HASH_TO_TAB[hash]) return;
+
+        setManagementTab(HASH_TO_TAB[hash]);
+
+        if (options?.scroll) {
+            pendingMenuScrollHashRef.current = hash;
+            window.setTimeout(() => {
+                if (
+                    pendingMenuScrollHashRef.current === hash &&
+                    scrollToHashTarget(hash)
+                ) {
+                    pendingMenuScrollHashRef.current = null;
+                }
+            }, 0);
+        }
+    }, []);
+
+    const handleTabChange = useCallback((tabId: ManagementTabId) => {
+        pendingMenuScrollHashRef.current = null;
+        preserveViewportScroll();
+        setManagementTab(tabId);
+    }, []);
+
+    useEffect(() => {
+        applyHashFromUrl({ scroll: true });
+
+        const onMenuHashNav = () => applyHashFromUrl({ scroll: true });
+        window.addEventListener("hashchange", onMenuHashNav);
+        window.addEventListener("popstate", onMenuHashNav);
+
+        const { pushState, replaceState } = window.history;
+        const hashFromHistoryUrl = (url: string | URL | null | undefined) => {
+            const urlStr = typeof url === "string" ? url : url?.toString?.() ?? "";
+            if (!urlStr.includes("#")) return "";
+            return urlStr.split("#")[1]?.split("?")[0] ?? "";
+        };
+
+        const notifyIfKnownHash = (url: string | URL | null | undefined) => {
+            const hash = hashFromHistoryUrl(url);
+            if (!hash || !HASH_TO_TAB[hash]) return;
+            window.setTimeout(() => applyHashFromUrl({ scroll: true }), 0);
+        };
+
+        window.history.pushState = function (...args) {
+            const result = pushState.apply(this, args);
+            notifyIfKnownHash(args[2] as string | URL | null | undefined);
+            return result;
+        };
+        window.history.replaceState = function (...args) {
+            const result = replaceState.apply(this, args);
+            notifyIfKnownHash(args[2] as string | URL | null | undefined);
+            return result;
+        };
+
+        return () => {
+            window.removeEventListener("hashchange", onMenuHashNav);
+            window.removeEventListener("popstate", onMenuHashNav);
+            window.history.pushState = pushState;
+            window.history.replaceState = replaceState;
+        };
+    }, [applyHashFromUrl]);
+
+    useEffect(() => {
+        const hash = pendingMenuScrollHashRef.current;
+        if (!hash) return;
+
+        const tryScroll = () => {
+            if (scrollToHashTarget(hash)) {
+                pendingMenuScrollHashRef.current = null;
+                return true;
+            }
+            return false;
+        };
+
+        if (tryScroll()) return;
+
+        const t1 = window.setTimeout(tryScroll, 50);
+        const t2 = window.setTimeout(() => {
+            tryScroll();
+            pendingMenuScrollHashRef.current = null;
+        }, 200);
+
+        return () => {
+            window.clearTimeout(t1);
+            window.clearTimeout(t2);
+        };
+    }, [managementTab]);
 
     if (!isAuthenticated || currentUserRole !== "MASTER_ADMIN") {
         return <></>;
@@ -158,51 +281,51 @@ export default function MasterAdminDashboard() {
                 <h2 className="theme-text-teal">Master Admin Panel</h2>
                 <p className="theme-text-subtle">Site management functions here.</p>
 
-                <div className="flex flex-col space-y-6 my-10" id="enity_management">
-                    <h3 className="theme-text-teal font-semibold mr-5">
+                <div className="flex flex-col space-y-6 my-10" id="entity_management">
+                    <h3 className="theme-text-teal font-semibold mr-5 text-lg md:text-xl">
                         Manage Site Content
                     </h3>
 
                     <div className="flex flex-col w-full md:w-[40%] space-y-3">
-                        <div className="flex justify-between mx-2">
+                        <div className="flex justify-between mx-2 gap-2">
                             <button
-                                className="green-underline-button text-xl"
+                                className="green-underline-button text-lg md:text-xl"
                                 onClick={() => router.push("/hotels")}
                             >
                                 View Hotel List
                             </button>
                             <button
-                                className="green-button"
+                                className="green-button text-sm md:text-base shrink-0"
                                 onClick={() => router.push("/hotels/create")}
                             >
                                 Add new Hotel
                             </button>
                         </div>
 
-                        <div className="flex justify-between mx-2">
+                        <div className="flex justify-between mx-2 gap-2">
                             <button
-                                className="green-underline-button text-xl"
+                                className="green-underline-button text-lg md:text-xl"
                                 onClick={() => router.push("/tour-spots")}
                             >
                                 View Tour Spot List
                             </button>
                             <button
-                                className="green-button"
+                                className="green-button text-sm md:text-base shrink-0"
                                 onClick={() => router.push("/tour-spots/create")}
                             >
                                 Add new Tour Spot
                             </button>
                         </div>
 
-                        <ul className="flex justify-between mx-2">
+                        <ul className="flex justify-between mx-2 gap-2">
                             <button
-                                className="green-underline-button text-xl"
+                                className="green-underline-button text-lg md:text-xl"
                                 onClick={() => router.push("/activity-spots")}
                             >
                                 View Activity Spot List
                             </button>
                             <button
-                                className="green-button"
+                                className="green-button text-sm md:text-base shrink-0"
                                 onClick={() => router.push("/activity-spots/create")}
                             >
                                 Add new Activity Spot
@@ -211,15 +334,15 @@ export default function MasterAdminDashboard() {
 
                         <DivGap />
 
-                        <ul className="flex justify-between mx-2">
+                        <ul className="flex justify-between mx-2 gap-2">
                             <button
-                                className="green-underline-button text-xl"
+                                className="green-underline-button text-lg md:text-xl"
                                 onClick={() => router.push("/tour-builder/tours")}
                             >
                                 View Tour Plan Templates List
                             </button>
                             <button
-                                className="green-button"
+                                className="green-button text-sm md:text-base shrink-0"
                                 onClick={() => router.push("/tour-builder")}
                             >
                                 Add new Tour Plan Template
@@ -234,25 +357,32 @@ export default function MasterAdminDashboard() {
                     title="Management Tabs"
                     tabs={MANAGEMENT_TABS}
                     activeTab={managementTab}
-                    onTabChange={setManagementTab}
+                    onTabChange={handleTabChange}
                 >
-                    {managementTab === "locations" && <LocationManagerModule />}
-                    {managementTab === "categories" && <CategoryManagerModule />}
-                    {managementTab === "users" && <UserManagerModule />}
+                    {managementTab === "locations" && (
+                        <LocationManagerModule className="scroll-mt-40" />
+                    )}
+                    {managementTab === "categories" && (
+                        <CategoryManagerModule className="scroll-mt-40" />
+                    )}
+                    {managementTab === "users" && (
+                        <UserManagerModule className="scroll-mt-40" />
+                    )}
                     {managementTab === "complaints" && (
                         <ComplaintManagerModule
                             addressedTo={ComplaintAddressedTo.MASTER_ADMIN}
+                            className="scroll-mt-40"
                         />
                     )}
                 </TabSwitchContainer>
 
                 <HorizontalDivider className="mr-5 my-10" />
-
-                <SiteConfigManagerModule />
+                
+                <WalletManagerModule />
 
                 <HorizontalDivider className="mr-5 my-10" />
 
-                <WalletManagerModule />
+                <SiteConfigManagerModule />
             </div>
 
             <HorizontalDivider className="mt-15 md:mt-20" />

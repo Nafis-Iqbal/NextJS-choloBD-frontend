@@ -340,7 +340,7 @@ export const BookedHotelsSection: React.FC<{
   );
 
   return (
-    <section className={`mb-0 ${className || ""}`} id="booked_hotels_section">
+    <section className={`mb-0 ${className || ""}`}>
       <div
         className="mb-3 md:mb-4 pb-2 md:pb-3 border-b-0 md:border-b"
         style={{ borderColor: "var(--theme-deep-green)" }}

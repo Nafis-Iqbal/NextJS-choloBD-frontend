@@ -60,9 +60,11 @@ function getStatusBadge(status: BookingStatus) {
 export const EarningsSummarySection = ({
   hotelId,
   className,
+  id,
 }: {
   hotelId: string;
   className?: string;
+  id?: string;
 }) => {
   const { data: bookingsResponse, isLoading } = HotelBookingApi.useGetBookingsRQ(
     `hotelId=${hotelId}`
@@ -90,7 +92,7 @@ export const EarningsSummarySection = ({
 
   if (isLoading) {
     return (
-      <section className={`mb-8 ${className || ""}`}>
+      <section className={`mb-8 ${className || ""}`} id={id}>
         <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
           Earnings Summary
         </h2>
@@ -100,7 +102,7 @@ export const EarningsSummarySection = ({
   }
 
   return (
-    <section className={`mb-8 ${className || ""}`}>
+    <section className={`mb-8 ${className || ""}`} id={id}>
       <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
         Earnings Summary
       </h2>

@@ -18,11 +18,15 @@ type HotelProfile = {
   rating: number;
 };
 
-export const HotelProfileSection: React.FC<{ profile: HotelProfile; className?: string }> = ({ profile, className }) => {
+export const HotelProfileSection: React.FC<{
+  profile: HotelProfile;
+  className?: string;
+  id?: string;
+}> = ({ profile, className, id }) => {
   const router = useRouter();
 
   return (
-    <section className={`mb-8 ${className}`}>
+    <section className={`mb-8 ${className}`} id={id}>
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold theme-text">Hotel Profile</h2>
         <button

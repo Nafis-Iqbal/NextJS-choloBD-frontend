@@ -1,6 +1,13 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 import { FaInfoCircle } from "react-icons/fa";
 
+/** Thin theme-aware field outline — keeps inputs visible against card/section backgrounds */
+const themeFieldBorder = (hasError = false): React.CSSProperties => ({
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: hasError ? "#DC2626" : "var(--theme-deep-green)",
+});
+
 type HelpInfoProps = {
     helpInfo?: string;
 };
@@ -133,6 +140,7 @@ export const CustomMiniTextInput = forwardRef<HTMLInputElement, CustomInputProps
         labelStyle,
         helpInfo = "",
         error,
+        style,
         ...rest
     } = props;
 
@@ -142,16 +150,16 @@ export const CustomMiniTextInput = forwardRef<HTMLInputElement, CustomInputProps
             <input
                 className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
                 placeholder={placeholderText}
+                ref={ref}
+                {...rest}
                 style={{
                     textIndent: "6px",
                     backgroundColor: "var(--theme-input-bg)",
                     color: "var(--theme-text)",
-                    borderWidth: "1px",
-                    borderColor: "var(--theme-deep-green)",
                     "--tw-ring-color": "var(--theme-teal)",
+                    ...style,
+                    ...themeFieldBorder(Boolean(error)),
                 } as React.CSSProperties & { "--tw-ring-color": string }}
-                ref={ref}
-                {...rest}
             />
         </div>
     );
@@ -169,6 +177,7 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
         labelStyle,
         helpInfo = "",
         error,
+        style,
         ...rest
     } = props;
 
@@ -184,17 +193,17 @@ export const CustomTextInput = forwardRef<HTMLInputElement, CustomInputProps>((p
             <input
                 className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
                 placeholder={placeholderText}
+                ref={ref}
+                {...rest}
                 style={{
                     textIndent: "6px",
                     backgroundColor: "var(--theme-input-bg)",
                     color: "var(--theme-text)",
-                    borderWidth: "1px",
-                    borderColor: "var(--theme-deep-green)",
                     outlineColor: "var(--theme-teal)",
                     "--tw-ring-color": "var(--theme-teal)",
+                    ...style,
+                    ...themeFieldBorder(Boolean(error)),
                 } as React.CSSProperties & { "--tw-ring-color": string }}
-                ref={ref}
-                {...rest}
             />
 
             {error && (
@@ -231,6 +240,7 @@ export const CustomTextAreaInput = forwardRef<HTMLTextAreaElement, CustomTextAre
         labelStyle,
         helpInfo = "",
         error,
+        style,
         ...rest
     } = props;
 
@@ -241,17 +251,17 @@ export const CustomTextAreaInput = forwardRef<HTMLTextAreaElement, CustomTextAre
             <textarea
                 className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
                 placeholder={placeholderText}
+                ref={ref}
+                {...rest}
                 style={{
                     textIndent: "6px",
                     backgroundColor: "var(--theme-input-bg)",
                     color: "var(--theme-text)",
-                    borderWidth: "1px",
-                    borderColor: "var(--theme-deep-green)",
                     outlineColor: "var(--theme-teal)",
                     "--tw-ring-color": "var(--theme-teal)",
+                    ...style,
+                    ...themeFieldBorder(Boolean(error)),
                 } as React.CSSProperties & { "--tw-ring-color": string }}
-                ref={ref}
-                {...rest}
             />
 
             {error && (
@@ -295,6 +305,7 @@ export const CustomSelectInput = forwardRef<HTMLSelectElement, CustomSelectProps
         error,
         labelStyle,
         helpInfo = "",
+        style,
         ...rest
     } = props;
 
@@ -304,16 +315,16 @@ export const CustomSelectInput = forwardRef<HTMLSelectElement, CustomSelectProps
 
             <select
                 className={`p-1 rounded-sm focus:outline-none focus:ring-2 ${className}`}
+                ref={ref}
+                {...rest}
                 style={{
-                    borderWidth: "1px",
-                    borderColor: "var(--theme-deep-green)",
                     backgroundColor: "var(--theme-input-bg)",
                     color: "var(--theme-text)",
                     outlineColor: "var(--theme-teal)",
                     "--tw-ring-color": "var(--theme-teal)",
+                    ...style,
+                    ...themeFieldBorder(Boolean(error)),
                 } as React.CSSProperties & { "--tw-ring-color": string }}
-                ref={ref}
-                {...rest}
             >
                 {options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -429,8 +440,7 @@ export const CustomDateInput = forwardRef<HTMLInputElement, CustomInputProps>((p
                 <div
                     className="w-full h-full px-2 py-2 rounded-sm flex items-center transition-all"
                     style={{
-                        borderWidth: "1px",
-                        borderColor: error ? "#DC2626" : "var(--theme-deep-green)",
+                        ...themeFieldBorder(Boolean(error)),
                         backgroundColor: "var(--theme-input-bg)",
                         color: "var(--theme-text)",
                     }}
@@ -538,10 +548,13 @@ export const CustomDatePicker = forwardRef<HTMLInputElement, CustomDatePickerPro
                 />
 
                 <div
-                    className="w-full h-full px-2 py-2 border rounded-lg bg-white text-black flex items-center transition-all"
+                    className="w-full h-full px-2 py-2 rounded-lg flex items-center transition-all"
                     style={{
-                        borderColor: error ? "#DC2626" : "var(--theme-deep-green)",
-                        backgroundColor: disabled ? "#f3f4f6" : "white",
+                        ...themeFieldBorder(Boolean(error)),
+                        backgroundColor: disabled
+                            ? "color-mix(in srgb, var(--theme-input-bg) 70%, var(--theme-card-bg))"
+                            : "var(--theme-input-bg)",
+                        color: "var(--theme-text)",
                     }}
                 >
                     {disabled && disabledText ? (
@@ -567,7 +580,7 @@ export const CustomDatePicker = forwardRef<HTMLInputElement, CustomDatePickerPro
                                         );
                                     })()
                                 ) : (
-                                    <span className="text-sm text-gray-500">
+                                    <span className="text-sm" style={{ color: "var(--theme-text-subtle)" }}>
                                         {placeholder}
                                     </span>
                                 )

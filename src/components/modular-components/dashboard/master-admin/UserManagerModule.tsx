@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useMemo, useState, type ReactNode } from "react"
+import { useMemo, useState } from "react"
 import { Role, UserStatus, PaymentStatus, ServiceType } from "@/types/enums"
 import { UserApi } from "@/services/api"
 import { filterUsersSchema } from "@/validators/userValidators"
@@ -14,36 +14,6 @@ import { PaginationControls } from "../user/PaginationControls"
 import { useRouter } from "next/navigation"
 
 const PAGE_SIZE = 50;
-
-const infoCardClass =
-    "w-full shrink-0 rounded-sm md:rounded-md p-4 md:p-5 mb-3 border-0 md:border transition-colors min-h-[7.5rem]";
-
-const infoCardStyle = {
-    backgroundColor: "var(--theme-bg)",
-    borderColor: "var(--theme-deep-green)",
-} as const;
-
-const metaChipClass =
-    "inline-flex items-center px-2.5 py-1 rounded-sm text-xs font-medium";
-
-const MetaChip = ({
-    label,
-    value,
-}: {
-    label: string;
-    value: ReactNode;
-}) => (
-    <span
-        className={metaChipClass}
-        style={{
-            backgroundColor: "var(--theme-section-bg)",
-            color: "var(--theme-text-muted)",
-        }}
-    >
-        <span className="theme-text-subtle mr-1">{label}:</span>
-        <span className="theme-text">{value}</span>
-    </span>
-);
 
 const formatEnumValue = (value: string): string => {
     return value
@@ -94,7 +64,7 @@ export function buildUserQueryString(
     return params.toString();
 }
 
-export const UserManagerModule = () => {
+export const UserManagerModule = ({ className = "" }: { className?: string }) => {
     const router = useRouter();
     const [filters, setFilters] = useState<UserFilter>(defaultFilterValues);
     const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -160,7 +130,7 @@ export const UserManagerModule = () => {
     };
 
     return (
-        <section className="flex flex-col mt-5" id="users_management">
+        <section className={`flex flex-col mt-5 ${className}`} id="users_management">
             <div className="flex mb-2 space-x-5 items-center">
                 <h4 className="theme-text">All Users</h4>
                 <p className="text-sm theme-text-subtle">
@@ -332,10 +302,22 @@ const UserListTableRow = ({
               ? employeeServiceEntityName
               : undefined;
 
+    const isPaid = paymentStatus === PaymentStatus.PAID;
+    const statusColor =
+        userStatus === UserStatus.ACTIVE
+            ? "var(--theme-teal)"
+            : userStatus === UserStatus.BANNED
+              ? "var(--theme-red)"
+              : "var(--theme-star)";
+
     return (
         <article
-            className={`${infoCardClass} cursor-pointer hover:opacity-95`}
-            style={infoCardStyle}
+            className="w-full cursor-pointer px-3 py-3 border-b hover:opacity-95"
+            style={{
+                backgroundColor: "var(--theme-bg)",
+                borderBottomWidth: "1px",
+                borderColor: "var(--theme-deep-green)",
+            }}
             onClick={navigateOnClick}
             onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
@@ -346,44 +328,74 @@ const UserListTableRow = ({
             role="button"
             tabIndex={0}
         >
-            <div className="flex flex-col gap-3 min-w-0">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-base md:text-lg font-semibold theme-text break-words">
-                                {userName}
-                            </h3>
-                            <span className="text-xs theme-text-subtle">#{id}</span>
-                        </div>
-                        <p className="text-sm theme-text-muted break-all mt-1">{email}</p>
-                    </div>
+            {/* Row 1: serial + user name */}
+            <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base theme-text-subtle shrink-0 tabular-nums">
+                    {id}.
+                </span>
+                <p className="text-base md:text-lg font-semibold theme-text truncate leading-snug">
+                    {userName}
+                </p>
+            </div>
 
-                    <span className="text-xs theme-text-subtle shrink-0">
-                        Joined {new Date(createdAt).toDateString()}
-                    </span>
-                </div>
+            {/* Row 2: email · role */}
+            <div className="mt-1.5 pl-6 flex flex-wrap items-center gap-x-2 gap-y-1 min-w-0">
+                <span className="text-sm theme-text-muted truncate">
+                    {email}
+                </span>
+                <span className="theme-text-subtle text-sm">·</span>
+                <span
+                    className="text-sm font-bold shrink-0"
+                    style={{ color: "var(--theme-teal)" }}
+                >
+                    {formatEnumValue(role)}
+                </span>
+            </div>
 
-                <div className="flex flex-wrap gap-1.5">
-                    <MetaChip label="Role" value={formatEnumValue(role)} />
-                    <MetaChip label="Status" value={formatEnumValue(userStatus)} />
-                    <MetaChip label="Payment" value={formatEnumValue(paymentStatus)} />
-                    <MetaChip
-                        label="Wallet"
-                        value={walletBalance >= 0 ? `৳ ${walletBalance.toLocaleString()}` : "N/A"}
-                    />
-                    {phoneNumber && (
-                        <MetaChip label="Phone" value={phoneNumber} />
-                    )}
-                    {resolvedServiceType && (
-                        <MetaChip
-                            label="Service"
-                            value={formatEnumValue(resolvedServiceType)}
-                        />
-                    )}
-                    {resolvedCompanyName && (
-                        <MetaChip label="Company" value={resolvedCompanyName} />
-                    )}
-                </div>
+            {/* Row 3: service type · service name */}
+            <div className="mt-1 pl-6 flex flex-wrap items-center gap-x-2 gap-y-0.5 min-w-0 text-sm">
+                <span className="theme-text-subtle shrink-0">Service:</span>
+                <span className="theme-text font-medium">
+                    {resolvedServiceType
+                        ? formatEnumValue(resolvedServiceType)
+                        : "N/A"}
+                </span>
+                <span className="theme-text-subtle">·</span>
+                <span className="theme-text-muted truncate">
+                    {resolvedCompanyName || "—"}
+                </span>
+            </div>
+
+            {/* Row 4: status · payment · wallet · phone · joined */}
+            <div className="mt-1.5 pl-6 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm min-w-0">
+                <span className="font-medium shrink-0" style={{ color: statusColor }}>
+                    {formatEnumValue(userStatus)}
+                </span>
+                <span className="theme-text-subtle">·</span>
+                <span
+                    className="font-bold shrink-0"
+                    style={{
+                        color: isPaid ? "var(--theme-teal)" : "var(--theme-red)",
+                    }}
+                >
+                    {formatEnumValue(paymentStatus)}
+                </span>
+                <span className="theme-text-subtle">·</span>
+                <span className="theme-text shrink-0">
+                    {walletBalance >= 0
+                        ? `৳ ${walletBalance.toLocaleString()}`
+                        : "Wallet N/A"}
+                </span>
+                {phoneNumber && (
+                    <>
+                        <span className="theme-text-subtle">·</span>
+                        <span className="theme-text-muted shrink-0">{phoneNumber}</span>
+                    </>
+                )}
+                <span className="theme-text-subtle">·</span>
+                <span className="theme-text-subtle shrink-0">
+                    Joined {new Date(createdAt).toDateString()}
+                </span>
             </div>
         </article>
     )

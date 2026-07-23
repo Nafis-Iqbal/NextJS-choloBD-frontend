@@ -28,7 +28,7 @@ function CommunityPageContent() {
     const actionBarContainerRef = useRef<HTMLDivElement>(null);
 
     // Get current user
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
+    const { data: authResponse, isLoading: isAuthLoading } = AuthApi.useGetUserAuthenticationRQ(true);
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
     const currentUserRole = authResponse?.data?.userRole;
@@ -85,17 +85,39 @@ function CommunityPageContent() {
 
     const handleOpenCreateModal = () => {
         if (!isAuthenticated) {
-            router.push('/login');
+            router.push(
+                `/login?redirect=${encodeURIComponent('/community?createPost=1')}`
+            );
             return;
         }
         setIsCreateModalOpen(true);
+        if (searchParams.get('createPost') !== '1') {
+            router.replace('/community?createPost=1', { scroll: false });
+        }
     };
 
     const handleCloseCreateModal = () => {
         setIsCreateModalOpen(false);
-        // Refetch posts to show the newly created one
+        if (searchParams.get('createPost') === '1') {
+            router.replace('/community', { scroll: false });
+        }
         refetch();
     };
+
+    // Open create-post modal from Quick Actions / deep links: /community?createPost=1
+    useEffect(() => {
+        const shouldOpenCreateModal = searchParams.get('createPost') === '1';
+        if (!shouldOpenCreateModal || isAuthLoading) return;
+
+        if (!isAuthenticated) {
+            router.replace(
+                `/login?redirect=${encodeURIComponent('/community?createPost=1')}`
+            );
+            return;
+        }
+
+        setIsCreateModalOpen(true);
+    }, [searchParams, isAuthenticated, isAuthLoading, router]);
 
     // Extract images from first 5 posts
     const heroImages = posts.slice(0, 5).flatMap(post => 

@@ -38,10 +38,6 @@ export default function AdminDashboard() {
         <section
             className="flex flex-col p-2 font-sans"
             id="service_admin_dashboard"
-            style={{
-                backgroundColor: "var(--theme-section-bg)",
-                color: "var(--theme-text)",
-            }}
         >
             <div className="md:ml-4 flex flex-col space-y-2">
                 {currentUserServiceType === "HOTEL_BOOKING" ? (

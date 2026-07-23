@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { AuthApi, NotificationApi, WalletApi } from "@/services/api";
 import useLogout from "@/hooks/UtilHooks/logoutHooks";
+import { Role } from "@/types/enums";
 
 import { Menu } from "lucide-react";
 import { MotionDropdownMenu } from "./DropdownMenu";
@@ -19,18 +20,54 @@ import { SearchInputBar } from "./SearchInputBar";
 import { NextImage } from "../custom-elements/UIUtilities";
 
 
-const THEMES = ['forest', 'dusk', 'crimson', 'violet', 'amber', 'iceBlue', 'rose'] as const;
+const THEMES = ['dusk', 'crimson', 'iceBlue', 'rose'] as const;
 type Theme = typeof THEMES[number];
 
 const THEME_LABELS: Record<Theme, string> = {
-    forest: '🌿 Forest',
     dusk:   '🌇 Dusk',
     crimson: '🩸 Crimson',
-    violet: '🍇 Violet',
-    amber: '🍂 Amber',
     iceBlue: '🧊 Ice Blue',
     rose: '🌹 Rose',
 };
+
+function getRoleBadgeStyle(role?: Role | string | null): {
+    backgroundColor: string;
+    color: string;
+    borderColor: string;
+} {
+    switch (role) {
+        case Role.MASTER_ADMIN:
+            return {
+                backgroundColor: "#D4A017",
+                color: "#1a1a1a",
+                borderColor: "#B8860B",
+            };
+        case Role.SERVICE_ADMIN:
+            return {
+                backgroundColor: "#7C3AED",
+                color: "#ffffff",
+                borderColor: "#6D28D9",
+            };
+        case Role.EMPLOYEE:
+            return {
+                backgroundColor: "#16A34A",
+                color: "#ffffff",
+                borderColor: "#15803D",
+            };
+        case Role.USER:
+        default:
+            return {
+                backgroundColor: "rgba(255, 255, 255, 0.22)",
+                color: "#ffffff",
+                borderColor: "rgba(255, 255, 255, 0.55)",
+            };
+    }
+}
+
+function formatRoleBadgeLabel(role?: Role | string | null): string {
+    if (!role) return "USER";
+    return String(role).replace(/_/g, " ").toUpperCase();
+}
 
 const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) => {
     const router = useRouter();
@@ -40,6 +77,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
     const isAuthenticated = authResponse?.data?.isAuthenticated || false;
     const currentUserId = authResponse?.data?.userId;
     const currentUserName = authResponse?.data?.userName;
+    const currentUserRole = authResponse?.data?.userRole;
 
     const { data: walletResponse } = WalletApi.useGetMyWalletRQ();
     const walletBalance = walletResponse?.data?.balance || 0;
@@ -48,7 +86,7 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
     const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
     const [isSideBarMenuOpen, setIsSideBarMenuOpen] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-    const [currentTheme, setCurrentTheme] = useState<Theme>('forest');
+    const [currentTheme, setCurrentTheme] = useState<Theme>('dusk');
     const [navOpacity, setNavOpacity] = useState(0);
 
     const { data: unreadResponse } = NotificationApi.useGetUnreadNotificationCountRQ(
@@ -58,8 +96,8 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
 
     // Load persisted theme on mount
     useEffect(() => {
-        const saved = (localStorage.getItem('cholobd-theme') ?? 'forest') as Theme;
-        const valid = THEMES.includes(saved) ? saved : 'forest';
+        const saved = (localStorage.getItem('cholobd-theme') ?? 'dusk') as Theme;
+        const valid = THEMES.includes(saved) ? saved : 'dusk';
         document.documentElement.setAttribute('data-theme', valid);
         setCurrentTheme(valid);
     }, []);
@@ -120,32 +158,15 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
         router.push("/");
     }
 
-    // Helper to convert hex color to RGB object
-    const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result
-            ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16),
-            }
-            : { r: 0, g: 0, b: 0 };
-    };
-
-    // Helper to read CSS variable value from current theme
-    const getCSSVariableValue = (varName: string): string => {
-        if (typeof window === 'undefined') return '#000000';
-        return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-    };
-
-    // Dynamically get nav color from CSS variables (updated whenever currentTheme changes)
-    const navColor = hexToRgb(getCSSVariableValue('--theme-teal'));
-    
     return (
         <div 
             className="fixed top-0 z-100 md:flex items-center p-1 w-[100%] h-[55px] md:h-[70px]"
             style={{
-                backgroundColor: `rgba(${navColor.r}, ${navColor.g}, ${navColor.b}, ${affectOpacity ? navOpacity : 1.0})`
+                // Use CSS vars only — reading getComputedStyle(window) during render
+                // caused server/client hydration mismatches on every page with Navbar.
+                backgroundColor: affectOpacity
+                    ? `color-mix(in srgb, var(--theme-teal) ${Math.round(navOpacity * 100)}%, transparent)`
+                    : "var(--theme-teal)",
             }}
         >
             <div className="relative flex justify-between items-center w-[100%] h-full bg-transparent">
@@ -310,14 +331,27 @@ const Navbar: React.FC<{affectOpacity?: boolean}> = ({affectOpacity = false}) =>
                                 <Link className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125" href={`/user_profile/${currentUserId}`}>
                                     <IconWithBadge Icon={FaUser} badgeValue={2} iconClassName="text-white text-xl"/>
                                     {currentUserName && (
-                                        <span className="text-xs font-normal">{currentUserName.length > 7 ? `${currentUserName.slice(0, 7)}.` : currentUserName}!</span>
+                                        <span className="text-xs font-normal">{currentUserName.length > 7 ? `${currentUserName.slice(0, 7)}.` : currentUserName}</span>
                                     )}
                                 </Link>
+                                {currentUserRole !== Role.USER && (
+                                <div
+                                    className="flex flex-col items-center justify-center px-1.5 py-1"
+                                    title={formatRoleBadgeLabel(currentUserRole)}
+                                >
+                                    <span
+                                        className="inline-flex items-center justify-center max-w-[7.5rem] px-2 py-0.5 rounded-md text-[10px] lg:text-[11px] font-bold tracking-wide leading-tight text-center whitespace-nowrap overflow-hidden text-ellipsis border"
+                                        style={getRoleBadgeStyle(currentUserRole)}
+                                    >
+                                        {formatRoleBadgeLabel(currentUserRole)}
+                                    </span>
+                                </div>
+                                )}
 
                                 <div className="flex flex-col items-center justify-center bg-transparent">
-                                    {isAuthenticated && (<p className="h-1/2 text-white font-semibold">{walletBalance.toLocaleString()} C</p>)}
+                                    {isAuthenticated && (<p className="h-1/2 text-white text-sm font-semibold">{walletBalance.toLocaleString()} C</p>)}
                                     <button 
-                                        className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-gray-300/30 text-white text-sm text-center rounded-sm"
+                                        className="h-1/2 p-1 bg-transparent hover:scale-110 hover:bg-gray-300/30 text-white text-xs text-center rounded-sm"
                                         onClick={() => router.push("wallet/wallet-recharge")}
                                     >
                                         Get Credits!

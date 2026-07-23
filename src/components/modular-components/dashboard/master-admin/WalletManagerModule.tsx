@@ -109,7 +109,7 @@ const RechargeOptionListTableRow = ({
     const truncatedDescription = description.length > 50 ? description.substring(0, 50) + '...' : description;
     
     return (
-        <div className="flex p-2 w-full theme-outline hover:bg-gray-100 text-center" onClick={() => navigateOnClick()}>
+        <div className="flex p-2 w-full hover:bg-gray-100 text-center" onClick={() => navigateOnClick()}>
             <p className="w-[5%]">{id}</p>
             <p className="w-[25%] hover:cursor-pointer px-2">{title}</p>
             <p className="w-[30%] px-2" title={description}>{truncatedDescription}</p>

@@ -69,7 +69,8 @@ function getStatusBadge(status: BookingStatus) {
 export const EarningsSummarySection: React.FC<{
   activitySpotId: string;
   className?: string;
-}> = ({ activitySpotId, className }) => {
+  id?: string;
+}> = ({ activitySpotId, className, id }) => {
   const { data: bookingsResponse, isLoading } =
     ActivitySpotBookingApi.useGetActivityBookingsRQ(
       activitySpotId ? { activitySpotId } : undefined
@@ -94,7 +95,7 @@ export const EarningsSummarySection: React.FC<{
 
   if (isLoading) {
     return (
-      <section className={`mb-8 ${className || ""}`}>
+      <section className={`mb-8 ${className || ""}`} id={id}>
         <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4">
           Earnings Summary
         </h2>
@@ -104,10 +105,10 @@ export const EarningsSummarySection: React.FC<{
   }
 
   return (
-    <section className={`mb-8 ${className || ""}`}>
-      <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
+    <section className={`mb-8 ${className || ""}`} id={id}>
+      {/* <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
         Earnings Summary
-      </h2>
+      </h2> */}
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6">
         <div className="theme-card rounded-xl p-3 sm:p-4">

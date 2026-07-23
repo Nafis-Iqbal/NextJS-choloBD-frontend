@@ -289,10 +289,11 @@ export const TripsSection: React.FC<{
   title: string;
   className?: string;
   showFakeData?: boolean;
-}> = ({ trips, title, className }) => {
+  id?: string;
+}> = ({ trips, title, className, id }) => {
   if (!trips || trips.length === 0) {
     return (
-      <section className={`mb-8 ${className || ""}`}>
+      <section className={`mb-8 ${className || ""}`} id={id}>
         <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4">{title}</h2>
         <div className="theme-card rounded-xl p-6 text-center theme-text-subtle">
           No {title.toLowerCase()} at the moment
@@ -302,7 +303,7 @@ export const TripsSection: React.FC<{
   }
 
   return (
-    <section className={`mb-8 ${className || ""}`}>
+    <section className={`mb-8 ${className || ""}`} id={id}>
       <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4">{title}</h2>
       <div
         className="rounded-xl overflow-y-auto max-h-[80vh] md:max-h-[50vh] min-h-[40vh] p-3 sm:p-4"
@@ -359,7 +360,8 @@ export const TripsSection: React.FC<{
 
 export const BookmarksSection: React.FC<{
   className?: string;
-}> = ({ className }) => {
+  id?: string;
+}> = ({ className, id = "bookmarks_section" }) => {
   const [activeTab, setActiveTab] = useState<BookmarkType>(
     BOOKMARK_SECTIONS[0].type
   );
@@ -369,7 +371,7 @@ export const BookmarksSection: React.FC<{
     BOOKMARK_SECTIONS[0];
 
   return (
-    <div className={`${className || ""}`} id="bookmarks_section">
+    <div className={`${className || ""}`} id={id}>
       <div
         className="rounded-none md:rounded-md bg-section overflow-hidden border-0 md:border"
         style={{ borderColor: "var(--theme-deep-green)" }}

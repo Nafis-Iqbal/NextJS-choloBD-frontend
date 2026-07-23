@@ -27,6 +27,8 @@ export interface ComplaintManagerModuleProps {
     /** Optional entity id for SERVICE_ADMIN header context */
     targetEntityId?: string;
     className?: string;
+    /** Root element id for sidebar hash navigation */
+    sectionId?: string;
 }
 
 const formatEnumValue = (value: string): string => {
@@ -171,6 +173,7 @@ export const ComplaintManagerModule = ({
     addressedTo,
     targetType: propTargetType,
     className = "",
+    sectionId = "complain_management",
 }: ComplaintManagerModuleProps) => {
     const isMasterAdminQueue =
         addressedTo === ComplaintAddressedTo.MASTER_ADMIN;
@@ -218,29 +221,26 @@ export const ComplaintManagerModule = ({
     return (
         <section
             className={`flex flex-col ${className}`}
-            id="complain_management"
+            id={sectionId}
         >
-            <div className="flex space-x-5 mb-2 items-center">
-                <h4 className="theme-text">{title}</h4>
-            </div>
-
             <TableLayout className="">
-                <div className="overflow-x-auto w-full">
-                    <div className="min-w-[800px]">
+                <div className="w-full md:overflow-x-auto">
+                    <div className="w-full md:min-w-[800px]">
                         <div
-                            className="flex theme-outline p-2 text-left"
+                            className="hidden md:flex theme-outline p-2 text-left"
                             style={{ backgroundColor: "var(--theme-card-bg)" }}
                         >
-                            <p className={isMasterAdminQueue ? "w-[18%]" : "w-[22%]"}>
+                            <p className="w-[6%]">Sr.</p>
+                            <p className={isMasterAdminQueue ? "w-[16%]" : "w-[20%]"}>
                                 Title
                             </p>
-                            <p className={isMasterAdminQueue ? "w-[28%]" : "w-[33%]"}>
+                            <p className={isMasterAdminQueue ? "w-[26%]" : "w-[31%]"}>
                                 Description
                             </p>
                             {isMasterAdminQueue && (
                                 <p className="w-[14%]">Related Entity</p>
                             )}
-                            <p className={isMasterAdminQueue ? "w-[16%]" : "w-[20%]"}>
+                            <p className={isMasterAdminQueue ? "w-[14%]" : "w-[18%]"}>
                                 Complained by
                             </p>
                             <p className="w-[12%]">Status</p>
@@ -264,9 +264,10 @@ export const ComplaintManagerModule = ({
                                     tdColSpan={1}
                                 />
                             ) : (
-                                complaints.map((complaint) => (
+                                complaints.map((complaint, index) => (
                                     <ComplaintListTableRow
                                         key={complaint.id}
+                                        id={(page - 1) * limit + index + 1}
                                         complaintId={complaint.id}
                                         title={complaint.title}
                                         description={complaint.description}
@@ -345,6 +346,7 @@ export const ComplaintManagerModule = ({
 };
 
 const ComplaintListTableRow = ({
+    id,
     complaintId,
     title,
     description,
@@ -353,6 +355,7 @@ const ComplaintListTableRow = ({
     complaintStatus,
     createdAt,
 }: {
+    id: number;
     complaintId: string;
     title: string;
     description: string;
@@ -363,58 +366,134 @@ const ComplaintListTableRow = ({
 }) => {
     const router = useRouter();
     const showTarget = target !== undefined;
+    const openComplaint = () => router.push(`/complaint/${complaintId}`);
+
+    const statusColor =
+        complaintStatus === ComplaintStatus.OPEN
+            ? "var(--theme-teal)"
+            : complaintStatus === ComplaintStatus.CLOSED
+              ? "var(--theme-text-subtle)"
+              : "var(--theme-red)";
+
+    const rowInteractionProps = {
+        role: "link" as const,
+        tabIndex: 0,
+        onClick: openComplaint,
+        onKeyDown: (e: React.KeyboardEvent) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openComplaint();
+            }
+        },
+        title: "Open complaint details",
+    };
 
     return (
-        <div
-            role="link"
-            tabIndex={0}
-            onClick={() => router.push(`/complaint/${complaintId}`)}
-            onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    router.push(`/complaint/${complaintId}`);
-                }
-            }}
-            className="flex p-2 w-full theme-outline text-left cursor-pointer transition-colors"
-            style={{
-                borderColor: "var(--theme-deep-green)",
-                borderBottomWidth: "1px",
-            }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--theme-card-bg)";
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-            }}
-            title="Open complaint details"
-        >
-            <p
-                className={`${showTarget ? "w-[18%]" : "w-[22%]"} truncate pr-2`}
-                title={title}
+        <>
+            {/* Mobile: info block */}
+            <article
+                {...rowInteractionProps}
+                className="md:hidden w-full cursor-pointer px-3 py-3 border-b hover:opacity-95"
+                style={{
+                    backgroundColor: "var(--theme-bg)",
+                    borderBottomWidth: "1px",
+                    borderColor: "var(--theme-deep-green)",
+                }}
             >
-                {title}
-            </p>
-            <p
-                className={`${showTarget ? "w-[28%]" : "w-[33%]"} truncate pr-2 theme-text-muted`}
-                title={description}
-            >
-                {truncateText(description, 120)}
-            </p>
-            {showTarget && (
-                <p className="w-[14%] truncate pr-2" title={target}>
-                    {target}
+                {/* Row 1: serial + title */}
+                <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-base theme-text-subtle shrink-0 tabular-nums">
+                        {id}.
+                    </span>
+                    <p className="text-base font-semibold theme-text truncate leading-snug">
+                        {title}
+                    </p>
+                </div>
+
+                {/* Row 2: description */}
+                <p className="mt-1.5 pl-6 text-sm theme-text-muted line-clamp-2 leading-snug">
+                    {truncateText(description, 140)}
                 </p>
-            )}
-            <p
-                className={`${showTarget ? "w-[16%]" : "w-[20%]"} truncate pr-2`}
-                title={complainingUserName}
+
+                {/* Row 3: target · complained by */}
+                <div className="mt-1.5 pl-6 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm min-w-0">
+                    {showTarget && (
+                        <>
+                            <span
+                                className="theme-text font-medium truncate"
+                                title={target}
+                            >
+                                {target}
+                            </span>
+                            <span className="theme-text-subtle">·</span>
+                        </>
+                    )}
+                    <span className="theme-text-muted truncate" title={complainingUserName}>
+                        by {complainingUserName}
+                    </span>
+                </div>
+
+                {/* Row 4: status · submitted */}
+                <div className="mt-1.5 pl-6 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm">
+                    <span className="font-bold shrink-0" style={{ color: statusColor }}>
+                        {formatEnumValue(complaintStatus)}
+                    </span>
+                    <span className="theme-text-subtle">·</span>
+                    <span className="theme-text-subtle shrink-0">
+                        {formatCreatedAt(createdAt)}
+                    </span>
+                </div>
+            </article>
+
+            {/* md+: column row */}
+            <div
+                {...rowInteractionProps}
+                className="hidden md:flex p-2 w-full theme-outline text-left cursor-pointer transition-colors"
+                style={{
+                    borderColor: "var(--theme-deep-green)",
+                    borderBottomWidth: "1px",
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--theme-card-bg)";
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                }}
             >
-                {complainingUserName}
-            </p>
-            <p className="w-[12%] pr-2">{formatEnumValue(complaintStatus)}</p>
-            <p className="w-[12%] theme-text-subtle">
-                {formatCreatedAt(createdAt)}
-            </p>
-        </div>
+                <p className="w-[6%] pr-2 tabular-nums theme-text-subtle">{id}</p>
+                <p
+                    className={`${showTarget ? "w-[16%]" : "w-[20%]"} truncate pr-2`}
+                    title={title}
+                >
+                    {title}
+                </p>
+                <p
+                    className={`${showTarget ? "w-[26%]" : "w-[31%]"} truncate pr-2 theme-text-muted`}
+                    title={description}
+                >
+                    {truncateText(description, 120)}
+                </p>
+                {showTarget && (
+                    <p className="w-[14%] truncate pr-2" title={target}>
+                        {target}
+                    </p>
+                )}
+                <p
+                    className={`${showTarget ? "w-[14%]" : "w-[18%]"} truncate pr-2`}
+                    title={complainingUserName}
+                >
+                    {complainingUserName}
+                </p>
+                <p
+                    className="w-[12%] pr-2 font-semibold"
+                    style={{ color: statusColor }}
+                >
+                    {formatEnumValue(complaintStatus)}
+                </p>
+                <p className="w-[12%] theme-text-subtle">
+                    {formatCreatedAt(createdAt)}
+                </p>
+            </div>
+        </>
     );
 };

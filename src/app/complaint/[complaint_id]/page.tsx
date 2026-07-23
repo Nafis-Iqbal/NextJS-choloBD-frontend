@@ -11,7 +11,6 @@ import {
     ComplaintStatus,
     Role,
 } from "@/types/enums";
-import { CustomTextAreaInput } from "@/components/custom-elements/CustomInputElements";
 
 function getErrorMessage(error: unknown, fallback: string): string {
     if (error instanceof Error && error.message) {
@@ -43,16 +42,6 @@ function getErrorStatus(error: unknown): number | undefined {
     return undefined;
 }
 
-function formatEnumValue(value: string): string {
-    return value
-        .replace(/_/g, " ")
-        .toLowerCase()
-        .replace(/^\w/, (c) => c.toUpperCase())
-        .split(" ")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ");
-}
-
 function formatDateTime(value: Date | string): string {
     const date = typeof value === "string" ? new Date(value) : value;
     if (Number.isNaN(date.getTime())) return "—";
@@ -65,15 +54,22 @@ function formatDateTime(value: Date | string): string {
     });
 }
 
+function statusLabel(status: ComplaintStatus): string {
+    switch (status) {
+        case ComplaintStatus.OPEN:
+            return "Open";
+        case ComplaintStatus.UNSOLVED:
+            return "Unsolved";
+        case ComplaintStatus.CLOSED:
+            return "Closed";
+        default:
+            return status;
+    }
+}
+
 function statusBadgeStyle(status: ComplaintStatus): React.CSSProperties {
     switch (status) {
-        case ComplaintStatus.PENDING:
-            return {
-                backgroundColor: "var(--theme-card-bg)",
-                color: "var(--theme-text-muted)",
-                borderColor: "var(--theme-deep-green)",
-            };
-        case ComplaintStatus.UNDER_REVIEW:
+        case ComplaintStatus.OPEN:
             return {
                 backgroundColor: "var(--theme-teal)",
                 color: "#ffffff",
@@ -98,6 +94,46 @@ function statusBadgeStyle(status: ComplaintStatus): React.CSSProperties {
                 borderColor: "var(--theme-deep-green)",
             };
     }
+}
+function initialsFromName(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "?";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
+
+/** Entity currently handling this complaint (hotel / guide / activity spot / support). */
+function handlerEntityName(complaint: Complaint): string {
+    if (complaint.targetEntityName) {
+        return complaint.targetEntityName;
+    }
+
+    if (complaint.addressedTo === ComplaintAddressedTo.MASTER_ADMIN) {
+        return "CholoBD Support";
+    }
+
+    return "Service team";
+}
+
+/** Staff replies show the company/entity name, not the individual user. */
+function commentAuthorDisplayName(
+    comment: ComplaintComment,
+    entityName: string
+): string {
+    const role = comment.author?.role;
+
+    if (
+        (role === Role.SERVICE_ADMIN || role === Role.EMPLOYEE) &&
+        entityName
+    ) {
+        return entityName;
+    }
+
+    return (
+        comment.authorName ||
+        comment.author?.userName ||
+        "Someone"
+    );
 }
 
 function canAccessComplaint(
@@ -141,6 +177,25 @@ function canAccessComplaint(
     return false;
 }
 
+function Avatar({ name, accent }: { name: string; accent?: boolean }) {
+    return (
+        <div
+            className="shrink-0 w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs font-semibold"
+            style={{
+                backgroundColor: accent
+                    ? "var(--theme-teal)"
+                    : "var(--theme-card-bg)",
+                color: accent ? "#ffffff" : "var(--theme-text)",
+                borderWidth: "1px",
+                borderColor: "var(--theme-deep-green)",
+            }}
+            aria-hidden
+        >
+            {initialsFromName(name)}
+        </div>
+    );
+}
+
 export default function ComplaintDetailPage() {
     const router = useRouter();
     const params = useParams();
@@ -174,27 +229,44 @@ export default function ComplaintDetailPage() {
     );
     const complaint = complaintResponse?.data;
 
-    const {
-        data: commentsResponse,
-        isLoading: isCommentsLoading,
-    } = ComplaintApi.useGetComplaintCommentsRQ(
-        complaintId,
-        isAuthenticated && !!complaintId && !!complaint && !accessDenied
-    );
+    const { data: commentsResponse, isLoading: isCommentsLoading } =
+        ComplaintApi.useGetComplaintCommentsRQ(
+            complaintId,
+            isAuthenticated && !!complaintId && !!complaint && !accessDenied
+        );
     const comments = commentsResponse?.data || [];
 
     const { mutate: addComment, isPending: isSubmittingComment } =
         ComplaintApi.useAddComplaintCommentRQ(
             () => {
                 setCommentText("");
-                openNotificationPopUpMessage("Comment posted.");
+                openNotificationPopUpMessage("Your reply was sent.");
                 queryClient.invalidateQueries({
                     queryKey: ["complaints", complaintId, "comments"],
                 });
             },
             (error: unknown) => {
                 openNotificationPopUpMessage(
-                    getErrorMessage(error, "Failed to post comment.")
+                    getErrorMessage(error, "Couldn't send your reply. Try again.")
+                );
+            }
+        );
+
+    const { mutate: updateComplaintStatus, isPending: isMarkingSolved } =
+        ComplaintApi.useUpdateComplaintStatusRQ(
+            () => {
+                openNotificationPopUpMessage("Complaint marked as solved.");
+                queryClient.invalidateQueries({
+                    queryKey: ["complaints", complaintId],
+                });
+                queryClient.invalidateQueries({ queryKey: ["complaints"] });
+            },
+            (error: unknown) => {
+                openNotificationPopUpMessage(
+                    getErrorMessage(
+                        error,
+                        "Couldn't update complaint status. Try again."
+                    )
                 );
             }
         );
@@ -252,6 +324,36 @@ export default function ComplaintDetailPage() {
         );
     }, [complaint, accessDenied]);
 
+    const canMarkAsSolved = useMemo(() => {
+        if (
+            !complaint ||
+            accessDenied ||
+            complaint.status === ComplaintStatus.CLOSED ||
+            !currentUserId ||
+            !currentUserRole
+        ) {
+            return false;
+        }
+
+        // Complainant cannot mark solved — only the receiving authority
+        if (complaint.complainantUserId === currentUserId) {
+            return false;
+        }
+
+        return canAccessComplaint(complaint, {
+            userId: currentUserId,
+            role: currentUserRole,
+            serviceEntityId: currentUser?.serviceEntityId,
+            employeeServiceEntityId: currentUser?.employeeServiceEntityId,
+        });
+    }, [
+        complaint,
+        accessDenied,
+        currentUserId,
+        currentUserRole,
+        currentUser,
+    ]);
+
     const onSubmitComment = (e: React.FormEvent) => {
         e.preventDefault();
         const content = commentText.trim();
@@ -260,10 +362,22 @@ export default function ComplaintDetailPage() {
         addComment({ complaintId, content });
     };
 
-    if (isAuthLoading || (isAuthenticated && (isUserLoading || isComplaintLoading))) {
+    const onMarkAsSolved = () => {
+        if (!complaintId || isMarkingSolved || !canMarkAsSolved) return;
+
+        updateComplaintStatus({
+            complaintId,
+            data: { status: ComplaintStatus.CLOSED },
+        });
+    };
+
+    if (
+        isAuthLoading ||
+        (isAuthenticated && (isUserLoading || isComplaintLoading))
+    ) {
         return (
             <section className="min-h-[60vh] flex items-center justify-center p-6 theme-text">
-                <p className="theme-text-muted">Loading complaint…</p>
+                <p className="theme-text-muted">Loading conversation…</p>
             </section>
         );
     }
@@ -271,199 +385,265 @@ export default function ComplaintDetailPage() {
     if (accessDenied || isComplaintError || !complaint) {
         return (
             <section className="min-h-[60vh] flex flex-col items-center justify-center gap-4 p-6 theme-text">
-                <h1 className="text-2xl font-bold theme-text-teal">
-                    Complaint not found
+                <h1 className="text-2xl font-bold theme-text">
+                    We couldn&apos;t open this complaint
                 </h1>
                 <p className="theme-text-muted text-center max-w-md">
-                    This complaint does not exist, or you do not have permission
-                    to view it.
+                    It may have been removed, or you might not have access to
+                    view it.
                 </p>
-                <Link href="/" className="green-button px-4 py-2">
-                    Go to homepage
+                <Link href="/" className="theme-btn-teal px-4 py-2 rounded-md">
+                    Back to home
                 </Link>
             </section>
         );
     }
 
+    const authorName =
+        complaint.complainantName ||
+        complaint.complainant?.userName ||
+        complaint.complainant?.email ||
+        "Traveler";
+
+    const isOriginalAuthor = complaint.complainantUserId === currentUserId;
+    const entityName = handlerEntityName(complaint);
+    const isCurrentUserStaff =
+        currentUserRole === Role.SERVICE_ADMIN ||
+        currentUserRole === Role.EMPLOYEE;
+    const composerDisplayName = isCurrentUserStaff
+        ? entityName
+        : currentUser?.userName || currentUser?.firstName || "You";
+
     return (
         <section
-            className="w-full min-h-screen theme-text p-4 md:p-8"
+            className="w-full min-h-screen theme-text px-4 py-8 md:px-8 md:py-10 font-sans"
             id="complaint_detail_page"
         >
-            <div className="max-w-4xl mx-auto flex flex-col gap-6">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <p className="theme-text-subtle text-sm mb-1">
-                            Complaint detail
-                        </p>
-                        <h1 className="text-3xl font-bold theme-text-teal">
-                            {complaint.title}
-                        </h1>
-                    </div>
-
-                    <span
-                        className="px-3 py-1 rounded-md text-sm font-semibold border"
-                        style={statusBadgeStyle(complaint.status)}
-                    >
-                        {formatEnumValue(complaint.status)}
-                    </span>
-                </div>
-
-                <div className="theme-section theme-outline rounded-xl p-4 md:p-6 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <p className="theme-text-subtle">Submitted</p>
-                            <p className="theme-text font-medium">
-                                {formatDateTime(complaint.createdAt)}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="theme-text-subtle">Filed by</p>
-                            <p className="theme-text font-medium">
-                                {complaint.complainantName ||
-                                    complaint.complainant?.userName ||
-                                    complaint.complainant?.email ||
-                                    "Unknown user"}
-                            </p>
-                        </div>
-                        {complaint.targetEntityName && (
-                            <div>
-                                <p className="theme-text-subtle">
-                                    Related entity
-                                </p>
-                                <p className="theme-text font-medium">
-                                    {complaint.targetEntityName}
-                                    {complaint.targetType
-                                        ? ` (${formatEnumValue(complaint.targetType)})`
-                                        : ""}
-                                </p>
-                            </div>
-                        )}
-                        <div>
-                            <p className="theme-text-subtle">Addressed to</p>
-                            <p className="theme-text font-medium">
-                                {formatEnumValue(complaint.addressedTo)}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div
-                        className="pt-4 border-t"
-                        style={{ borderColor: "var(--theme-deep-green)" }}
-                    >
-                        <p className="theme-text-subtle text-sm mb-2">
-                            Description
-                        </p>
-                        <p className="theme-text whitespace-pre-wrap leading-relaxed">
-                            {complaint.description}
-                        </p>
-                    </div>
-
-                    {complaint.adminResponse && (
-                        <div
-                            className="pt-4 border-t"
-                            style={{ borderColor: "var(--theme-deep-green)" }}
+            <div className="max-w-2xl mx-auto">
+                <div className="mb-8 space-y-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                        <span
+                            className="px-2.5 py-1 rounded-full text-xs font-semibold border"
+                            style={statusBadgeStyle(complaint.status)}
                         >
-                            <p className="theme-text-subtle text-sm mb-2">
-                                Admin response
-                            </p>
-                            <p className="theme-text whitespace-pre-wrap">
-                                {complaint.adminResponse}
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                <div className="theme-section theme-outline rounded-xl p-4 md:p-6 space-y-4">
-                    <div className="flex items-center justify-between gap-3">
-                        <h2 className="text-xl font-semibold theme-text-teal">
-                            Discussion
-                        </h2>
+                            {statusLabel(complaint.status)}
+                        </span>
                         <span className="theme-text-subtle text-sm">
-                            {comments.length} comment
-                            {comments.length === 1 ? "" : "s"}
+                            Opened {formatDateTime(complaint.createdAt)}
                         </span>
                     </div>
 
-                    <div className="flex flex-col gap-3 min-h-[180px]">
+                    <p className="text-sm font-semibold theme-text-teal tracking-wide">
+                        {entityName}
+                    </p>
+
+                    <h1 className="text-2xl md:text-3xl font-bold theme-text leading-snug">
+                        {complaint.title}
+                    </h1>
+
+                    <p className="theme-text-muted text-sm">
+                        Complaint submitted by{" "}
+                        <span className="theme-text font-medium">
+                            {authorName}
+                        </span>
+                    </p>
+                </div>
+
+                {/* Original post — thread starter */}
+                <article className="flex gap-3 md:gap-4 pb-8">
+                    <Avatar name={authorName} accent={isOriginalAuthor} />
+                    <div className="min-w-0 flex-1 space-y-2">
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                            <span className="font-semibold theme-text">
+                                {authorName}
+                            </span>
+                            {isOriginalAuthor && (
+                                <span className="text-xs theme-text-teal">
+                                    You
+                                </span>
+                            )}
+                            <span className="text-xs theme-text-subtle">
+                                · {formatDateTime(complaint.createdAt)}
+                            </span>
+                        </div>
+                        <p className="theme-text whitespace-pre-wrap leading-relaxed text-[15px] md:text-base">
+                            {complaint.description}
+                        </p>
+                    </div>
+                </article>
+
+                {complaint.adminResponse && (
+                    <div
+                        className="mb-8 ml-12 md:ml-14 pl-4 py-3"
+                        style={{
+                            borderLeftWidth: "3px",
+                            borderLeftColor: "var(--theme-teal)",
+                        }}
+                    >
+                        <p className="text-xs font-semibold theme-text-teal mb-1">
+                            Official update
+                        </p>
+                        <p className="theme-text whitespace-pre-wrap text-sm leading-relaxed">
+                            {complaint.adminResponse}
+                        </p>
+                    </div>
+                )}
+
+                {/* Replies */}
+                <div
+                    className="pt-2 mb-2"
+                    style={{
+                        borderTopWidth: "1px",
+                        borderTopColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <p className="py-4 text-sm theme-text-muted">
+                        {comments.length === 0
+                            ? "No replies yet"
+                            : `${comments.length} ${
+                                  comments.length === 1 ? "reply" : "replies"
+                              }`}
+                    </p>
+
+                    <div className="flex flex-col">
                         {isCommentsLoading ? (
-                            <p className="theme-text-muted text-sm">
-                                Loading comments…
+                            <p className="theme-text-muted text-sm py-4">
+                                Loading replies…
                             </p>
                         ) : comments.length === 0 ? (
-                            <p className="theme-text-muted text-sm">
-                                No comments yet. Start the conversation below.
+                            <p className="theme-text-subtle text-sm pb-6 leading-relaxed">
+                                Be the first to continue this conversation.
+                                Share any extra details that might help.
                             </p>
                         ) : (
-                            comments.map((comment) => {
+                            comments.map((comment, index) => {
                                 const isOwn =
                                     comment.authorUserId === currentUserId;
+                                const name = commentAuthorDisplayName(
+                                    comment,
+                                    entityName
+                                );
+
                                 return (
                                     <div
                                         key={comment.id}
-                                        className={`theme-card theme-outline rounded-lg p-3 ${
-                                            isOwn ? "ml-4 md:ml-12" : "mr-4 md:mr-12"
-                                        }`}
+                                        className="flex gap-3 md:gap-4 py-5"
+                                        style={
+                                            index < comments.length - 1
+                                                ? {
+                                                      borderBottomWidth: "1px",
+                                                      borderBottomColor:
+                                                          "var(--theme-deep-green)",
+                                                      borderBottomStyle:
+                                                          "dashed",
+                                                  }
+                                                : undefined
+                                        }
                                     >
-                                        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                                            <p className="font-semibold theme-text">
-                                                {comment.authorName ||
-                                                    comment.author?.userName ||
-                                                    "User"}
-                                                {isOwn ? " (You)" : ""}
-                                            </p>
-                                            <p className="theme-text-subtle text-xs">
-                                                {formatDateTime(comment.createdAt)}
+                                        <Avatar name={name} accent={isOwn} />
+                                        <div className="min-w-0 flex-1 space-y-1.5">
+                                            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                                                <span className="font-semibold theme-text text-sm md:text-base">
+                                                    {name}
+                                                </span>
+                                                {isOwn && (
+                                                    <span className="text-xs theme-text-teal">
+                                                        You
+                                                    </span>
+                                                )}
+                                                <span className="text-xs theme-text-subtle">
+                                                    ·{" "}
+                                                    {formatDateTime(
+                                                        comment.createdAt
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <p className="theme-text whitespace-pre-wrap text-sm md:text-[15px] leading-relaxed">
+                                                {comment.content}
                                             </p>
                                         </div>
-                                        <p className="theme-text whitespace-pre-wrap text-sm leading-relaxed">
-                                            {comment.content}
-                                        </p>
                                     </div>
                                 );
                             })
                         )}
                     </div>
+                </div>
 
-                    {canComment ? (
-                        <form
-                            onSubmit={onSubmitComment}
-                            className="pt-4 border-t space-y-3"
-                            style={{ borderColor: "var(--theme-deep-green)" }}
-                        >
-                            <CustomTextAreaInput
-                                label="Add a comment"
-                                placeholderText="Write your reply…"
+                {/* Composer */}
+                {canComment ? (
+                    <form
+                        onSubmit={onSubmitComment}
+                        className="mt-6 pt-6 flex gap-3 md:gap-4"
+                        style={{
+                            borderTopWidth: "1px",
+                            borderTopColor: "var(--theme-deep-green)",
+                        }}
+                    >
+                        <Avatar name={composerDisplayName} accent />
+                        <div className="min-w-0 flex-1 space-y-3">
+                            <textarea
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
-                                rows={4}
-                                className="theme-input w-full"
+                                rows={3}
                                 disabled={isSubmittingComment}
+                                placeholder="Write a reply…"
+                                className="theme-input w-full rounded-xl px-3 py-3 text-sm md:text-[15px] resize-y min-h-[88px] focus:outline-none focus:ring-2"
+                                style={
+                                    {
+                                        backgroundColor: "var(--theme-input-bg)",
+                                        color: "var(--theme-text)",
+                                        borderWidth: "1px",
+                                        borderColor: "var(--theme-deep-green)",
+                                        "--tw-ring-color": "var(--theme-teal)",
+                                    } as React.CSSProperties
+                                }
                             />
-                            <div className="flex justify-end">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                                <p className="text-xs theme-text-subtle">
+                                    Keep it clear and respectful.
+                                </p>
                                 <button
                                     type="submit"
-                                    className="green-button px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="theme-btn-teal px-5 py-2.5 rounded-md text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                                     disabled={
                                         isSubmittingComment ||
                                         !commentText.trim()
                                     }
                                 >
                                     {isSubmittingComment
-                                        ? "Posting…"
-                                        : "Post comment"}
+                                        ? "Sending…"
+                                        : "Reply"}
                                 </button>
                             </div>
-                        </form>
-                    ) : (
-                        <p
-                            className="pt-4 border-t theme-text-muted text-sm"
-                            style={{ borderColor: "var(--theme-deep-green)" }}
+                        </div>
+                    </form>
+                ) : (
+                    <p
+                        className="mt-6 pt-6 theme-text-muted text-sm"
+                        style={{
+                            borderTopWidth: "1px",
+                            borderTopColor: "var(--theme-deep-green)",
+                        }}
+                    >
+                        This conversation is closed, so new replies can&apos;t
+                        be added.
+                    </p>
+                )}
+
+                {canMarkAsSolved && (
+                    <div className="mt-6 flex justify-end">
+                        <button
+                            type="button"
+                            onClick={onMarkAsSolved}
+                            disabled={isMarkingSolved}
+                            className="theme-btn-teal px-5 py-2.5 rounded-md text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            This complaint is closed. Commenting is disabled.
-                        </p>
-                    )}
-                </div>
+                            {isMarkingSolved
+                                ? "Updating…"
+                                : "Mark Complaint as Solved"}
+                        </button>
+                    </div>
+                )}
             </div>
         </section>
     );

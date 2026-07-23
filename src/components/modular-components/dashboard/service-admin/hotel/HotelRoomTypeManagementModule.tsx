@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import HotelRoomUpdateModal from "@/components/modals/HotelRoomUpdateModal";
 import { ImageViewerModule } from "@/components/modular-components/ImageViewerModule";
 
@@ -32,7 +32,19 @@ function toRoomTypeImageList(roomType: HotelRoomType, hotelImages?: Image[]) {
     .filter((image): image is { imageURL: string; imageAlt: string; imageStyle: string } => !!image);
 }
 
-export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail: Hotel; className?: string }> = ({ hotelId, hotelDetail, className }) => {
+export const RoomTypeManagementSection: React.FC<{
+  hotelId: string;
+  hotelDetail: Hotel;
+  className?: string;
+  openCreateModal?: boolean;
+  onCreateModalClose?: () => void;
+}> = ({
+  hotelId,
+  hotelDetail,
+  className,
+  openCreateModal = false,
+  onCreateModalClose,
+}) => {
   const [expandedRoom, setExpandedRoom] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
@@ -42,6 +54,13 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
     () => hotelDetail?.roomTypes || [],
     [hotelDetail?.roomTypes]
   );
+
+  useEffect(() => {
+    if (!openCreateModal) return;
+    setModalMode("create");
+    setSelectedRoomTypeId(undefined);
+    setIsModalVisible(true);
+  }, [openCreateModal]);
 
   const handleAddRoom = () => {
     setModalMode("create");
@@ -58,6 +77,7 @@ export const RoomTypeManagementSection: React.FC<{ hotelId: string; hotelDetail:
   const handleCloseModal = () => {
     setIsModalVisible(false);
     setSelectedRoomTypeId(undefined);
+    onCreateModalClose?.();
   };
 
   return (

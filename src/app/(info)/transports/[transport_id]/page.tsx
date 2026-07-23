@@ -1,0 +1,42 @@
+"use client";
+
+import Link from "next/link";
+import { use } from "react";
+import { FeatureUnderDevelopment } from "@/components/placeholder-components/FeatureUnderDevelopment";
+
+export default function TransportDetailPage({
+  params,
+}: {
+  params: Promise<{ transport_id: string }>;
+}) {
+  const { transport_id } = use(params);
+
+  return (
+    <div className="flex flex-col p-2 font-sans mt-5 theme-text">
+      <div className="md:ml-6 flex flex-col space-y-4 max-w-5xl">
+        <div>
+          <h1 className="text-3xl font-bold theme-text">Transport Details</h1>
+          <p className="theme-text-muted mt-2 text-sm">
+            Detail view for transport{" "}
+            <span className="theme-text-teal font-mono">{transport_id}</span> is
+            not available yet.
+          </p>
+        </div>
+
+        <FeatureUnderDevelopment moduleName="Transport Details" />
+
+        <div className="flex flex-wrap gap-4 text-sm">
+          <Link href="/transports" className="theme-text-teal font-medium">
+            ← Transport listings
+          </Link>
+          <Link
+            href={`/transports/${transport_id}/edit`}
+            className="theme-text-muted font-medium"
+          >
+            Edit (placeholder)
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

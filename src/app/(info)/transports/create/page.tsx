@@ -1,0 +1,30 @@
+"use client";
+
+import Link from "next/link";
+import { FeatureUnderDevelopment } from "@/components/placeholder-components/FeatureUnderDevelopment";
+
+export default function CreateTransportPage() {
+  return (
+    <div className="flex flex-col p-2 font-sans mt-5 theme-text">
+      <div className="md:ml-6 flex flex-col space-y-4 max-w-5xl">
+        <div>
+          <h1 className="text-3xl font-bold theme-text">Create Transport</h1>
+          <p className="theme-text-muted mt-2 text-sm">
+            Creating a transport entity is not available yet.
+          </p>
+        </div>
+
+        <FeatureUnderDevelopment moduleName="Create Transport" />
+
+        <div className="flex flex-wrap gap-4 text-sm">
+          <Link href="/transports" className="theme-text-teal font-medium">
+            ← Transport listings
+          </Link>
+          <Link href="/dashboard" className="theme-text-muted font-medium">
+            Dashboard
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}

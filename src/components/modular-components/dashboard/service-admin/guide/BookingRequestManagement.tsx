@@ -89,7 +89,8 @@ function getStatusBadge(status: BookingStatus) {
 export const BookingRequestManagement: React.FC<{
   guideId: string;
   className?: string;
-}> = ({ guideId, className }) => {
+  id?: string;
+}> = ({ guideId, className, id }) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [declineReason, setDeclineReason] = useState("");
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -307,7 +308,7 @@ export const BookingRequestManagement: React.FC<{
 
   if (isLoading) {
     return (
-      <section className={`mb-8 ${className || ""}`}>
+      <section className={`mb-8 ${className || ""}`} id={id}>
         <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4">
           Booking Requests
         </h2>
@@ -317,10 +318,10 @@ export const BookingRequestManagement: React.FC<{
   }
 
   return (
-    <section className={`mb-8 ${className || ""}`}>
-      <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
+    <section className={`mb-8 ${className || ""}`} id={id}>
+      {/* <h2 className="text-xl sm:text-2xl font-bold theme-text mb-4 sm:mb-6">
         Booking Requests
-      </h2>
+      </h2> */}
 
       {bookings.length === 0 ? (
         <div className="theme-card rounded-xl p-6 text-center theme-text-subtle">

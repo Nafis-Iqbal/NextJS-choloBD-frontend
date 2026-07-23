@@ -5,7 +5,7 @@ import { FaTrash, FaHeart } from "react-icons/fa"
 import { EditButton } from "../custom-elements/Buttons"
 import { motion } from "framer-motion"
 import { ImageViewerModule } from "../modular-components/ImageViewerModule"
-import { useState, type ReactNode } from "react"
+import { useState, type MouseEvent, type ReactNode } from "react"
 
 const infoCardClass =
     "w-full shrink-0 rounded-sm md:rounded-md p-4 md:p-5 mb-3 border-0 md:border transition-colors min-h-[7.5rem]";
@@ -136,20 +136,68 @@ export const CategoryViewListTableRow = ({
     onDelete: () => void
 }) => 
 {
+    const activeLabel = isActive !== null ? (isActive ? "Yes" : "No") : "N/A";
+
     return (
-        <div className="flex items-center p-2 w-full h-[100px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%]">{id}</p>
-            <p className="w-[30%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{categoryName}</p>
-            <p className="w-[15%]">{categoryType}</p>
-            <p className="w-[15%]">{slug}</p>
-            <p className="w-[15%]">{isActive !== null ? ((isActive === true) ? "Yes" : "No") : "N/A"}</p>
-            <div className="w-[20%] flex items-center justify-center space-x-2">
-                <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>
-                    <FaTrash className="cursor-pointer"/>
-                </button>
+        <>
+            {/* Mobile: compact two-row info block */}
+            <article
+                className="md:hidden w-full px-3 py-2 border-b"
+                style={{
+                    backgroundColor: "var(--theme-bg)",
+                    borderBottomWidth: "1px",
+                    borderColor: "var(--theme-deep-green)",
+                }}
+            >
+                {/* Row 1: serial + name | actions */}
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-sm theme-text-subtle shrink-0 tabular-nums">
+                            {id}.
+                        </span>
+                        <p className="text-sm font-medium theme-text truncate leading-tight">
+                            {categoryName}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                        <button
+                            type="button"
+                            onClick={onDelete}
+                            className="p-1 rounded hover:scale-110"
+                            style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}
+                            aria-label="Delete category"
+                        >
+                            <FaTrash className="cursor-pointer" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Row 2: type · slug · active */}
+                <p className="mt-0.5 pl-5 text-xs theme-text-muted truncate leading-tight">
+                    {categoryType}
+                    <span className="theme-text-subtle mx-1.5">·</span>
+                    {slug}
+                    <span className="theme-text-subtle mx-1.5">·</span>
+                    Active: {activeLabel}
+                </p>
+            </article>
+
+            {/* md+: original column row */}
+            <div className="hidden md:flex items-center p-2 w-full h-[100px] text-center">
+                <p className="w-[5%]">{id}</p>
+                <p className="w-[30%] hover:theme-text-teal hover:scale-110 transition-all duration-150 cursor-pointer">{categoryName}</p>
+                <p className="w-[15%]">{categoryType}</p>
+                <p className="w-[15%]">{slug}</p>
+                <p className="w-[15%]">{activeLabel}</p>
+                <div className="w-[20%] flex items-center justify-center space-x-2">
+                    <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
+                    <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>
+                        <FaTrash className="cursor-pointer"/>
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     )
 }
 
@@ -163,22 +211,72 @@ export const LocationListTableRow = ({
     onEditClick: () => void
 }) => {
     const locationDisplay = "Bangladesh";
+
+    const handleEditClick = (e?: MouseEvent) => {
+        e?.stopPropagation();
+        onEditClick();
+    };
     
     return (
-        <div className="flex p-2 w-full text-center justify-center" style={{borderColor: 'var(--theme-deep-green)'}} onClick={() => navigateOnClick()}>
-            <p className="w-[10%]">{id}</p>
-            <p className="w-[30%] hover:cursor-pointer px-2">{name}</p>
-            <p className="w-[25%]">{locationType}</p>
-            <p className="w-[25%] px-2">{locationDisplay}</p>
-            <p className="w-[15%]">
-                <button 
-                    className="text-sm" style={{color: 'var(--theme-teal)', backgroundColor: 'inherit'}}
-                    onClick={() => onEditClick()}
-                >
-                    Edit
-                </button>
-            </p>
-        </div>
+        <>
+            {/* Mobile: compact two-row info block */}
+            <article
+                className="md:hidden w-full cursor-pointer px-3 py-2 border-b"
+                style={{
+                    backgroundColor: "var(--theme-bg)",
+                    borderBottomWidth: "1px",
+                    borderColor: "var(--theme-deep-green)",
+                }}
+                onClick={navigateOnClick}
+            >
+                {/* Row 1: serial + name | edit */}
+                <div className="flex items-center justify-between gap-2 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="text-sm theme-text-subtle shrink-0 tabular-nums">
+                            {id}.
+                        </span>
+                        <p className="text-sm font-medium theme-text truncate leading-tight">
+                            {name}
+                        </p>
+                    </div>
+                    <div
+                        className="shrink-0"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <EditButton className="scale-90 hover:scale-110" onClick={onEditClick} />
+                    </div>
+                </div>
+
+                {/* Row 2: type · country */}
+                <p className="mt-0.5 pl-5 text-xs theme-text-muted truncate leading-tight">
+                    {locationType}
+                    <span className="theme-text-subtle mx-1.5">·</span>
+                    {locationDisplay}
+                </p>
+            </article>
+
+            {/* md+: original column row */}
+            <div
+                className="hidden md:flex p-2 w-full text-center justify-center"
+                style={{borderColor: 'var(--theme-deep-green)'}}
+                onClick={navigateOnClick}
+            >
+                <p className="w-[10%]">{id}</p>
+                <p className="w-[30%] hover:cursor-pointer px-2">{name}</p>
+                <p className="w-[25%]">{locationType}</p>
+                <p className="w-[25%] px-2">{locationDisplay}</p>
+                <p className="w-[15%]">
+                    <button 
+                        type="button"
+                        className="text-sm"
+                        style={{color: 'var(--theme-teal)', backgroundColor: 'inherit'}}
+                        onClick={handleEditClick}
+                    >
+                        Edit
+                    </button>
+                </p>
+            </div>
+        </>
     )
 }
 

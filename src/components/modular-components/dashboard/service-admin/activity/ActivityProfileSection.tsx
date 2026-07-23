@@ -13,15 +13,16 @@ function formatLabel(value: string) {
 export const ActivityProfileSection: React.FC<{
   profile: ActivitySpot;
   className?: string;
-}> = ({ profile, className }) => {
+  id?: string;
+}> = ({ profile, className, id }) => {
   const router = useRouter();
 
   return (
-    <section className={`mb-8 ${className || ""}`}>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold theme-text">
+    <section className={`mb-8 ${className || ""}`} id={id}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center justify-end mb-6">
+        {/* <h2 className="text-xl sm:text-2xl font-bold theme-text">
           Activity Profile
-        </h2>
+        </h2> */}
         <button
           onClick={() => router.push(`/activity-spots/${profile.id}/edit`)}
           className="w-full sm:w-auto px-4 py-2.5 sm:py-2 rounded-lg theme-btn-teal font-medium"

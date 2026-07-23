@@ -21,7 +21,8 @@ export const BookedTransportSection: React.FC<{
   transports: TransportBooking[];
   className?: string;
   showFakeData?: boolean;
-}> = ({ transports, className, showFakeData = false }) => {
+  id?: string;
+}> = ({ transports, className, showFakeData = false, id }) => {
   const ongoingTransport =
     transports?.filter((t) => t.status === "ongoing") || [];
   const upcomingTransport =
@@ -57,7 +58,7 @@ export const BookedTransportSection: React.FC<{
   );
 
   return (
-    <section className={`mb-0 ${className || ""}`}>
+    <section className={`mb-0 ${className || ""}`} id={id}>
       <div
         className="mb-3 md:mb-4 pb-2 md:pb-3 border-b-0 md:border-b"
         style={{ borderColor: "var(--theme-deep-green)" }}

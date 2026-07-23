@@ -54,11 +54,13 @@ export const TransactionHistorySection: React.FC<{
   className?: string;
   itemsPerPage?: number;
   showFakeData?: boolean;
+  id?: string;
 }> = ({
   transactions: propTransactions,
   itemsPerPage = 10,
   className,
   showFakeData = false,
+  id,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -107,7 +109,7 @@ export const TransactionHistorySection: React.FC<{
 
   if (isLoading) {
     return (
-      <section className={`mb-0 ${className || ""}`}>
+      <section className={`mb-0 ${className || ""}`} id={id}>
         {header}
         <div className={emptyStateClass}>Loading transactions...</div>
       </section>
@@ -116,7 +118,7 @@ export const TransactionHistorySection: React.FC<{
 
   if (!transactions || transactions.length === 0) {
     return (
-      <section className={`mb-0 ${className || ""}`}>
+      <section className={`mb-0 ${className || ""}`} id={id}>
         {header}
         {showFakeData && (
           <PlaceholderFeatureWarning moduleName="Transaction History Details" />
@@ -131,7 +133,7 @@ export const TransactionHistorySection: React.FC<{
   const paginatedData = transactions.slice(startIdx, startIdx + itemsPerPage);
 
   return (
-    <section className={`mb-0 ${className || ""}`}>
+    <section className={`mb-0 ${className || ""}`} id={id}>
       {header}
       {showFakeData && (
         <PlaceholderFeatureWarning moduleName="Transaction History Details" />

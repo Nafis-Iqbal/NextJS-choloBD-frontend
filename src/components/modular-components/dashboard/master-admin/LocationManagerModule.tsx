@@ -10,7 +10,7 @@ import { CustomSelectInput, CustomTextInput} from "../../../custom-elements/Cust
 import { HorizontalDivider } from "../../../custom-elements/UIUtilities"
 import { NoContentTableRow } from "../../../placeholder-components/NoContentTableRow"
 
-export const LocationManagerModule = () => {
+export const LocationManagerModule = ({ className = "" }: { className?: string }) => {
     const [locationModal, setLocationModal] = useState<{isOpen: boolean, locationId: string, mode: 'create' | 'edit'}>({
         isOpen: false, 
         locationId: '',
@@ -61,7 +61,7 @@ export const LocationManagerModule = () => {
     }
 
     return (
-        <section className="flex flex-col space-y-2 mt-4" id="locations_management">
+        <section className={`flex flex-col space-y-2 mt-4 ${className}`} id="locations_management">
             <LocationUpdateModal
                 isVisible={locationModal.isOpen}
                 location_id={locationModal.locationId}
@@ -70,12 +70,13 @@ export const LocationManagerModule = () => {
             />
 
             {/* Location List Section */}
-            <h4 className="mb-2 theme-text">Location List</h4>
-
-            <TableLayout className="mr-5">
-                <div className="overflow-x-auto w-full">
-                    <div className="min-w-[900px]">
-                        <div className="flex theme-outline p-2 text-center" style={{backgroundColor: 'var(--theme-card-bg)'}}>
+            <TableLayout className="md:mr-5">
+                <div className="w-full md:overflow-x-auto">
+                    <div className="w-full md:min-w-[900px]">
+                        <div
+                            className="hidden md:flex theme-outline p-2 text-center"
+                            style={{backgroundColor: 'var(--theme-card-bg)'}}
+                        >
                             <p className="w-[10%]">Sr.</p>
                             <p className="w-[30%]">Location Name</p>
                             <p className="w-[25%]">Type</p>
