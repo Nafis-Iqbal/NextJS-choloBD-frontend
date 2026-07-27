@@ -1,14 +1,12 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { AuthApi } from "@/services/api";
 
 import Navbar from "@/components/structure-components/Navbar";
 import Footer from "@/components/structure-components/Footer";
-import BottomNavbar from "@/components/structure-components/BottomNavbar";
 import SidebarMenu from "@/components/structure-components/SIdebarMenu";
-import DivGap from "@/components/custom-elements/UIUtilities";
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 
 export default function DashboardLayout({
     children, 
@@ -24,56 +22,58 @@ export default function DashboardLayout({
     master_admin: React.ReactNode
 }){
     const router = useRouter();
-    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated;
-    console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isLoading);
+    const {
+        data: authResponse,
+        isPending,
+        isFetching,
+        isFetched,
+    } = AuthApi.useGetUserAuthenticationRQ(true);
+    const isAuthenticated = authResponse?.data?.isAuthenticated === true;
     
     useEffect(() => {
-        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
-            router.replace("/");
+        // Wait for in-flight auth checks to finish. Right after login the cache
+        // may still say false until refetch completes — redirecting early causes
+        // a login ↔ dashboard bounce.
+        if (!isFetched || isPending || isFetching) return;
+        if (!isAuthenticated) {
+            router.replace("/login");
         }
-    }, [isLoading, isAuthenticated, router]);
+    }, [isFetched, isPending, isFetching, isAuthenticated, router]);
 
-    if (isLoading) {
-        return null; // or <FullPageLoader />
+    // Authenticated: render immediately (background refetch won't blank the UI)
+    if (isAuthenticated) {
+        return (
+            <section className="flex flex-col">
+                <header className="relative">
+                    <nav>
+                        <Navbar/>
+                    </nav>
+                </header>
+
+                <div className="flex border">
+                    <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 font-sans">
+                        <SidebarMenu 
+                            className="fixed w-[15%] top-17 left-0" 
+                            isPopOutSidebar={false}
+                        />
+                    </aside>
+
+                    <div className="flex flex-col flex-grow w-full md:w-[85%] md:border-r-4">
+                        {[children, master_admin, service_admin, employee, user].map((el, i) => (
+                            <React.Fragment key={i}>
+                                {el}
+                            </React.Fragment>
+                        ))}
+
+                        <footer>
+                            <Footer/>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+        );
     }
 
-    return (
-        <section className="flex flex-col">
-            <header className="relative">
-                <nav>
-                    <Navbar/>
-                </nav>
-            </header>
-
-            <div className="flex border">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 font-sans">
-                    <SidebarMenu 
-                        className="fixed w-[15%] top-17 left-0" 
-                        isPopOutSidebar={false}
-                    />
-                </aside>
-
-                <div className="flex flex-col flex-grow w-full md:w-[85%] md:border-r-4">
-                    {[children, master_admin, service_admin, employee, user].map((el, i) => (
-                        <React.Fragment key={i}>
-                            {el}
-                        </React.Fragment>
-                    ))}
-
-                    <footer>
-                        <Footer/>
-                    </footer>
-                </div>
-
-                {/* <aside className="relative z-10 flex-grow w-[25%] shadow-[0_0_20px_#00FF99]">
-                    {stats}
-                </aside> */}
-            </div>
-            
-            {/* <nav>
-                <BottomNavbar/>
-            </nav> */}
-        </section>
-    )
+    // Verifying session or redirecting to login
+    return null;
 }

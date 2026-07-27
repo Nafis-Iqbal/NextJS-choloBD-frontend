@@ -43,8 +43,6 @@ import {
   ComplaintAddressedTo
 } from './enums';
 
-declare module '*.css';
-
 declare global {
 
   interface ApiResponse<T> {

@@ -3,30 +3,48 @@ import { Role, UserStatus, ServiceType } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from '@tanstack/react-query';
 
-async function getCurrentUserAuthentication() {
-  const response = await apiFetch<ApiResponse<{ 
-    isAuthenticated: boolean 
-    userId: string,
-    userName: string,
-    userRole: Role,
-    userServiceType?: ServiceType
-  }>>(`/auth/authenticate`, {
-    method: 'GET'
-  });
+export interface AuthCheckData {
+  isAuthenticated: boolean;
+  userId: string;
+  userName: string;
+  userRole: Role;
+  userServiceType?: ServiceType;
+}
 
-  return response;
+export type AuthCheckResponse = ApiResponse<AuthCheckData>;
+
+export const AUTH_QUERY_KEY = ["users", "authenticate"] as const;
+
+async function getCurrentUserAuthentication(): Promise<AuthCheckResponse> {
+  try {
+    return await apiFetch<AuthCheckResponse>(`/auth/authenticate`, {
+      method: 'GET'
+    });
+  } catch (error: any) {
+    // Backend returns 401 when logged out. Treat that as a successful
+    // "not authenticated" result so React Query replaces any stale
+    // authenticated cache instead of keeping isAuthenticated: true + isError.
+    if (error?.status === 401) {
+      const unauthenticated: AuthCheckResponse = {
+        status: "failure",
+        message: error?.message || "User is not authenticated",
+        data: {
+          isAuthenticated: false,
+          userId: "",
+          userName: "",
+          userRole: Role.USER,
+        },
+      };
+      return unauthenticated;
+    }
+    throw error;
+  }
 }
 
 export function useGetUserAuthenticationRQ(enabled: boolean) {
-    return useQuery<ApiResponse<{ 
-      isAuthenticated: boolean 
-      userId: string,
-      userName: string,
-      userRole: Role,
-      userServiceType?: ServiceType
-    }>>({
-        queryFn: () => getCurrentUserAuthentication(),
-        queryKey: ["users", "authenticate"],
+    return useQuery<AuthCheckResponse, Error>({
+        queryFn: getCurrentUserAuthentication,
+        queryKey: AUTH_QUERY_KEY,
         staleTime: 0,
         gcTime: 30 * 1000,
         retry: false,

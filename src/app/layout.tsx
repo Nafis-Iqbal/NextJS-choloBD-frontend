@@ -32,32 +32,56 @@ const satisfy = Satisfy({
 
 export const metadata: Metadata = {
   title: {
-    default: "Cholo BD! - Premium Tour Management Experience",
-    template: "%s | Cholo BD!"
+    default: "CholoBD — Travel & Tours in Bangladesh",
+    template: "%s | CholoBD",
   },
-  description: "Discover premium products at Suit Up! Your one-stop destination for quality goods, exceptional service, and unbeatable prices.",
-  keywords: ["e-commerce", "online shopping", "premium products", "Cholo BD", "quality goods"],
-  authors: [{ name: "Nafis Iqbal" }],
+  description:
+    "Plan trips, book hotels, activities, guides, and tour packages across Bangladesh. CholoBD is your travel companion for discovering destinations and managing bookings.",
+  keywords: [
+    "CholoBD",
+    "Bangladesh travel",
+    "tour packages",
+    "hotel booking",
+    "trip planner",
+    "tour spots",
+    "activity booking",
+    "guides",
+    "tourism Bangladesh",
+  ],
+  authors: [{ name: "CholoBD" }],
+  applicationName: "CholoBD",
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: 'Cholo BD! - Premium Tour Management Experience',
-    description: 'Discover premium products at Suit Up! Your one-stop destination for quality goods and exceptional service.',
-    images: ['/TIcon.PNG'],
+    type: "website",
+    locale: "en_BD",
+    siteName: "CholoBD",
+    title: "CholoBD — Travel & Tours in Bangladesh",
+    description:
+      "Discover destinations, build tours, and book hotels, activities, and guides across Bangladesh with CholoBD.",
+    images: [
+      {
+        url: "/CholoBD-Logo.png",
+        alt: "CholoBD logo",
+      },
+    ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Cholo BD! - Premium Tour Management Experience',
-    description: 'Discover premium products at Suit Up! Your one-stop destination for quality goods and exceptional service.',
+    card: "summary_large_image",
+    title: "CholoBD — Travel & Tours in Bangladesh",
+    description:
+      "Discover destinations, build tours, and book hotels, activities, and guides across Bangladesh with CholoBD.",
+    images: ["/CholoBD-Logo.png"],
   },
   icons: {
-    icon: 'favicon.ico',
-    apple: 'favicon.ico',
+    icon: [{ url: "/cholobd-icon.png", type: "image/png" }],
+    apple: [{ url: "/cholobd-icon.png", type: "image/png" }],
+    shortcut: "/cholobd-icon.png",
   },
   other: {
-    'theme-color': '#00FF99',
+    "theme-color": "#2A9D8F",
   },
 };
 

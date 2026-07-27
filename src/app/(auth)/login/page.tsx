@@ -4,7 +4,9 @@ import Image from "next/image";
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AuthApi } from "@/services/api";
+import { AUTH_QUERY_KEY } from "@/services/api/authApi";
 import { API_BASE_URL } from "@/lib/apiConfig";
+import { queryClient } from "@/services/apiInstance";
 
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
 import DivGap, { Logo } from "@/components/custom-elements/UIUtilities";
@@ -31,8 +33,9 @@ const oauthButtonClassName =
 
 function LoginContent() {
   const router = useRouter();
-  const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
-  const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+  const { data: authResponse, isLoading: isAuthLoading, isFetched: isAuthFetched } =
+    AuthApi.useGetUserAuthenticationRQ(true);
+  const isAuthenticated = authResponse?.data?.isAuthenticated === true;
 
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -86,15 +89,26 @@ function LoginContent() {
   );
 
   const { mutate: loginUserMutate } = AuthApi.useLoginUserRQ(
-    (responseData) => {
-      setIsLoading(false);
+    async (responseData) => {
       console.log("Login response data:", responseData);
       if (responseData.status === "success") {
-        console.log("Login successful, redirecting");
-        router.push(
-          redirectTo.startsWith("/") ? redirectTo : "/dashboard"
-        );
+        try {
+          // Refresh auth cache before navigating so dashboard does not briefly
+          // see the pre-login isAuthenticated: false and bounce back to /login.
+          await queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEY });
+          await queryClient.refetchQueries({ queryKey: AUTH_QUERY_KEY });
+          router.replace(
+            redirectTo.startsWith("/") ? redirectTo : "/dashboard"
+          );
+        } catch (e) {
+          console.error("Post-login auth refresh failed:", e);
+          setIsLoading(false);
+          onSignInFailure(
+            "Logged in, but session check failed. Please refresh and try again."
+          );
+        }
       } else {
+        setIsLoading(false);
         console.log("Login failed with status:", responseData.status);
         onSignInFailure(
           responseData.message ||
@@ -161,10 +175,12 @@ function LoginContent() {
   };
 
   useEffect(() => {
-    if (isAuthenticated === true) {
-      router.push(redirectTo.startsWith("/") ? redirectTo : "/");
+    // Wait for auth to settle so a stale cached "true" cannot bounce us
+    // to dashboard before a 401 refetch updates the cache to false.
+    if (isAuthFetched && !isAuthLoading && isAuthenticated) {
+      router.replace(redirectTo.startsWith("/") ? redirectTo : "/dashboard");
     }
-  }, [isAuthenticated, router, redirectTo]);
+  }, [isAuthFetched, isAuthLoading, isAuthenticated, router, redirectTo]);
 
   return (
     <div

@@ -14,9 +14,15 @@ import { NoContentTableRow } from "@/components/placeholder-components/NoContent
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 
 function HotelListingsPage() {
-    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+    const {
+        data: authResponse,
+        isPending,
+        isFetching,
+        isFetched,
+    } = AuthApi.useGetUserAuthenticationRQ(true);
+    const isAuthenticated = authResponse?.data?.isAuthenticated === true;
     const currentUserRole = authResponse?.data?.userRole;
+    const isMasterAdmin = isAuthenticated && currentUserRole === "MASTER_ADMIN";
 
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -63,13 +69,18 @@ function HotelListingsPage() {
     }, [queryString]);
 
     useEffect(() => {
-        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined || currentUserRole !== 'MASTER_ADMIN')) {
+        if (!isFetched || isPending || isFetching) return;
+        if (!isAuthenticated) {
+            router.replace("/login");
+            return;
+        }
+        if (currentUserRole !== "MASTER_ADMIN") {
             router.replace("/");
         }
-    }, [isLoading, isAuthenticated, router]);
+    }, [isFetched, isPending, isFetching, isAuthenticated, currentUserRole, router]);
 
-    if (isLoading) {
-        return null; // or <FullPageLoader />
+    if (!isMasterAdmin) {
+        return null;
     }
 
     return (

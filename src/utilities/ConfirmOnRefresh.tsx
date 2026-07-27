@@ -2,11 +2,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { AuthApi } from "@/services/api";
 
 export default function ConfirmOnRefresh() {
-    const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
-
     const shouldConfirm = false;
 
     useEffect(() => {
