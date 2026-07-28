@@ -5,7 +5,7 @@ import { useState } from "react";
 export const Logo = ({width = 120, height = 50, position = "ml-5"} : {width?: number, height?: number, position?: string}) => {
     return (
         <div className={`${position} relative`} style={{width: `${width}px`, height: `${height}px`}}>
-            <Image src="/cholobd-logo.png" alt="Cholo BD Logo" fill className="object-contain" />
+            <Image src="/CholoBD-Logo.png" alt="Cholo BD Logo" fill className="object-contain" />
         </div>
     );
 }
