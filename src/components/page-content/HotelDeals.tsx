@@ -148,7 +148,7 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
 
       <div className="mt-8 flex justify-center font-sans">
         <Link
-          href="/hotels"
+          href="/search"
           className="theme-btn-teal group inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold tracking-wide"
         >
           Browse all stays
