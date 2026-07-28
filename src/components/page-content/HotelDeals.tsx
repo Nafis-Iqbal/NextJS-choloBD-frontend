@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
-import Image from "next/image";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { SectionHeader } from "./SectionHeader";
 import { HotelApi } from "@/services/api";
+import { useAutoScrollMarquee } from "./useAutoScrollMarquee";
+import { CardImageWithFallback } from "./CardImageWithFallback";
+import { HOTEL_CARD_FALLBACK_IMAGE } from "./pageContentFallbackImages";
 
 interface HotelDealsProps {
   animationSpeed?: number; // Duration in seconds (default: 30)
@@ -16,9 +18,6 @@ interface HotelDealsProps {
 
 export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 256, className = '', focusText }) => {
   const { data: hotelsResponse, isLoading, error } = HotelApi.useGetPopularHotelsRQ();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   const formattedHotels = useMemo(() => {
     return (hotelsResponse?.data || []).map((hotel: Hotel) => ({
@@ -30,23 +29,11 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
     }));
   }, [hotelsResponse?.data]);
 
-  const cardGap = 16;
-  const cardTotalWidth = cardWidth + cardGap;
-  const scrollDistance = cardTotalWidth * formattedHotels.length;
-
-  const handleScrollLeft = () => {
-    setIsPaused(true);
-    const newPosition = scrollPosition - cardTotalWidth;
-    setScrollPosition(newPosition);
-    setTimeout(() => setIsPaused(false), 500);
-  };
-
-  const handleScrollRight = () => {
-    setIsPaused(true);
-    const newPosition = scrollPosition + cardTotalWidth;
-    setScrollPosition(newPosition);
-    setTimeout(() => setIsPaused(false), 500);
-  };
+  const { x, handleScrollLeft, handleScrollRight } = useAutoScrollMarquee(
+    formattedHotels.length,
+    cardWidth,
+    animationSpeed
+  );
 
   if (isLoading) {
     return (
@@ -103,31 +90,18 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
 
         <div className="w-full overflow-hidden px-12">
           <motion.div
-            ref={scrollRef}
             className="flex gap-4 md:gap-6 font-sans"
-            initial={{ x: 0 }}
-            animate={isPaused ? { x: scrollPosition } : { x: -scrollDistance }}
-            transition={{
-              duration: isPaused ? 0.5 : animationSpeed,
-              ease: isPaused ? "easeInOut" : "linear",
-              repeat: isPaused ? 0 : Infinity,
-            }}
+            style={{ x }}
           >
-            {/* Duplicate hotels for seamless loop */}
-            {[...formattedHotels, ...formattedHotels].map((h, idx) => (
+            {[...formattedHotels, ...formattedHotels, ...formattedHotels].map((h, idx) => (
               <div key={`${h.id}-${idx}`} className="flex-shrink-0 w-full md:w-100 rounded-xl theme-card p-4">
                 <div className="h-35 rounded-lg theme-placeholder mb-3 overflow-hidden relative">
-                  {h.imageUrl ? (
-                    <Image 
-                      src={h.imageUrl} 
-                      alt={h.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="w-full h-full theme-placeholder" />
-                  )}
+                  <CardImageWithFallback
+                    src={h.imageUrl}
+                    fallbackSrc={HOTEL_CARD_FALLBACK_IMAGE}
+                    alt={h.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="theme-text font-medium truncate">{h.name}</div>
                 <div className="theme-text-muted text-sm truncate">{h.city}</div>

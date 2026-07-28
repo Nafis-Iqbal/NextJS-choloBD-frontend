@@ -5,13 +5,17 @@ import { Role } from "@/types/enums";
 import { UserApi } from "@/services/api";
 import { SectionHeader } from "./SectionHeader";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { useAutoScrollMarquee } from "./useAutoScrollMarquee";
+import { CardImageWithFallback } from "./CardImageWithFallback";
+import { COMMUNITY_CARD_FALLBACK_IMAGE } from "./pageContentFallbackImages";
 
 type Buddy = { id: string; name: string; tag: string; trips: number; imageUrl?: string };
 
 const COMMUNITY_USERS_QUERY = new URLSearchParams({
     role: Role.USER,
     page: "1",
-    limit: "4",
+    limit: "10",
 }).toString();
 
 const FALLBACK_BUDDIES: Buddy[] = [
@@ -34,29 +38,33 @@ const getTag = (user: User): string => {
     return user.email ? user.email.split("@")[0] : "traveler";
 };
 
-export const CommunitySection: React.FC<{ className?: string; focusText?: string }> = ({ className, focusText }) => {
+export const CommunitySection: React.FC<{
+  className?: string;
+  focusText?: string;
+  animationSpeed?: number;
+  cardWidth?: number;
+}> = ({ className, focusText, animationSpeed = 25, cardWidth = 256 }) => {
   const { data: usersResponse } = UserApi.useGetUsersRQ(COMMUNITY_USERS_QUERY);
   const router = useRouter();
 
   const communityUsers = (usersResponse?.data?.results ?? [])
     .filter((user) => user.role === Role.USER)
-    .slice(0, 4);
+    .slice(0, 10);
 
-  const buddies = FALLBACK_BUDDIES.map((fallbackBuddy, index) => {
-    const fetchedUser = communityUsers[index];
-
-    if (!fetchedUser) {
-      return fallbackBuddy;
-    }
-
-    return {
-      id: fetchedUser.id || fallbackBuddy.id,
-      name: getDisplayName(fetchedUser) || fallbackBuddy.name,
-      tag: getTag(fetchedUser) || fallbackBuddy.tag,
-      trips: fallbackBuddy.trips,
-      imageUrl: fetchedUser.imageUrl || fallbackBuddy.imageUrl,
-    };
-  });
+  const buddies = communityUsers.length > 0
+    ? communityUsers.map((user, index) => ({
+        id: user.id,
+        name: getDisplayName(user),
+        tag: getTag(user),
+        trips: 4 + (index % 9),
+        imageUrl: user.imageUrl,
+      }))
+    : FALLBACK_BUDDIES;
+  const { x, handleScrollLeft, handleScrollRight } = useAutoScrollMarquee(
+    buddies.length,
+    cardWidth,
+    animationSpeed
+  );
 
   return (
     <section className={`w-full scroll-mt-36 ${className}`} id="community">
@@ -70,24 +78,48 @@ export const CommunitySection: React.FC<{ className?: string; focusText?: string
           💬 Chat • 💳 Split QR Payments • 🎒 Group Bookings
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 font-sans">
-        {buddies.map((b) => (
-          <div key={b.id} className="rounded-xl theme-card p-4">
-            <div
-              className="h-16 w-16 rounded-full theme-avatar mb-3"
-              style={b.imageUrl ? { backgroundImage: `url(${b.imageUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
-            />
-            <div className="theme-text font-medium">{b.name}</div>
-            <div className="theme-text-muted text-sm">#{b.tag}</div>
-            <div className="mt-2 text-xs theme-text-subtle">Trips: {b.trips}</div>
-            <button 
-              className="mt-3 w-full rounded-lg py-2 text-sm theme-btn-teal"
-              onClick={() => router.push(`/user_profile/${b.id}/public`)}
-            >
-              View Profile
-            </button>
-          </div>
-        ))}
+      <div className="relative w-full">
+        <button
+          onClick={handleScrollLeft}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 theme-btn-teal rounded-full w-10 h-10 flex items-center justify-center transition-colors shadow-lg"
+          aria-label="Scroll left"
+        >
+          ←
+        </button>
+
+        <div className="w-full overflow-hidden px-12">
+          <motion.div className="flex gap-4 md:gap-6 font-sans" style={{ x }}>
+            {[...buddies, ...buddies, ...buddies].map((b, idx) => (
+              <div key={`${b.id}-${idx}`} className="flex-shrink-0 w-full md:w-100 rounded-xl theme-card p-4">
+                <div className="h-16 w-16 rounded-full overflow-hidden theme-avatar mb-3">
+                  <CardImageWithFallback
+                    src={b.imageUrl}
+                    fallbackSrc={COMMUNITY_CARD_FALLBACK_IMAGE}
+                    alt={b.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="theme-text font-medium truncate">{b.name}</div>
+                <div className="theme-text-muted text-sm truncate">#{b.tag}</div>
+                <div className="mt-2 text-xs theme-text-subtle">Trips: {b.trips}</div>
+                <button 
+                  className="mt-3 w-full rounded-lg py-2 text-sm theme-btn-teal"
+                  onClick={() => router.push(`/user_profile/${b.id}/public`)}
+                >
+                  View Profile
+                </button>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+
+        <button
+          onClick={handleScrollRight}
+          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 theme-btn-teal rounded-full w-10 h-10 flex items-center justify-center transition-colors shadow-lg"
+          aria-label="Scroll right"
+        >
+          →
+        </button>
       </div>
       {focusText && (
         <div className="mt-12 md:mt-16 flex justify-center">

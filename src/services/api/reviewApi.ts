@@ -9,6 +9,15 @@ interface GetReviewsParams {
     own?: string;
 }
 
+interface GetAllReviewsParams {
+    minRating?: number;
+    maxRating?: number;
+    sortBy?: 'rating' | 'createdAt';
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+    skip?: number;
+}
+
 export const getPageReviews = async ({
     reviewType,
     reviewAssetId,
@@ -19,6 +28,34 @@ export const getPageReviews = async ({
         reviewAssetId,
         own
     });
+
+    const response = await apiFetch<ApiResponse<Review[]>>(
+        `/reviews?${params.toString()}`,
+        {
+            method: "GET",
+            cache: "no-store",
+        }
+    );
+
+    return response;
+};
+
+export const getAllUserReviews = async ({
+    minRating,
+    maxRating,
+    sortBy = 'createdAt',
+    sortOrder = 'asc',
+    limit = 15,
+    skip = 0
+}: GetAllReviewsParams = {}) => {
+    const params = new URLSearchParams();
+
+    if (typeof minRating === 'number') params.set('minRating', String(minRating));
+    if (typeof maxRating === 'number') params.set('maxRating', String(maxRating));
+    params.set('sortBy', sortBy);
+    params.set('sortOrder', sortOrder);
+    params.set('limit', String(limit));
+    params.set('skip', String(skip));
 
     const response = await apiFetch<ApiResponse<Review[]>>(
         `/reviews?${params.toString()}`,
