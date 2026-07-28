@@ -57,13 +57,6 @@ export const HomepageContent = async () => {
         { id: "r4", type: "Launch", route: "Dhaka → Barishal", price: 1200 },
     ];
 
-    const buddies = [
-        { id: "u1", name: "Nila", tag: "trekker", trips: 8 },
-        { id: "u2", name: "Rafi", tag: "foodie", trips: 5 },
-        { id: "u3", name: "Sumi", tag: "photog", trips: 12 },
-        { id: "u4", name: "Tamal", tag: "chiller", trips: 6 },
-    ];
-
     const testimonials = [
         { id: "s1", name: "Rashed", quote: "I went to Sylhet without carrying a single note. Everything was QR — game changer!", place: "Dhaka" },
         { id: "s2", name: "Nadia & Family", quote: "No more ATM lines in remote areas. The QR tickets made our family trip so relaxing.", place: "Cox's Bazar" },
@@ -106,7 +99,7 @@ export const HomepageContent = async () => {
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* Community: find tour buddies */}
-                <CommunitySection buddies={buddies} className="min-h-[75vh]" focusText={communityFocusText}/>
+                <CommunitySection className="min-h-[75vh]" focusText={communityFocusText}/>
                 <HorizontalDivider className="w-full border-gray-600 my-10" />
 
                 {/* SECTIONS ON GUIDES, WALLETS, & DEALS*/}

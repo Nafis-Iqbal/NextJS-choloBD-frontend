@@ -10,6 +10,27 @@ export type PaginatedUsers = {
   limit: number;
 };
 
+export type PublicUserProfile = {
+  id: string;
+  userName?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  imageUrl?: string | null;
+  role: Role;
+  serviceType?: ServiceType | null;
+  serviceEntityName?: string | null;
+  employeeServiceType?: ServiceType | null;
+  employeeServiceEntityName?: string | null;
+  createdAt: string;
+  userStatus?: UserStatus | string;
+  _count: {
+    userTripPlans: number;
+    tripBookings: number;
+    communityPostsCreated: number;
+    reviews: number;
+  };
+};
+
 export async function getUsers(queryString?: string) {
   const response = await apiFetch<ApiResponse<PaginatedUsers>>(`/users${queryString ? `?${queryString}` : ""}`, {
     method: 'GET'
@@ -136,6 +157,24 @@ export function useGetUserDetailRQ(userId: string, enabled: boolean) {
     return useQuery<ApiResponse<User>>({
         queryFn: () => getUserDetail(userId),
         queryKey: ["users", userId],
+        staleTime: 30_000,
+        gcTime: 30 * 1000,
+        enabled
+    });
+}
+
+export async function getPublicUserDetail(userId: string) {
+  const response = await apiFetch<ApiResponse<PublicUserProfile>>(`/users/profile/${userId}/public`, {
+    method: 'GET'
+  });
+
+  return response;
+}
+
+export function useGetPublicUserDetailRQ(userId: string, enabled: boolean) {
+    return useQuery<ApiResponse<PublicUserProfile>>({
+        queryFn: () => getPublicUserDetail(userId),
+        queryKey: ["users", "public", userId],
         staleTime: 30_000,
         gcTime: 30 * 1000,
         enabled
