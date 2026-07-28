@@ -129,12 +129,7 @@ export const ImageViewerModule = ({
 
                         {/* Navigation Buttons - positioned relative to image area */}
                         <button 
-                            className="absolute top-1/2 left-4 transform -translate-y-1/2 p-3 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
-                            style={{ 
-                                backgroundColor: 'var(--theme-card-bg)',
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal)'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-card-bg)'}
+                            className="absolute top-1/2 left-4 transform -translate-y-1/2 p-3 rounded-full bg-gray-100/20 text-gray-100 backdrop-blur-sm transition-all duration-300 hover:bg-gray-100/35 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
                             onClick={showPreviousImage}
                             hidden={displayedImageId === 0}
                         >
@@ -142,12 +137,7 @@ export const ImageViewerModule = ({
                         </button>
 
                         <button 
-                            className="absolute top-1/2 right-4 transform -translate-y-1/2 p-3 text-white rounded-full transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
-                            style={{ 
-                                backgroundColor: 'var(--theme-card-bg)',
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-teal)'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--theme-card-bg)'}
+                            className="absolute top-1/2 right-4 transform -translate-y-1/2 p-3 rounded-full bg-gray-100/20 text-gray-100 backdrop-blur-sm transition-all duration-300 hover:bg-gray-100/35 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100" 
                             onClick={showNextImage}
                             hidden={displayedImageId === imageList.length - 1}
                         >
