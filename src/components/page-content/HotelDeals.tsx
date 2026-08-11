@@ -15,6 +15,7 @@ interface HotelDealsProps {
   cardWidth?: number; // Card width in pixels (default: 300)
   className?: string;
   focusText?: string;
+  showFocusText?: boolean;
 }
 
 interface HotelDealCardData {
@@ -30,12 +31,11 @@ interface HotelDealCardData {
 // The marquee wrap distance is derived from card width + gap, so both must stay in sync.
 const CARD_GAP = 24;
 
-const SECTION_TITLE = "Stay Comfortably — Pay QR, Rest Easy";
 const SECTION_SUBTITLE = "Handpicked hotels & resorts with instant cashless check-in across Bangladesh";
 
 const toTitleCase = (value: string) => value.charAt(0) + value.slice(1).toLowerCase();
 
-export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 300, className = '', focusText }) => {
+export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, cardWidth = 300, className = '', focusText, showFocusText = false }) => {
   const { data: hotelsResponse, isLoading, error } = HotelApi.useGetPopularHotelsRQ();
 
   const formattedHotels = useMemo<HotelDealCardData[]>(() => {
@@ -156,7 +156,7 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
         </Link>
       </div>
 
-      {focusText && (
+      {showFocusText && focusText && (
         <div className="mt-12 md:mt-16 flex justify-center">
           <div className="max-w-3xl px-6 py-8 md:py-10 relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-[var(--theme-teal)] to-transparent" />
@@ -172,11 +172,11 @@ export const HotelDeals: React.FC<HotelDealsProps> = ({ animationSpeed = 25, car
 const HotelDealsHeading: React.FC = () => (
   <div className="mb-8 flex w-full flex-col items-center md:mb-10">
     <div className="mb-4 flex items-center gap-3 font-sans">
-      <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--theme-teal)]" />
-      <span className="theme-text-teal text-[11px] font-semibold uppercase tracking-[0.22em]">Stays &amp; Resorts</span>
-      <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--theme-teal)]" />
+      <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--theme-teal)] md:w-12" />
+      <span className="theme-text-teal text-xl font-semibold uppercase tracking-[0.16em] md:text-2xl">Stays &amp; Resorts</span>
+      <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--theme-teal)] md:w-12" />
     </div>
-    <SectionHeader title={SECTION_TITLE} subtitle={SECTION_SUBTITLE} />
+    <SectionHeader subtitle={SECTION_SUBTITLE} />
   </div>
 );
 

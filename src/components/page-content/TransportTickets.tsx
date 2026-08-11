@@ -5,7 +5,12 @@ import { SectionHeader } from "./SectionHeader";
 
 type Ticket = { id: string; type: string; route: string; price: number };
 
-export const TransportTickets: React.FC<{ tickets: Ticket[], className?: string; focusText?: string }> = ({ tickets, className, focusText }) => {
+export const TransportTickets: React.FC<{ tickets: Ticket[]; className?: string; focusText?: string; showFocusText?: boolean }> = ({
+  tickets,
+  className,
+  focusText,
+  showFocusText = false,
+}) => {
   const getNavigationPath = (type: string): string => {
     const lowerType = type.toLowerCase();
     if (lowerType.includes("bus")) return "/booking/bus";
@@ -27,14 +32,11 @@ export const TransportTickets: React.FC<{ tickets: Ticket[], className?: string;
     <section className={`w-full scroll-mt-36 ${className}`} id="transport">
       <div className="mb-8 flex w-full flex-col items-center md:mb-10">
         <div className="mb-4 flex items-center gap-3 font-sans">
-          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--theme-teal)]" />
-          <span className="theme-text-teal text-[11px] font-semibold uppercase tracking-[0.22em]">Getting Around</span>
-          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--theme-teal)]" />
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--theme-teal)] md:w-12" />
+          <span className="theme-text-teal text-xl font-semibold uppercase tracking-[0.16em] md:text-2xl">Getting Around</span>
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--theme-teal)] md:w-12" />
         </div>
-        <SectionHeader
-          title="Travel Smoothly Across Bangladesh"
-          subtitle="Book buses, trains, launches & CNGs — Get QR tickets instantly. Board without cash stress."
-        />
+        <SectionHeader subtitle="Book buses, trains, launches & CNGs — Get QR tickets instantly. Board without cash stress." />
       </div>
 
       <div className="grid grid-cols-1 gap-4 font-sans md:grid-cols-2 md:gap-6">
@@ -88,7 +90,7 @@ export const TransportTickets: React.FC<{ tickets: Ticket[], className?: string;
         })}
       </div>
 
-      {focusText && (
+      {showFocusText && focusText && (
         <div className="mt-12 md:mt-16 flex justify-center">
           <div className="max-w-3xl px-6 py-8 md:py-10 relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-[var(--theme-teal)] to-transparent" />

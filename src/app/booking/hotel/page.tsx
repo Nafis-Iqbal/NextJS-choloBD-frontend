@@ -81,6 +81,20 @@ function searchParamsEqual(a: URLSearchParams, b: URLSearchParams): boolean {
 	);
 }
 
+/** Match URL/form district names to DISTRICT options only (case-insensitive, trimmed). */
+function resolveDistrictName(raw: string, districtNames: string[]): string {
+	const needle = raw.trim();
+	if (!needle || districtNames.length === 0) return "";
+
+	const exact = districtNames.find((name) => name === needle);
+	if (exact) return exact;
+
+	const lower = needle.toLowerCase();
+	return (
+		districtNames.find((name) => name.toLowerCase() === lower) || ""
+	);
+}
+
 function HotelBookingContent() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -88,27 +102,39 @@ function HotelBookingContent() {
 	const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
 	const authUserId = authResponse?.data?.userId;
 
-	const { data: locationsResponse } = LocationApi.useGetAllLocationsRQ();
+	const {
+		data: locationsResponse,
+		isLoading: locationsLoading,
+		isFetched: locationsFetched,
+	} = LocationApi.useGetAllLocationsRQ();
 
-	// Filters use DISTRICT only — LocationType.CITY is omitted from options.
-	const cityLocations = useMemo(() => {
+	// Hotel filters use DISTRICT locations only — CITY-type locations are ignored.
+	const districtLocations = useMemo(() => {
 		return (locationsResponse?.data || [])
 			.filter((loc) => loc.locationType === "DISTRICT")
 			.sort((a, b) => a.name.localeCompare(b.name));
 	}, [locationsResponse]);
 
-	const cityOptions = useMemo(
-		() => cityLocations.map((loc) => loc.name),
-		[cityLocations]
+	const districtOptions = useMemo(
+		() => districtLocations.map((loc) => loc.name),
+		[districtLocations]
 	);
 
 	const locationNameToIdMap = useMemo(() => {
 		const map: Record<string, string> = {};
-		for (const loc of cityLocations) {
+		for (const loc of districtLocations) {
 			map[loc.name] = loc.id;
 		}
 		return map;
-	}, [cityLocations]);
+	}, [districtLocations]);
+
+	const districtSelectOptions = useMemo(
+		() => [
+			{ label: "Select a city", value: "" },
+			...districtOptions.map((name) => ({ label: name, value: name })),
+		],
+		[districtOptions]
+	);
 
 	const [form, setForm] = useState<HotelFilterForm>({
 		city: "",
@@ -180,9 +206,13 @@ function HotelBookingContent() {
 	const { data: hotelDetailResponse } =
 		HotelApi.useGetHotelDetailRQ(hotelIdParam);
 
-	// Prefill filters from URL
+	// Prefill filters from URL only after DISTRICT options are available.
+	// Avoids rewriting URL with an empty/wrong city before locations load.
 	useEffect(() => {
-		const city = searchParams.get("city") || "";
+		if (locationsLoading || !locationsFetched) return;
+
+		const cityFromUrl =
+			searchParams.get("city") || searchParams.get("location") || "";
 		const checkIn = searchParams.get("checkIn") || "";
 		const checkOut = searchParams.get("checkOut") || "";
 		const guests = searchParams.get("guests") || "2";
@@ -192,12 +222,14 @@ function HotelBookingContent() {
 			"ALL_DAY") as keyof typeof RoomShift;
 		const sort = (searchParams.get("sort") || "rating") as "rating" | "name";
 
-		setForm((prev) => ({
-			city: cityOptions.includes(city)
-				? city
-				: cityOptions.includes(prev.city)
-					? prev.city
-					: cityOptions[0] || prev.city || "",
+		const resolvedDistrict = resolveDistrictName(
+			cityFromUrl,
+			districtOptions
+		);
+
+		setForm({
+			// Never fall back to districtOptions[0] — that silently selected Bagerhat.
+			city: resolvedDistrict,
 			checkIn,
 			checkOut,
 			guests: ["1", "2", "3", "4", "5", "6"].includes(guests)
@@ -209,30 +241,11 @@ function HotelBookingContent() {
 				: "0",
 			shift: Object.keys(RoomShift).includes(shift) ? shift : "ALL_DAY",
 			sort: sort === "name" ? "name" : "rating",
-		}));
-		setFiltersHydrated(true);
-		// cityOptions intentionally omitted: only resolve default city when options arrive
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [searchParams]);
-
-	// Once locations load, ensure selected city is valid
-	useEffect(() => {
-		if (!cityOptions.length) return;
-
-		setForm((prev) => {
-			if (cityOptions.includes(prev.city)) return prev;
-
-			const cityFromUrl = searchParams.get("city") || "";
-			const nextCity = cityOptions.includes(cityFromUrl)
-				? cityFromUrl
-				: cityOptions[0];
-
-			if (prev.city === nextCity) return prev;
-			return { ...prev, city: nextCity };
 		});
-	}, [cityOptions, searchParams]);
+		setFiltersHydrated(true);
+	}, [searchParams, districtOptions, locationsLoading, locationsFetched]);
 
-	// Keep URL in sync when filters change
+	// Keep URL in sync when filters change (only after district hydration).
 	useEffect(() => {
 		if (!filtersHydrated) return;
 
@@ -295,24 +308,18 @@ function HotelBookingContent() {
 		return b.getTime() <= a.getTime();
 	}, [form.checkIn, form.checkOut, form.shift]);
 
-	const showInitialLoading = isLoading && !hotelsResponse;
+	const showInitialLoading =
+		locationsLoading ||
+		!filtersHydrated ||
+		(isLoading && !hotelsResponse);
 
 	if (showInitialLoading) {
-		return (
-			<div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
-				<div className="flex flex-col gap-2">
-					<h3 className="theme-text-teal font-fredericka">
-						Hotel Booking
-					</h3>
-					<p className="theme-text-muted">Loading hotel data...</p>
-				</div>
-			</div>
-		);
+		return <SuspenseFallback loadingText="hotels" />;
 	}
 
 	if (error && !hotelsResponse) {
 		return (
-			<div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
+			<div className="flex flex-1 flex-col p-3 md:p-6 mt-5 font-sans">
 				<div className="flex flex-col gap-2">
 					<h3 className="theme-text-teal font-fredericka">
 						Hotel Booking
@@ -326,7 +333,7 @@ function HotelBookingContent() {
 	}
 
 	return (
-		<div className="flex flex-col p-3 md:p-6 mt-5 font-sans min-h-screen">
+		<div className="flex flex-col flex-1 p-3 md:p-6 mt-5 font-sans">
 			<div className="flex flex-col gap-2">
 				<h3 className="theme-text-teal font-fredericka">Hotel Booking</h3>
 				<p className="theme-text-muted">
@@ -339,14 +346,11 @@ function HotelBookingContent() {
 
 				<div className="grid grid-cols-1 gap-3 mb-4">
 					<CustomSelectInput
-						label="City/District"
+						label="City"
 						labelStyle="theme-text-teal"
 						value={form.city}
 						onChange={(e) => updateForm({ city: e.target.value })}
-						options={cityOptions.map((c) => ({
-							label: c,
-							value: c,
-						}))}
+						options={districtSelectOptions}
 						defaultSelectText="Select a city"
 						className="w-full"
 					/>
@@ -471,10 +475,7 @@ function HotelBookingContent() {
 						className="green-underline-button"
 						onClick={() => {
 							const resetForm: HotelFilterForm = {
-								city:
-									cityOptions.length > 0
-										? cityOptions[0]
-										: "",
+								city: "",
 								checkIn: "",
 								checkOut: "",
 								guests: "2",

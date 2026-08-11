@@ -1,38 +1,20 @@
 "use client";
 
-import { redirect, useRouter } from "next/navigation";
-import { AuthApi } from "@/services/api";
-
 import Navbar from "@/components/structure-components/Navbar";
 import Footer from "@/components/structure-components/Footer";
 import BottomNavbar from "@/components/structure-components/BottomNavbar";
 import SidebarMenu from "@/components/structure-components/SIdebarMenu";
 import DivGap from "@/components/custom-elements/UIUtilities";
-import React, { use, useEffect } from "react";
+import React from "react";
 
-export default function DashboardLayout({
+export default function BookingLayout({
     children
 } : {
     children: React.ReactNode
 }){
-    const router = useRouter();
-    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated;
-    console.log("DashboardLayout - isAuthenticated:", isAuthenticated, " isLoading:", isLoading);
-    
-    // useEffect(() => {
-    //     if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
-    //         router.replace("/");
-    //     }
-    // }, [isLoading, isAuthenticated, router]);
-
-    // if (isLoading) {
-    //     return null; // or <FullPageLoader />
-    // }
-
     return (
         <section className="flex flex-col min-h-screen">
-            <header className="relative">
+            <header className="relative shrink-0">
                 <nav>
                     <Navbar/>
                 </nav>
@@ -40,28 +22,26 @@ export default function DashboardLayout({
             
             <DivGap customHeightGap="h-[55px] md:h-[70px]"/>
 
-            <div className="flex border min-h-screen">
-                <aside className="hidden md:block relative z-10 flex-grow w-[15%] border-r-4 font-sans">
+            <div className="flex flex-1 border">
+                <aside className="hidden md:block relative z-10 w-[15%] shrink-0 border-r-4 font-sans">
                     <SidebarMenu 
                         className="fixed w-[15%] top-17 left-0" 
                         isPopOutSidebar={false}
                     />
                 </aside>
 
-                <div className="flex flex-col flex-grow w-full md:w-[85%] md:border-r-4">
-                    {[children].map((el, i) => (
-                        <React.Fragment key={i}>
-                            {el}
-                        </React.Fragment>
-                    ))}
+                <div className="flex flex-col flex-1 w-full md:w-[85%] md:border-r-4 min-h-0">
+                    <div className="flex flex-1 flex-col min-h-0">
+                        {children}
+                    </div>
 
-                    <footer>
+                    <footer className="mt-auto shrink-0">
                         <Footer/>
                     </footer>
                 </div>
             </div>
             
-            <nav>
+            <nav className="shrink-0">
                 <BottomNavbar/>
             </nav>
         </section>

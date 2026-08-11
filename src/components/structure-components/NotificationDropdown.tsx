@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { FaBell } from "react-icons/fa";
+import { AnimatePresence, motion } from "framer-motion";
+import { FaBell, FaSpinner, FaTimes } from "react-icons/fa";
 import { AuthApi, NotificationApi } from "@/services/api";
 import { NotificationAudience, Priority, Role } from "@/types/enums";
 import IconWithBadge from "../custom-elements/IconWithBadge";
 
 const PAGE_SIZE = 10;
+
+/** ~5 notification rows visible in the md list viewport */
+const MD_LIST_HEIGHT = "md:h-[17.5rem]";
 
 const AUDIENCE_LABELS: Record<NotificationAudience, string> = {
     [NotificationAudience.USER]: "Personal",
@@ -356,10 +360,10 @@ export default function NotificationDropdown({
     };
 
     return (
-        <div ref={containerRef} className="relative hidden md:block">
+        <div ref={containerRef} className="relative">
             <button
                 type="button"
-                className="flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125 bg-transparent"
+                className="hidden md:flex flex-col items-center space-y-2 p-2 text-white transition-all duration-150 hover:scale-120 hover:brightness-125 bg-transparent"
                 onClick={onToggle}
                 aria-expanded={isOpen}
                 aria-label="Notifications"
@@ -372,141 +376,180 @@ export default function NotificationDropdown({
                 <span className="text-xs font-normal">Notifications</span>
             </button>
 
-            {isOpen && (
-                <div
-                    className="absolute top-full right-0 mt-2 z-90 w-[min(92vw,22rem)] max-h-[70vh] flex flex-col theme-dropdown rounded-md shadow-lg overflow-hidden"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--theme-border-subtle)] theme-section shrink-0">
-                        <h3 className="text-sm font-semibold theme-text">Notifications</h3>
-                        {unreadCount > 0 && (
-                            <button
-                                type="button"
-                                className="text-xs theme-text-teal bg-transparent hover:brightness-125 px-1"
-                                onClick={handleMarkAllRead}
-                            >
-                                Mark all read
-                            </button>
-                        )}
-                    </div>
-
-                    <div className="flex flex-col gap-2 px-3 py-2 border-b border-[var(--theme-border-subtle)] theme-section shrink-0">
-                        <div className="flex items-center gap-2">
-                            <FilterChip
-                                label="Normal"
-                                active={priorityFilter === Priority.NORMAL}
-                                onClick={() => togglePriority(Priority.NORMAL)}
-                            />
-                            <FilterChip
-                                label="Urgent"
-                                active={priorityFilter === Priority.URGENT}
-                                onClick={() => togglePriority(Priority.URGENT)}
-                            />
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        key="notification-panel"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.2, ease: "easeOut" }}
+                        className="fixed left-0 right-0 top-0 z-90 flex h-[50dvh] w-full flex-col overflow-hidden theme-dropdown shadow-lg rounded-none md:absolute md:left-auto md:right-0 md:top-full md:mt-2 md:h-auto md:w-[min(92vw,22rem)] md:rounded-md"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-[var(--theme-border-subtle)] theme-section shrink-0">
+                            <h3 className="text-sm font-semibold theme-text">Notifications</h3>
+                            <div className="flex items-center gap-2 shrink-0">
+                                {unreadCount > 0 && (
+                                    <button
+                                        type="button"
+                                        className="text-xs theme-text-teal bg-transparent hover:brightness-125 px-1"
+                                        onClick={handleMarkAllRead}
+                                    >
+                                        Mark all read
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    className="md:hidden flex items-center justify-center p-1.5 rounded-sm bg-[var(--theme-red)] text-white border-0 hover:brightness-110"
+                                    onClick={onClose}
+                                    style={{ backgroundColor: '#b91c1c', borderColor: 'transparent', color: '#ffffff' }}
+                                    aria-label="Close notifications"
+                                >
+                                    <FaTimes className="text-sm" />
+                                </button>
+                            </div>
                         </div>
 
-                        {showAudienceFilters && roleAudience && (
+                        <div className="flex flex-col gap-2 px-3 py-2 border-b border-[var(--theme-border-subtle)] theme-section shrink-0">
                             <div className="flex items-center gap-2">
                                 <FilterChip
-                                    label="Personal"
-                                    active={audienceFilter === NotificationAudience.USER}
-                                    onClick={() =>
-                                        selectAudience(NotificationAudience.USER)
-                                    }
+                                    label="Normal"
+                                    active={priorityFilter === Priority.NORMAL}
+                                    onClick={() => togglePriority(Priority.NORMAL)}
                                 />
                                 <FilterChip
-                                    label={AUDIENCE_LABELS[roleAudience]}
-                                    active={audienceFilter === roleAudience}
-                                    onClick={() => selectAudience(roleAudience)}
+                                    label="Urgent"
+                                    active={priorityFilter === Priority.URGENT}
+                                    onClick={() => togglePriority(Priority.URGENT)}
                                 />
                             </div>
-                        )}
-                    </div>
 
-                    <div className="overflow-y-auto flex-1 min-h-0">
-                        {(isLoading || (isFetching && page === 1) || !audienceFilter) &&
-                        items.length === 0 ? (
-                            <p className="p-4 text-sm text-center theme-text-muted">
-                                Loading notifications…
-                            </p>
-                        ) : items.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center gap-2 px-4 py-10">
-                                <FaBell className="text-2xl theme-text-subtle opacity-60" />
-                                <p className="text-sm font-medium theme-text text-center">
-                                    {emptyCopy.title}
-                                </p>
-                                <p className="text-xs theme-text-muted text-center">
-                                    {emptyCopy.subtitle}
-                                </p>
-                            </div>
-                        ) : (
-                            <>
-                                {grouped.map((section) => (
-                                    <section
-                                        key={section.audience}
-                                        className="border-b border-[var(--theme-border-subtle)] last:border-b-0"
-                                    >
-                                        <h4 className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide theme-text-muted theme-card sticky top-0">
-                                            {section.label}
-                                        </h4>
-                                        <ul className="flex flex-col">
-                                            {section.items.map((notification) => (
-                                                <li key={notification.id}>
-                                                    <button
-                                                        type="button"
-                                                        className={`w-full text-left px-3 py-2.5 border-b border-[var(--theme-border-subtle)] last:border-b-0 bg-transparent hover:brightness-95 transition ${
-                                                            notification.isRead
-                                                                ? "opacity-75"
-                                                                : "theme-card"
-                                                        }`}
-                                                        onClick={() =>
-                                                            handleNotificationClick(notification)
-                                                        }
-                                                    >
-                                                        <div className="flex items-start justify-between gap-2">
-                                                            <p className="text-sm line-clamp-3 text-left">
-                                                                {renderColoredContent(
-                                                                    notification.content
+                            {showAudienceFilters && roleAudience && (
+                                <div className="flex items-center gap-2">
+                                    <FilterChip
+                                        label="Personal"
+                                        active={audienceFilter === NotificationAudience.USER}
+                                        onClick={() =>
+                                            selectAudience(NotificationAudience.USER)
+                                        }
+                                    />
+                                    <FilterChip
+                                        label={AUDIENCE_LABELS[roleAudience]}
+                                        active={audienceFilter === roleAudience}
+                                        onClick={() => selectAudience(roleAudience)}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
+                        <div
+                            className={`overflow-y-auto flex-1 min-h-0 ${MD_LIST_HEIGHT}`}
+                        >
+                            {(isLoading ||
+                                (isFetching && page === 1) ||
+                                !audienceFilter) &&
+                            items.length === 0 ? (
+                                <div
+                                    className="flex h-full min-h-[10rem] w-full items-center justify-center"
+                                    role="status"
+                                    aria-live="polite"
+                                    aria-label="Loading notifications"
+                                >
+                                    <FaSpinner
+                                        className="text-3xl md:text-4xl theme-text-teal animate-spin"
+                                        aria-hidden
+                                    />
+                                </div>
+                            ) : items.length === 0 ? (
+                                <div className="flex h-full min-h-[10rem] flex-col items-center justify-center gap-2 px-4">
+                                    <FaBell className="text-2xl theme-text-subtle opacity-60" />
+                                    <p className="text-sm font-medium theme-text text-center">
+                                        {emptyCopy.title}
+                                    </p>
+                                    <p className="text-xs theme-text-muted text-center">
+                                        {emptyCopy.subtitle}
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    {grouped.map((section) => (
+                                        <section
+                                            key={section.audience}
+                                            className="border-b border-[var(--theme-border-subtle)] last:border-b-0"
+                                        >
+                                            <h4 className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide theme-text-muted theme-card sticky top-0">
+                                                {section.label}
+                                            </h4>
+                                            <ul className="flex flex-col">
+                                                {section.items.map((notification) => (
+                                                    <li key={notification.id}>
+                                                        <button
+                                                            type="button"
+                                                            className={`w-full text-left px-3 py-2.5 border-b border-[var(--theme-border-subtle)] last:border-b-0 bg-transparent hover:brightness-95 transition ${
+                                                                notification.isRead
+                                                                    ? "opacity-75"
+                                                                    : "theme-card"
+                                                            }`}
+                                                            onClick={() =>
+                                                                handleNotificationClick(
+                                                                    notification
+                                                                )
+                                                            }
+                                                        >
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <p className="text-sm line-clamp-3 text-left">
+                                                                    {renderColoredContent(
+                                                                        notification.content
+                                                                    )}
+                                                                </p>
+                                                                {!notification.isRead && (
+                                                                    <span className="mt-1 shrink-0 w-2 h-2 rounded-full bg-[var(--theme-red)]" />
+                                                                )}
+                                                            </div>
+                                                            <p className="text-[10px] theme-text-subtle mt-1">
+                                                                {formatRelativeTime(
+                                                                    notification.createdAt
+                                                                )}
+                                                                {notification.notificationPriority ===
+                                                                    Priority.URGENT && (
+                                                                    <span className="ml-2 text-[var(--theme-red)] font-semibold">
+                                                                        Urgent
+                                                                    </span>
                                                                 )}
                                                             </p>
-                                                            {!notification.isRead && (
-                                                                <span className="mt-1 shrink-0 w-2 h-2 rounded-full bg-[var(--theme-red)]" />
-                                                            )}
-                                                        </div>
-                                                        <p className="text-[10px] theme-text-subtle mt-1">
-                                                            {formatRelativeTime(
-                                                                notification.createdAt
-                                                            )}
-                                                            {notification.notificationPriority ===
-                                                                Priority.URGENT && (
-                                                                <span className="ml-2 text-[var(--theme-red)] font-semibold">
-                                                                    Urgent
-                                                                </span>
-                                                            )}
-                                                        </p>
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </section>
-                                ))}
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </section>
+                                    ))}
 
-                                {hasMore && (
-                                    <div className="p-3 border-t border-[var(--theme-border-subtle)]">
-                                        <button
-                                            type="button"
-                                            className="w-full py-2 text-sm theme-btn-teal text-white rounded-sm disabled:opacity-60"
-                                            onClick={handleLoadMore}
-                                            disabled={isFetching}
-                                        >
-                                            {isFetching ? "Loading…" : "Load more"}
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+                                    {hasMore && (
+                                        <div className="p-3 border-t border-[var(--theme-border-subtle)]">
+                                            <button
+                                                type="button"
+                                                className="w-full py-2 text-sm theme-btn-teal text-white rounded-sm disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                                                onClick={handleLoadMore}
+                                                disabled={isFetching}
+                                            >
+                                                {isFetching ? (
+                                                    <FaSpinner
+                                                        className="text-base animate-spin"
+                                                        aria-hidden
+                                                    />
+                                                ) : (
+                                                    "Load more"
+                                                )}
+                                            </button>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

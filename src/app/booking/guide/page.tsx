@@ -188,19 +188,12 @@ function GuideBookingContent() {
     }, [form.bookingDate, form.startTime, form.endTime]);
 
     if (isLoading || locationsLoading) {
-        return (
-            <div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
-                <div className="flex flex-col gap-2">
-                    <h3 className="theme-text-teal font-fredericka">Guide Booking</h3>
-                    <p className="theme-text-muted">Loading guide data...</p>
-                </div>
-            </div>
-        );
+        return <SuspenseFallback loadingText="guides" />;
     }
 
     if (error) {
         return (
-            <div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
+            <div className="flex flex-1 flex-col p-3 md:p-6 mt-5 font-sans">
                 <div className="flex flex-col gap-2">
                     <h3 className="theme-text-teal font-fredericka">Guide Booking</h3>
                     <p className="text-red-400">Failed to load guides. Please try again.</p>
@@ -210,7 +203,7 @@ function GuideBookingContent() {
     }
 
     return (
-        <div className="flex flex-col p-3 md:p-6 mt-5 font-sans min-h-screen">
+        <div className="flex flex-col flex-1 p-3 md:p-6 mt-5 font-sans">
             <div className="flex flex-col gap-2">
                 <h3 className="theme-text-teal font-fredericka">Guide Booking</h3>
                 <p className="theme-text-muted">

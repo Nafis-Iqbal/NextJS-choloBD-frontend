@@ -56,6 +56,10 @@
         border: 1px solid var(--theme-deep-green);
     }
 
+    .theme-teal-soft {
+        background-color: var(--theme-teal-soft);
+    }
+
     /* --- Buttons --- */
     .theme-btn-teal {
         background-color: var(--theme-teal);
@@ -222,6 +226,7 @@
 
   --theme-teal:          #2A9D8F;   /* primary */
   --theme-teal-hover:    #1F7A6E;
+  --theme-teal-soft:     #D4EFEB;   /* light primary tint */
 
   --theme-deep-green:    #1F4E3C;   /* deep */
   --theme-border-subtle: rgba(31, 78, 60, 0.25);
@@ -246,6 +251,7 @@
 
   --theme-teal:          #000000;   /* primary — black buttons */
   --theme-teal-hover:    #1A1A1A;
+  --theme-teal-soft:     #E8E8E8;   /* light primary tint */
 
   --theme-deep-green:    #000000;   /* deep — black outlines */
   --theme-border-subtle: rgba(0, 0, 0, 0.25);
@@ -268,6 +274,7 @@
 
   --theme-teal:          #E67A7A;
   --theme-teal-hover:    #D96868;
+  --theme-teal-soft:     #FCE8E8;
 
   --theme-deep-green:    #8A5E5E;
   --theme-border-subtle: rgba(230, 122, 122, 0.10);
@@ -335,6 +342,7 @@
 
   --theme-teal:          #D32F3A;   /* primary — clear red */
   --theme-teal-hover:    #B52530;
+  --theme-teal-soft:     #FADADD;
 
   --theme-deep-green:    #6B1F2A;   /* deep burgundy outlines */
   --theme-border-subtle: rgba(211, 47, 58, 0.20);
@@ -357,6 +365,7 @@
 
   --theme-teal:          #0EA5E9;
   --theme-teal-hover:    #0284C7;
+  --theme-teal-soft:     #D6EFFB;
 
   --theme-deep-green:    #1E4A66;
   --theme-border-subtle: rgba(14, 165, 233, 0.15);
@@ -380,6 +389,17 @@ html {
 ::-webkit-scrollbar-track { background: var(--theme-section-bg); }
 ::-webkit-scrollbar-thumb { background: var(--theme-teal); border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--theme-teal-hover); }
+
+/* Opt-in: hide scrollbars while keeping scroll behavior (e.g. mobile tab strips) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
 body {
   background: var(--background);

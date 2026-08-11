@@ -2,6 +2,8 @@
 
 import React from "react";
 import Link from "next/link";
+import { Compass, QrCode, Route } from "lucide-react";
+import { SectionHeader } from "./SectionHeader";
 
 interface MobileAppIntroductionProps {
   className?: string;
@@ -15,6 +17,12 @@ const DEFAULT_APP_STORE_URL = "https://www.apple.com/app-store/";
 const DEFAULT_PREVIEW_IMAGE_URL =
   "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=1200&q=80&auto=format&fit=crop";
 
+const APP_HIGHLIGHTS = [
+  { icon: Compass, label: "Explore destinations" },
+  { icon: Route, label: "Organize trip plans" },
+  { icon: QrCode, label: "Cashless QR access" },
+];
+
 function buildQrImage(url: string) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
 }
@@ -27,18 +35,28 @@ export const MobileAppIntroduction: React.FC<MobileAppIntroductionProps> = ({
 }) => {
   return (
     <section className={`w-full scroll-mt-36 ${className}`} id="mobile-app">
-      <div className="w-full flex flex-col items-center text-center font-sans">
-        <div className="max-w-3xl">
-          <h2 className="text-2xl md:text-4xl font-semibold theme-text">
-            Your All-in-One CholoBD Travel App
-          </h2>
-          <p className="mt-3 text-sm md:text-base theme-text-muted leading-relaxed">
-            Discover destinations, explore stays and activities, keep trip plans organized,
-            and carry your cashless travel experience with you wherever the journey goes.
-          </p>
+      <div className="flex w-full flex-col items-center font-sans">
+        <div className="mb-4 flex items-center gap-3">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--theme-teal)] md:w-12" />
+          <span className="theme-text-teal text-xl font-semibold uppercase tracking-[0.16em] md:text-2xl">Mobile App</span>
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--theme-teal)] md:w-12" />
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4">
+        <SectionHeader subtitle="Discover destinations, explore stays and activities, keep trip plans organized, and carry your cashless travel experience with you wherever the journey goes." />
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-2.5 md:gap-3">
+          {APP_HIGHLIGHTS.map(({ icon: Icon, label }) => (
+            <span
+              key={label}
+              className="inline-flex items-center gap-1.5 rounded-full border border-[var(--theme-border-subtle)] bg-[var(--theme-bg)] px-3.5 py-1.5 text-xs font-medium theme-text"
+            >
+              <Icon className="h-3.5 w-3.5 theme-text-teal" strokeWidth={2} />
+              {label}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3 md:gap-4">
           <StoreBadge
             href={appStoreUrl}
             icon="apple"
@@ -46,7 +64,7 @@ export const MobileAppIntroduction: React.FC<MobileAppIntroductionProps> = ({
             bottomText="App Store"
           />
 
-          <div className="z-20 rounded-xl border border-[var(--theme-border-subtle)] bg-white p-2 shadow-sm hover:scale-250 transition-transform duration-300">
+          <div className="z-20 rounded-2xl border border-[var(--theme-border-subtle)] bg-white p-2 shadow-[0_10px_28px_-16px_var(--theme-deep-green)] transition-transform duration-300 hover:scale-[1.75]">
             <img
               src={buildQrImage(playStoreUrl)}
               alt="QR code for Google Play download"
@@ -62,16 +80,13 @@ export const MobileAppIntroduction: React.FC<MobileAppIntroductionProps> = ({
           />
         </div>
 
-        <div className="mt-8 w-full max-w-5xl">
-          <div className="relative overflow-hidden rounded-[2rem]">
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[var(--theme-bg)]/90 z-10 pointer-events-none" />
-            <div className="rounded-[2rem] overflow-hidden">
-              <img
-                src={previewImageUrl}
-                alt="Wide mobile app preview for CholoBD"
-                className="w-full h-[260px] md:h-[380px] lg:h-[460px] object-cover"
-              />
-            </div>
+        <div className="mt-10 w-full max-w-5xl">
+          <div className="overflow-hidden rounded-3xl border border-[var(--theme-border-subtle)] bg-[var(--theme-section-bg)] shadow-[0_24px_55px_-32px_var(--theme-deep-green)]">
+            <img
+              src={previewImageUrl}
+              alt="Wide mobile app preview for CholoBD"
+              className="h-[260px] w-full object-cover md:h-[380px] lg:h-[460px]"
+            />
           </div>
         </div>
       </div>
@@ -95,7 +110,7 @@ const StoreBadge = ({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="rounded-xl bg-black px-4 py-2 text-left text-white shadow-sm transition-transform hover:scale-[1.02]"
+      className="rounded-2xl bg-black px-4 py-2.5 text-left text-white shadow-[0_10px_28px_-16px_var(--theme-deep-green)] transition-transform hover:scale-[1.04]"
     >
       <div className="flex items-center gap-2.5">
         {icon === "apple" ? <AppleIcon /> : <GooglePlayIcon />}

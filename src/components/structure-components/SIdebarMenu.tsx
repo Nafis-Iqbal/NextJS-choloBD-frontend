@@ -5,10 +5,11 @@ import { forwardRef, type ReactNode, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
-import { AuthApi, UserApi } from '@/services/api';
-import { ServiceType } from '@/types/enums';
+import { AuthApi, UserApi, WalletApi } from '@/services/api';
+import { Role, ServiceType } from '@/types/enums';
 import { IconType } from 'react-icons';
-import { FaWindowClose } from 'react-icons/fa';
+import { FaTimes } from 'react-icons/fa';
+import { Logo } from '@/components/custom-elements/UIUtilities';
 import {
     FaBuilding,
     FaMapMarkerAlt,
@@ -53,6 +54,45 @@ type MenuItem = {
 type SidebarMenuConfig = {
     [key: string]: MenuItem[];
 };
+
+function formatRoleBadgeLabel(role?: Role | string | null): string {
+    if (!role) return 'USER';
+    return String(role).replace(/_/g, ' ').toUpperCase();
+}
+
+function getSidebarRoleBadgeStyle(role?: Role | string | null): {
+    backgroundColor: string;
+    color: string;
+    borderColor: string;
+} {
+    switch (role) {
+        case Role.MASTER_ADMIN:
+            return {
+                backgroundColor: '#D4A017',
+                color: '#1a1a1a',
+                borderColor: '#B8860B',
+            };
+        case Role.SERVICE_ADMIN:
+            return {
+                backgroundColor: '#7C3AED',
+                color: '#ffffff',
+                borderColor: '#6D28D9',
+            };
+        case Role.EMPLOYEE:
+            return {
+                backgroundColor: '#16A34A',
+                color: '#ffffff',
+                borderColor: '#15803D',
+            };
+        case Role.USER:
+        default:
+            return {
+                backgroundColor: 'var(--theme-card-bg)',
+                color: 'var(--theme-text)',
+                borderColor: 'var(--theme-border-subtle)',
+            };
+    }
+}
 
 type ServiceAwareLabels = {
     serviceAdminDashboardLabel: string;
@@ -559,8 +599,12 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(
         const { data: authResponse } = AuthApi.useGetUserAuthenticationRQ(true);
         const isAuthenticated = authResponse?.data?.isAuthenticated || false;
         const currentUserId = authResponse?.data?.userId;
+        const currentUserName = authResponse?.data?.userName;
         const currentUserRole = authResponse?.data?.userRole;
         const isDesktopSidebar = !isPopOutSidebar;
+
+        const { data: walletResponse } = WalletApi.useGetMyWalletRQ();
+        const walletBalance = walletResponse?.data?.balance || 0;
 
         const { data: userDetailResponse } = UserApi.useGetOwnUserDetailRQ(
             currentUserId || '',
@@ -619,9 +663,61 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(
             if (setSidebarVisibility) setSidebarVisibility(false);
         };
 
+        const renderPopOutHeader = (showUserSummary: boolean) => (
+            <div className="flex flex-col border-b border-[var(--theme-deep-green)]">
+                <div className="relative flex min-h-[100px] items-center justify-center theme-teal-soft mb-2">
+                    <Logo position="mx-auto" height={72} width={140} />
+                    <button
+                        type="button"
+                        aria-label="Close menu"
+                        className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-md !border-0 !bg-red-600 !text-white shadow-none outline-none hover:!bg-red-700"
+                        style={{ backgroundColor: '#b91c1c', borderColor: 'transparent', color: '#ffffff' }}
+                        onClick={() => onClose()}
+                    >
+                        <FaTimes className="text-sm text-white" />
+                    </button>
+                </div>
+
+                {showUserSummary && (
+                    <div className="flex flex-col gap-2.5 bg-[var(--theme-section-bg)] px-2 py-1 font-sans">
+                        <div className="flex justify-between mb-2">
+                            <p className="theme-text text-sm text-green-700 font-semibold leading-tight truncate">
+                                {currentUserName || 'Traveler'}
+                            </p>
+                            <span
+                                className="inline-flex w-fit max-w-full items-center justify-center rounded-md border px-2 py-0.5 text-[10px] font-bold tracking-wide"
+                                style={getSidebarRoleBadgeStyle(currentUserRole)}
+                            >
+                                {formatRoleBadgeLabel(currentUserRole)}
+                            </span>
+                        </div>
+
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                                <p className="theme-text-muted text-[11px] uppercase tracking-wide">Available credits</p>
+                                <p className="theme-text text-base font-semibold tabular-nums">
+                                    {walletBalance.toLocaleString()} C
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                className="theme-btn-teal shrink-0 rounded-md px-3 py-1.5 text-xs font-semibold"
+                                onClick={() => {
+                                    router.push('/wallet/wallet-recharge');
+                                    onClose();
+                                }}
+                            >
+                                Get Credits!
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+
         const smallScreenStyle =
-            'absolute top-[calc(100%-1rem)] min-h-screen md:h-auto left-0 md:hidden w-[120%] border-1 border-[var(--theme-deep-green)] bg-[var(--theme-section-bg)] z-50 flex flex-col ' +
-            className;
+            'fixed top-0 left-0 min-h-screen md:h-auto md:hidden w-[78vw] max-w-[320px] border-1 border-[var(--theme-deep-green)] bg-[var(--theme-section-bg)] z-50 flex flex-col ' +
+            (className ?? '');
         const bigScreenStyle =
             'border border-[color:color-mix(in_srgb,var(--theme-teal)_35%,transparent)] bg-[var(--theme-section-bg)] z-50 flex flex-col h-screen shadow-sm ' +
             className;
@@ -650,22 +746,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(
                         className={isPopOutSidebar ? smallScreenStyle : bigScreenStyle}
                         style={style}
                     >
-                        {isPopOutSidebar && (
-                            <div>
-                                <div
-                                    className="flex justify-center items-center min-h-[120px] font-bold text-white text-3xl bg-[var(--theme-teal)]
-                        border-b-2 border-[var(--theme-deep-green)]"
-                                >
-                                    Cholo BD!
-                                </div>
-                                <button
-                                    className="w-[100%] h-[40px] text-lg text-white font-sans theme-btn-teal"
-                                    onClick={() => onClose()}
-                                >
-                                    Close
-                                </button>
-                            </div>
-                        )}
+                        {isPopOutSidebar && renderPopOutHeader(false)}
 
                         <div className="relative">
                             <div className="relative p-3 text-xl text-center border-b-2 text-white font-sans overflow-visible theme-sidebar-header">
@@ -719,23 +800,7 @@ const SidebarMenuWithRef = forwardRef<HTMLDivElement, SidebarMenuProps>(
                     className={isPopOutSidebar ? smallScreenStyle : bigScreenStyle}
                     style={style}
                 >
-                    {isPopOutSidebar && (
-                        <div className="relative font-satisfy">
-                            <div
-                                className="flex justify-center items-center min-h-[80px] md:min-h-[120px] font-bold text-white text-2xl md:text-3xl
-                            bg-[var(--theme-teal)] border-b-1 border-t-2 border-[var(--theme-deep-green)]"
-                            >
-                                Cholo BD
-                            </div>
-
-                            <button
-                                className="absolute top-0 right-0 w-[20px] h-[20px] text-lg text-center text-red-400"
-                                onClick={() => onClose()}
-                            >
-                                <FaWindowClose />
-                            </button>
-                        </div>
-                    )}
+                    {isPopOutSidebar && renderPopOutHeader(true)}
 
                     <div className="relative">
                         {opensOnHover && (

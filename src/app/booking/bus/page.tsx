@@ -214,7 +214,7 @@ function BusBookingContent() {
 	};
 
 	return (
-		<div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
+		<div className="flex flex-col flex-1 p-3 md:p-6 mt-5 font-sans">
 			<div className="flex flex-col gap-2">
 				<h3 className="text-green-500 font-fredericka">Bus Tickets</h3>
 				<p className="text-green-200">Search routes, compare operators, and book seats (demo data).</p>

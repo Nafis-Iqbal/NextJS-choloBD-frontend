@@ -63,7 +63,7 @@ const options: BookingOption[] = [
 
 export default function BookingLandingPage() {
 	return (
-		<div className="min-h-[70vh] w-full">
+		<div className="flex-1 w-full">
 			<section className="mx-auto max-w-6xl px-4 py-8 md:py-10 font-sans">
 				<div className="mb-6 md:mb-8">
 					<h1 className="theme-text text-2xl font-semibold md:text-3xl">Booking Options</h1>

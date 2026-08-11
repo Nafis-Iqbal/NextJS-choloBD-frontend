@@ -67,7 +67,7 @@ export const SearchInputBar = ({
                                 onClick={() => onSearchResultNavigate("hotels", hotel.id)}
                             >
                                 <p className="ml-1 md:ml-3">{hotel.name}</p>
-                                <p className="text-blue-400 font-semibold"> Activity Spot</p>
+                                <p className="text-blue-400 font-semibold">Hotel</p>
                                 <NextImage 
                                     src={hotel.images?.[0]?.url || null} 
                                     alt={hotel.name} 
@@ -83,7 +83,7 @@ export const SearchInputBar = ({
                                 onClick={() => onSearchResultNavigate("tour-spots", tourSpot.id)}
                             >
                                 <p className="ml-1 md:ml-3">{tourSpot.name}</p>
-                                <p className="text-green-400 font-semibold"> Tour Spot</p>
+                                <p className="text-green-400 font-semibold">Tour Spot</p>
                                 <NextImage 
                                     src={tourSpot.images?.[0]?.url || null} 
                                     alt={tourSpot.name} 
@@ -99,26 +99,7 @@ export const SearchInputBar = ({
                                 onClick={() => onSearchResultNavigate("activity-spots", activitySpot.id)}
                             >
                                 <p className="ml-1 md:ml-3">{activitySpot.name}</p>
-                                <p className="text-pink-400 font-semibold"> Activity Spot</p>
-                                <NextImage 
-                                    src={activitySpot.images?.[0]?.url || null} 
-                                    alt={activitySpot.name} 
-                                    className="w-16 h-16" 
-                                />
-                            </div>
-                        ))}
-                    </div>
-                }
-                {activitySpotList.length > 0 &&
-                    <div className="absolute top-full left-0 w-full font-sans bg-white border border-gray-300 rounded-md mt-1 max-h-60 overflow-y-auto z-10">
-                        {hotelList.map((activitySpot: ActivitySpot) => (
-                            <div 
-                                key={activitySpot.id} 
-                                className="flex justify-between items-center max-h-[100px] p-2 bg-white hover:bg-gray-200 
-                                    text-gray-700 border-b border-gray-300 cursor-pointer"
-                                onClick={() => onSearchResultNavigate("activity-spots", activitySpot.id)}
-                            >
-                                <p className="ml-1 md:ml-3">{activitySpot.name}</p>
+                                <p className="text-pink-400 font-semibold">Activity Spot</p>
                                 <NextImage 
                                     src={activitySpot.images?.[0]?.url || null} 
                                     alt={activitySpot.name} 

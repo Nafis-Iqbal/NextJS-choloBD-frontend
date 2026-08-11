@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { FaSpinner } from "react-icons/fa";
 import { AuthApi, HotelBookingApi } from "@/services/api";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
 import { CustomTextInput } from "@/components/custom-elements/CustomInputElements";
@@ -101,7 +102,7 @@ export default function TrackersPage() {
 
   return (
     <div
-      className="min-h-screen pt-20 pb-10 font-sans"
+      className="flex-1 pt-20 pb-10 font-sans"
       style={{
         backgroundColor: "var(--theme-bg)",
         color: "var(--theme-text)",
@@ -175,15 +176,21 @@ export default function TrackersPage() {
                   </div>
                 ) : isWaitingForResults ? (
                   <div
-                    className="mb-8 rounded-lg p-6 text-center"
+                    className="mb-8 flex min-h-[10rem] flex-col items-center justify-center gap-3 rounded-lg p-6"
                     style={{
                       backgroundColor: "var(--theme-section-bg)",
                       borderColor: "var(--theme-deep-green)",
                       border: "1px solid",
-                      color: "var(--theme-text-muted)",
                     }}
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Searching for booking"
                   >
-                    <p>Searching for your booking...</p>
+                    <FaSpinner
+                      className="text-3xl md:text-4xl theme-text-teal animate-spin"
+                      aria-hidden
+                    />
+                    <p className="theme-text-muted">Searching for your booking…</p>
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="mb-8 space-y-4">

@@ -176,19 +176,12 @@ function ActivityBookingContent() {
     }, [form.bookingDate]);
 
     if (isLoading || locationsLoading) {
-        return (
-            <div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
-                <div className="flex flex-col gap-2">
-                    <h3 className="theme-text-teal font-fredericka">Activity Booking</h3>
-                    <p className="theme-text-muted">Loading activity spots...</p>
-                </div>
-            </div>
-        );
+        return <SuspenseFallback loadingText="activities" />;
     }
 
     if (error) {
         return (
-            <div className="flex flex-col p-3 md:p-6 mt-5 font-sans">
+            <div className="flex flex-1 flex-col p-3 md:p-6 mt-5 font-sans">
                 <div className="flex flex-col gap-2">
                     <h3 className="theme-text-teal font-fredericka">Activity Booking</h3>
                     <p className="text-red-400">Failed to load activity spots. Please try again.</p>
@@ -198,7 +191,7 @@ function ActivityBookingContent() {
     }
 
     return (
-        <div className="flex flex-col p-3 md:p-6 mt-5 font-sans min-h-screen">
+        <div className="flex flex-col flex-1 p-3 md:p-6 mt-5 font-sans">
             <div className="flex flex-col gap-2">
                 <h3 className="theme-text-teal font-fredericka">Activity Booking</h3>
                 <p className="theme-text-muted">

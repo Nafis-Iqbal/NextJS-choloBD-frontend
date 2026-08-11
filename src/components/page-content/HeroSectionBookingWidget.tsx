@@ -5,7 +5,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { NextImage } from "../custom-elements/UIUtilities";
 import { CustomDatePicker } from "../custom-elements/CustomInputElements";
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
-import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking, MdPersonPin } from "react-icons/md";
+import { MdHotel, MdDirectionsBus, MdTrain, MdFlightTakeoff, MdTour, MdHiking, MdPersonPin, MdKeyboardArrowDown } from "react-icons/md";
+import { FaSpinner } from "react-icons/fa";
 import { AuthApi, LocationApi } from "@/services/api";
 import { ActivityType, Language, RoomShift, TourType } from "@/types/enums";
 import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
@@ -78,6 +79,55 @@ interface GuideFilters {
   travelers: string;
   specialization: string;
   language: string;
+}
+
+function ComingSoonBadge() {
+  return (
+    <span className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap">
+      Coming Soon
+    </span>
+  );
+}
+
+function UnderMaintenanceBadge() {
+  return (
+    <span className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-orange-100 text-orange-800 border border-orange-200 whitespace-nowrap">
+      Under Maintenance
+    </span>
+  );
+}
+
+/** Spinner sits absolutely to the right of the label so centered text does not shift. */
+function FindSubmitButton({
+  label,
+  isLoading,
+  onClick,
+  disabled = false,
+}: {
+  label: string;
+  isLoading: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+}) {
+  const isDisabled = disabled || isLoading;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={isDisabled}
+      className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[var(--theme-teal)]"
+    >
+      <span className="relative inline-flex items-center justify-center">
+        {label}
+        {isLoading && (
+          <FaSpinner
+            className="absolute left-full top-1/2 ml-2 -translate-y-1/2 text-sm animate-spin"
+            aria-hidden
+          />
+        )}
+      </span>
+    </button>
+  );
 }
 
 export const HeroSectionBookingWidget = ({
@@ -180,7 +230,7 @@ export const HeroSectionBookingWidget = ({
 
   return (
     <div
-      className={`relative w-full h-screen md:h-[90vh] overflow-hidden bg-black font-sans ${className ?? ""}`}
+      className={`relative w-full h-[90vh] md:h-[85vh] overflow-hidden bg-black font-sans ${className ?? ""}`}
     >
       {/* Background Image Carousel */}
       <motion.div 
@@ -239,12 +289,11 @@ export const HeroSectionBookingWidget = ({
             transition={{ duration: 0.6 }}
             className="text-center mb-2 md:mb-8"
           >
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-6 drop-shadow-lg">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white my-2 md:my-0 mb-3 md:mb-6 drop-shadow-lg">
               Prepaid. QR Easy. Cash-Free Journeys.
             </h1>
-            <p className="text-base md:text-xl text-white/95 max-w-3xl mx-auto drop-shadow-md">
-              One payment covers your whole trip. Scan QR codes at every stop — hotels, bus terminals, 
-              boats, attractions. We handle the rest.
+            <p className="text-base md:text-xl text-white max-w-3xl mx-auto drop-shadow-md my-2">
+              One payment. Endless stops. Zero payment hassle.
             </p>
           </motion.div>
 
@@ -253,22 +302,24 @@ export const HeroSectionBookingWidget = ({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-wrap gap-2 md:gap-3 justify-center mb-4 md:mb-5 flex-shrink-0"
+            className="mb-4 md:mb-5 w-full flex-shrink-0 overflow-x-auto scrollbar-none"
           >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => handleTabChange(tab.id)}
-                className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg font-medium transition-all ${
-                  activeTab === tab.id
-                    ? "bg-white text-black shadow-lg scale-105"
-                    : "bg-white/65 text-gray-700 hover:bg-white/90"
-                }`}
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-              </button>
-            ))}
+            <div className="mx-auto flex w-max min-w-full justify-center gap-2 md:gap-3">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => handleTabChange(tab.id)}
+                  className={`flex min-w-[7.5rem] shrink-0 items-center justify-center gap-2 px-3 md:px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "bg-white text-black shadow-lg scale-105"
+                      : "bg-white/65 text-gray-700 hover:bg-white/90"
+                  }`}
+                >
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </motion.div>
 
           {/* Filter Content - Slides in/out */}
@@ -297,6 +348,8 @@ export const HeroSectionBookingWidget = ({
           </AnimatePresence>
         </div>
       </div>
+
+      //Down arrow anim for sm screens
     </div>
   );
 };
@@ -320,6 +373,7 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
 
   const [locationSearch, setLocationSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const locationSuggestions = locations
@@ -390,9 +444,11 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
     }
 
     if (!validationFilters.city || !validationFilters.checkIn || !validationFilters.checkOut) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("city", validationFilters.city);
     qs.set("shift", RoomShift[validationFilters.shift]);
@@ -404,9 +460,9 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Hotel</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <h3 className="text-lg md:text-xl font-bold text-black mt-2 md:mt-0 mb-3 md:mb-6">Book a Hotel</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Destination City</label>
           <div className="relative">
@@ -511,12 +567,11 @@ function HotelFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Find Hotels"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Find Cashless Hotels
-      </button>
+      />
       <p className="text-xs text-gray-600 text-center mt-3">Join thousands exploring Cox's Bazar, Sylhet, Bandarban & more — completely hassle-free.</p>
     </div>
   );
@@ -539,12 +594,15 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
     busClass: "standard",
     tripType: "oneway",
   });
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = () => {
     if (!filters.departureCity || !filters.arrivalCity || !filters.departureDate) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("from", filters.departureCity);
     qs.set("to", filters.arrivalCity);
@@ -556,8 +614,11 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Bus</h3>
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mb-3 mt-2 md:mt-0 md:mb-6">
+        <h3 className="text-lg md:text-xl font-bold text-black">Book a Bus</h3>
+        <ComingSoonBadge />
+      </div>
       <div className="mb-6">
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-black">
@@ -582,7 +643,7 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
           </label>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Departure City</label>
           <input
@@ -649,12 +710,12 @@ function BusFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Get Bus Tickets"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Get QR Bus Tickets
-      </button>
+        disabled
+      />
       <p className="text-xs text-gray-600 text-center mt-3">Board instantly with QR — no queues, no paper tickets.</p>
     </div>
   );
@@ -677,12 +738,15 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
     trainClass: "general",
     tripType: "oneway",
   });
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = () => {
     if (!filters.departureStation || !filters.arrivalStation || !filters.departureDate) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("from", filters.departureStation);
     qs.set("to", filters.arrivalStation);
@@ -694,8 +758,11 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Train</h3>
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mt-2 md:mt-0 mb-3 md:mb-6">
+        <h3 className="text-lg md:text-xl font-bold text-black">Book a Train</h3>
+        <ComingSoonBadge />
+      </div>
       <div className="mb-6">
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-black">
@@ -720,7 +787,7 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
           </label>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">From Station</label>
           <input
@@ -787,12 +854,12 @@ function TrainFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Get Train Tickets"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Get QR Train Tickets
-      </button>
+        disabled
+      />
       <p className="text-xs text-gray-600 text-center mt-3">Travel smoothly with instant QR tickets — cashless & convenient.</p>
     </div>
   );
@@ -814,12 +881,15 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
     passengers: "1",
     tripType: "oneway",
   });
+  const [isSearching, setIsSearching] = useState(false);
 
   const handleSearch = () => {
     if (!filters.departureCity || !filters.arrivalCity || !filters.departureDate) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("from", filters.departureCity);
     qs.set("to", filters.arrivalCity);
@@ -833,8 +903,11 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <h3 className="text-lg md:text-xl font-bold text-black mb-6">Book a Flight</h3>
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mt-2 md:mt-0 mb-3 md:mb-6">
+        <h3 className="text-lg md:text-xl font-bold text-black">Book a Flight</h3>
+        <ComingSoonBadge />
+      </div>
       <div className="mb-6">
         <div className="flex gap-6">
           <label className="flex items-center gap-2 text-black">
@@ -859,7 +932,7 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
           </label>
         </div>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">From</label>
           <input
@@ -913,12 +986,12 @@ function FlightFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Find Flights"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Find Cashless Flights
-      </button>
+        disabled
+      />
       <p className="text-xs text-gray-600 text-center mt-3">Skip the hassle — pay with bKash, Nagad or QR instantly.</p>
     </div>
   );
@@ -944,6 +1017,7 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
   const [locationSearch, setLocationSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const locationSuggestions = locations
@@ -989,9 +1063,11 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.startDate || !filters.duration) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in all required fields");
       return;
     }
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("location", filters.location);
     qs.set("startDate", filters.startDate);
@@ -1002,16 +1078,17 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <div className="flex items-center gap-3 mb-6 bg-transparent">
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mt-2 md:mt-0 mb-6 bg-transparent">
         <h3 className="text-lg md:text-xl font-bold text-black">Plan a Tour</h3>
+        <UnderMaintenanceBadge />
         {!isAuthenticated && (
           <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
             Requires sign up
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Tour Type</label>
           <select
@@ -1097,12 +1174,11 @@ function TourFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Explore Tours"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Explore Cashless Tours
-      </button>
+      />
       <p className="text-xs text-gray-600 text-center mt-3">All-inclusive tours with QR payments — no cash needed anywhere.</p>
     </div>
   );
@@ -1135,6 +1211,7 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
 
   const [locationSearch, setLocationSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const locationSuggestions = locations
@@ -1180,6 +1257,7 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.date) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in location and activity date");
       return;
     }
@@ -1189,10 +1267,12 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
     today.setHours(0, 0, 0, 0);
     bookingDate.setHours(0, 0, 0, 0);
     if (bookingDate < today) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Activity date cannot be in the past");
       return;
     }
 
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("location", filters.location);
     qs.set("bookingDate", filters.date);
@@ -1202,8 +1282,8 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <div className="flex items-center gap-3 mb-6">
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mt-2 md:mt-0 mb-6">
         <h3 className="text-lg md:text-xl font-bold text-black">Find Activities</h3>
         {!isAuthenticated && (
           <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
@@ -1211,7 +1291,7 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Activity Type</label>
           <select
@@ -1283,12 +1363,11 @@ function ActivityFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Book Activities"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Book QR Activities
-      </button>
+      />
       <p className="text-xs text-gray-600 text-center mt-3">
         Seamless experiences — pay once, enjoy everything with QR.
       </p>
@@ -1332,6 +1411,7 @@ function GuideFilterPanel({ locations }: { locations: Location[] }) {
 
   const [locationSearch, setLocationSearch] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
   const locationSuggestions = locations
@@ -1377,6 +1457,7 @@ function GuideFilterPanel({ locations }: { locations: Location[] }) {
 
   const handleSearch = () => {
     if (!filters.location || !filters.bookingDate || !filters.endTime) {
+      setIsSearching(false);
       openNotificationPopUpMessage("Please fill in location, date, and end time");
       return;
     }
@@ -1385,11 +1466,13 @@ function GuideFilterPanel({ locations }: { locations: Location[] }) {
       const start = new Date(`${filters.bookingDate}T${filters.startTime}:00`);
       const end = new Date(`${filters.bookingDate}T${filters.endTime}:00`);
       if (end.getTime() <= start.getTime()) {
+        setIsSearching(false);
         openNotificationPopUpMessage("End time must be after start time");
         return;
       }
     }
 
+    setIsSearching(true);
     const qs = new URLSearchParams();
     qs.set("location", filters.location);
     qs.set("bookingDate", filters.bookingDate);
@@ -1402,8 +1485,8 @@ function GuideFilterPanel({ locations }: { locations: Location[] }) {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-xl p-4 md:p-6 shadow-xl">
-      <div className="flex items-center gap-3 mb-6 bg-transparent">
+    <div className="bg-white backdrop-blur-sm rounded-xl p-2.5 md:p-6 shadow-xl">
+      <div className="flex items-center gap-3 mb-6 mt-2 md:mt-0 bg-transparent">
         <h3 className="text-lg md:text-xl font-bold text-black">Request a Local Guide</h3>
         {!isAuthenticated && (
           <div className="text-[10px] md:text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
@@ -1411,7 +1494,7 @@ function GuideFilterPanel({ locations }: { locations: Location[] }) {
           </div>
         )}
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-5">
         <div className="flex flex-col">
           <label className="text-sm font-semibold text-gray-700 mb-2">Location</label>
           <div className="relative">
@@ -1522,12 +1605,11 @@ function GuideFilterPanel({ locations }: { locations: Location[] }) {
           </select>
         </div>
       </div>
-      <button
+      <FindSubmitButton
+        label="Find Local Guides"
+        isLoading={isSearching}
         onClick={handleSearch}
-        className="w-full mt-6 px-4 py-2 bg-[var(--theme-teal)] hover:bg-[var(--theme-teal-hover)] text-white font-semibold rounded-lg transition"
-      >
-        Find Local Guides
-      </button>
+      />
       <p className="text-xs text-gray-600 text-center mt-3">
         Submit a request — guides accept before payment. Contact details unlock after confirmation.
       </p>

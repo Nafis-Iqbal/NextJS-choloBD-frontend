@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
 
 interface FAQItem {
@@ -54,33 +55,50 @@ export const FrequentlyAskedQuestions: React.FC<FrequentlyAskedQuestionsProps> =
 
   return (
     <section className={`w-full scroll-mt-36 ${className}`} id="faq">
-      <SectionHeader
-        title="Frequently Asked Questions"
-        subtitle="Quick answers to the common things travelers want to know before planning with CholoBD"
-        className="mb-6"
-      />
+      <div className="mb-8 flex w-full flex-col items-center md:mb-10">
+        <div className="mb-4 flex items-center gap-3 font-sans">
+          <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--theme-teal)] md:w-12" />
+          <span className="theme-text-teal text-xl font-semibold uppercase tracking-[0.16em] md:text-2xl">Good To Know</span>
+          <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--theme-teal)] md:w-12" />
+        </div>
+        <SectionHeader subtitle="Quick answers to the common things travelers want to know before planning with CholoBD" />
+      </div>
 
-      <div className="w-full max-w-4xl mx-auto flex flex-col gap-4 font-sans">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 font-sans">
         {items.map((item, index) => {
           const isOpen = openIndex === index;
 
           return (
             <div
               key={`${item.question}-${index}`}
-              className="rounded-xl border border-[var(--theme-border-subtle)] bg-[var(--theme-card-bg)] overflow-hidden"
+              className={`overflow-hidden rounded-2xl border bg-[var(--theme-bg)] transition-all duration-300 ${
+                isOpen
+                  ? "border-[var(--theme-teal)] shadow-[0_18px_40px_-28px_var(--theme-deep-green)]"
+                  : "border-[var(--theme-border-subtle)] hover:border-[var(--theme-teal)]"
+              }`}
             >
               <button
                 type="button"
                 onClick={() => setOpenIndex(isOpen ? null : index)}
-                className="w-full px-5 py-4 md:px-6 md:py-5 flex items-center justify-between gap-4 text-left"
+                className="flex w-full items-center justify-between gap-4 bg-transparent px-5 py-4 text-left md:px-6 md:py-5"
                 aria-expanded={isOpen}
               >
-                <span className="theme-text font-medium text-sm md:text-base">{item.question}</span>
+                <span className="theme-text text-sm font-semibold leading-snug tracking-tight md:text-base">
+                  {item.question}
+                </span>
+
                 <span
-                  className={`text-2xl leading-none theme-text-muted transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
+                  className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
+                    isOpen ? "bg-[var(--theme-teal)]" : "theme-section"
+                  }`}
                   aria-hidden="true"
                 >
-                  +
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-300 ${
+                      isOpen ? "rotate-180 text-white" : "theme-text-teal"
+                    }`}
+                    strokeWidth={2.25}
+                  />
                 </span>
               </button>
 
@@ -90,8 +108,8 @@ export const FrequentlyAskedQuestions: React.FC<FrequentlyAskedQuestionsProps> =
                 }`}
               >
                 <div className="overflow-hidden">
-                  <div className="px-5 pb-4 md:px-6 md:pb-5 border-t border-[var(--theme-border-subtle)]">
-                    <p className="pt-4 theme-text-muted text-sm md:text-base leading-relaxed">{item.answer}</p>
+                  <div className="border-t border-[var(--theme-border-subtle)] px-5 pb-5 md:px-6">
+                    <p className="pt-4 theme-text-muted text-sm leading-relaxed md:text-base">{item.answer}</p>
                   </div>
                 </div>
               </div>
