@@ -348,8 +348,6 @@ export const HeroSectionBookingWidget = ({
           </AnimatePresence>
         </div>
       </div>
-
-      //Down arrow anim for sm screens
     </div>
   );
 };
