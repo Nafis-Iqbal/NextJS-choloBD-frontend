@@ -90,6 +90,7 @@ export async function getAllTourPlans(queryString?: string) {
         `/tour-builder${queryString ? `?${queryString}` : ""}`,
         {
             method: "GET",
+            cache: "no-store",
         }
     );
 

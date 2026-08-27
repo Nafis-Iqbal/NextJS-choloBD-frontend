@@ -1,4 +1,3 @@
-import { TourBuilderApi } from "@/services/api";
 import { HeroSectionBookingWidget } from "./HeroSectionBookingWidget";
 import {
     TourSuggestions,
@@ -11,26 +10,7 @@ import {
 } from "./index";
 import { HorizontalDivider } from "@/components/custom-elements/UIUtilities";
 
-export const HomepageContent = async () => {
-    let tourPackagesTour: TourPackage[] = [];
-    try {
-        const tourResponse = await TourBuilderApi.getAllTourPlans("limit=100");
-        tourPackagesTour = tourResponse?.data || [];
-    } catch (error) {
-        console.error("Failed to fetch tours. Error:", error);
-        tourPackagesTour = [];
-    }
-
-    type Tour = { id: string; name: string; place: string; days: number; price: number; rating: number };
-    const suggestedTours: Tour[] = tourPackagesTour.map((tour) => ({
-        id: tour.id,
-        name: tour.packageName,
-        place: tour.location?.name || "N/A",
-        days: tour.duration || 0,
-        price: tour.totalBudget || 0,
-        rating: tour.rating || 0,
-    }));
-
+export const HomepageContent = () => {
     const tickets = [
         { id: "r1", type: "Bus", route: "Dhaka → Cox’s Bazar", price: 1400 },
         { id: "r2", type: "Train", route: "Dhaka → Sylhet", price: 900 },
@@ -60,7 +40,7 @@ export const HomepageContent = async () => {
                 <TransportTickets tickets={tickets} className="min-h-[50vh]" focusText={transportFocusText} />
                 <HorizontalDivider className="w-full border-gray-600 mb-5" />
 
-                <TourSuggestions tours={suggestedTours} className="min-h-[50vh]" focusText={toursFocusText} />
+                <TourSuggestions className="min-h-[50vh]" focusText={toursFocusText} />
                 <HorizontalDivider className="w-full border-gray-600 mb-5" />
 
                 <ActivitySuggestions className="min-h-[50vh]" focusText={activitiesFocusText} />

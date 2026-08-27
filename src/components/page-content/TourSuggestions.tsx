@@ -1,18 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, CalendarDays, ChevronLeft, ChevronRight, MapPin, QrCode, Route, Star } from "lucide-react";
 import { SectionHeader } from "./SectionHeader";
+import { TourBuilderApi } from "@/services/api";
 import { useAutoScrollMarquee } from "./useAutoScrollMarquee";
 import { CardImageWithFallback } from "./CardImageWithFallback";
 import { TOUR_CARD_FALLBACK_IMAGE } from "./pageContentFallbackImages";
 
-type Tour = { id: string; name: string; place: string; days: number; price: number; rating: number };
+type Tour = {
+  id: string;
+  name: string;
+  place: string;
+  days: number;
+  price: number;
+  rating: number;
+  imageUrl?: string;
+};
 
 interface TourSuggestionsProps {
-  tours: Tour[];
   animationSpeed?: number;
   cardWidth?: number;
   className?: string;
@@ -25,14 +33,35 @@ const CARD_GAP = 24;
 
 const SECTION_SUBTITLE = "From weekend getaways to multi-day tours — everything booked and paid with QR";
 
+function readTourPackages(data: unknown): TourPackage[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === "object" && Array.isArray((data as { results?: unknown }).results)) {
+    return (data as { results: TourPackage[] }).results;
+  }
+  return [];
+}
+
 export const TourSuggestions: React.FC<TourSuggestionsProps> = ({
-  tours,
   animationSpeed = 25,
   cardWidth = 300,
   className = "",
   focusText,
   showFocusText = false,
 }) => {
+  const { data: toursResponse, isLoading, error } = TourBuilderApi.useGetAllTourPlansRQ("limit=100");
+
+  const tours = useMemo<Tour[]>(() => {
+    return readTourPackages(toursResponse?.data).map((tour) => ({
+      id: tour.id,
+      name: tour.packageName,
+      place: tour.location?.name || "N/A",
+      days: tour.duration || 0,
+      price: tour.totalBudget || 0,
+      rating: tour.rating || 0,
+      imageUrl: tour.images?.[0]?.url,
+    }));
+  }, [toursResponse?.data]);
+
   const { x, handleScrollLeft, handleScrollRight } = useAutoScrollMarquee(
     tours.length,
     cardWidth,
@@ -40,11 +69,39 @@ export const TourSuggestions: React.FC<TourSuggestionsProps> = ({
     CARD_GAP
   );
 
+  if (isLoading) {
+    return (
+      <section className={`w-full scroll-mt-36 ${className}`} id="tours">
+        <TourSuggestionsHeading />
+        <div className="flex gap-6 overflow-hidden font-sans">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="flex-shrink-0 animate-pulse overflow-hidden rounded-2xl border border-[var(--theme-border-subtle)] bg-[var(--theme-bg)]"
+              style={{ width: cardWidth }}
+            >
+              <div className="h-44 theme-placeholder opacity-25" />
+              <div className="flex flex-col gap-3 p-5">
+                <div className="h-4 w-3/4 rounded theme-placeholder opacity-20" />
+                <div className="h-3 w-1/2 rounded theme-placeholder opacity-15" />
+                <div className="h-px w-full bg-[var(--theme-border-subtle)]" />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="h-5 w-20 rounded theme-placeholder opacity-20" />
+                  <div className="h-9 w-24 rounded-full theme-placeholder opacity-20" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={`w-full scroll-mt-36 ${className}`} id="tours">
       <TourSuggestionsHeading />
 
-      {tours.length === 0 ? (
+      {error || tours.length === 0 ? (
         <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl border border-[var(--theme-border-subtle)] bg-[var(--theme-bg)] px-6 py-10 text-center font-sans">
           <span className="flex h-12 w-12 items-center justify-center rounded-full theme-section">
             <Route className="h-5 w-5 theme-text-teal" strokeWidth={1.75} />
@@ -161,6 +218,7 @@ const TourSuggestionsCard: React.FC<{ tour: Tour; width: number }> = ({ tour, wi
   >
     <div className="relative h-44 overflow-hidden bg-[var(--theme-section-bg)]">
       <CardImageWithFallback
+        src={tour.imageUrl}
         fallbackSrc={TOUR_CARD_FALLBACK_IMAGE}
         alt={tour.name}
         className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
