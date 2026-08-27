@@ -24,7 +24,11 @@ interface HotelFormProps {
   hotel_id?: string;
 }
 
-export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType.LUXURY}, hotel_id}: HotelFormProps) => {
+const DEFAULT_HOTEL_DATA: Partial<Hotel> = {
+    hotelType: HotelType.LUXURY,
+};
+
+export const HotelPageForm = ({mode, editMode, hotelData = DEFAULT_HOTEL_DATA, hotel_id}: HotelFormProps) => {
     const router = useRouter();
 
     const [hotelId, setHotelId] = useState<string>(hotel_id ?? "");
@@ -102,9 +106,11 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
     );
 
     useEffect(() => {
-        if(hotelFormData && mode === "edit") setHotelFormData(hotelData);
+        if (mode !== "edit") return;
 
-        if(hotel_id) setHotelId(hotel_id);
+        setHotelFormData(hotelData);
+
+        if (hotel_id) setHotelId(hotel_id);
 
         if (!hotelData?.hotelCategories) return;
 
@@ -118,7 +124,7 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
 
         setHotelAmenities(amenities);
         setHotelPolicies(policies);
-    }, [hotelData, hotel_id]);
+    }, [mode, hotelData, hotel_id]);
 
     const onHotelFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -377,7 +383,7 @@ export const HotelPageForm = ({mode, editMode, hotelData = {hotelType: HotelType
                 pic_url_Builder={() => productPicUploadURLBuilder(hotelId)} 
                 updateResourceMutation={editMode === "SERVICE_ADMIN" ? updateHotelInfoMutate : updateHotelInfoMutate}
                 deleteResourceMutation={({id, imageIds} : {id: string, imageIds: string[]}) => deleteHotelImagesMutate({hotelId: id, imageIds})}
-                oldResourceImages={hotelFormData?.images || []}
+                oldResourceImages={hotelFormData?.images}
             />
 
             <button type="submit" className="w-fit px-10 bg-green-600 hover:bg-green-500 text-white p-2 rounded mt-3">{mode === "create" ? "Create Hotel" : "Save Changes"}</button>

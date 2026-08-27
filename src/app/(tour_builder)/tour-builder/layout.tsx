@@ -45,7 +45,7 @@ export default function DashboardLayout({
                     />
                 </aside>
 
-                <div className="flex flex-col flex-grow w-full md:w-[70%]">
+                <div className="flex flex-col flex-grow w-full md:w-[70%] min-h-screen">
                     {children}
                 </div>
 

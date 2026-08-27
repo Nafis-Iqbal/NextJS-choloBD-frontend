@@ -121,9 +121,9 @@ export default function UserDetailPage() {
         employeeServiceType === ServiceType.ACTIVITY_BOOKING;
     const needsGuides = serviceType === ServiceType.GUIDE_SERVICE;
 
-    const { data: hotelsData } = HotelApi.useGetAllHotelsRQ(needsHotels ? "" : undefined);
+    const { data: hotelsData } = HotelApi.useGetAllHotelsRQ(needsHotels ? "limit=100" : undefined);
     const { data: activitySpotsData } = ActivitySpotApi.useGetAllActivitySpotsRQ(
-        needsActivitySpots ? "" : undefined
+        needsActivitySpots ? "limit=100" : undefined
     );
     const { data: guidesData } = GuideApi.useGetAllGuidesRQ(
         needsGuides ? { limit: 100 } : undefined

@@ -14,7 +14,7 @@ import { HorizontalDivider } from "@/components/custom-elements/UIUtilities";
 export const HomepageContent = async () => {
     let tourPackagesTour: TourPackage[] = [];
     try {
-        const tourResponse = await TourBuilderApi.getAllTourPlans();
+        const tourResponse = await TourBuilderApi.getAllTourPlans("limit=100");
         tourPackagesTour = tourResponse?.data || [];
     } catch (error) {
         console.error("Failed to fetch tours. Error:", error);

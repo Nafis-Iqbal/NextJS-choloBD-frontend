@@ -1,141 +1,103 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { AuthApi, HotelApi } from "@/services/api";
+import { Suspense, type ChangeEvent } from "react";
+import { HotelApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
+import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
+import { useAdminEntityListQuery } from "@/hooks/useAdminEntityListQuery";
+import { AdminEntityListShell } from "@/components/layout-elements/AdminEntityListShell";
+import { CustomSelectInput } from "@/components/custom-elements/CustomInputElements";
+import { HotelViewListTableRow } from "@/components/data-elements/DataTableRowElements";
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
 
-import TableLayout from "@/components/layout-elements/TableLayout";
-import {HotelViewListTableRow} from "@/components/data-elements/DataTableRowElements";
-import { useEffect, useState, Suspense } from "react";
-import { NoContentTableRow } from "@/components/placeholder-components/NoContentTableRow";
-import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
+const HOTEL_LIST_EXTRA_KEYS = ["allowShiftBooking"] as const;
 
 function HotelListingsPage() {
+    const listQuery = useAdminEntityListQuery("/hotels", HOTEL_LIST_EXTRA_KEYS);
+    const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
+
     const {
-        data: authResponse,
-        isPending,
-        isFetching,
-        isFetched,
-    } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated === true;
-    const currentUserRole = authResponse?.data?.userRole;
-    const isMasterAdmin = isAuthenticated && currentUserRole === "MASTER_ADMIN";
+        data: hotelsData,
+        isLoading,
+        isError,
+        refetch,
+    } = HotelApi.useGetAllHotelsRQ(listQuery.queryString);
+    const hotels = hotelsData?.data ?? [];
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [queryString, setQueryString] = useState<string>('');
-
-    const {showLoadingContent, openNotificationPopUpMessage} = useGlobalUI();
-
-    const {data: hotelsData, isLoading: isHotelsLoading, isError: isHotelsError, refetch: refetchHotels} = HotelApi.useGetAllHotelsRQ(queryString);
-    const hotels = hotelsData?.data;
-
-    const {mutate: deleteHotelMutate} = HotelApi.useDeleteHotelRQ(
+    const { mutate: deleteHotelMutate } = HotelApi.useDeleteHotelRQ(
         (responseData) => {
-            if(responseData.status === "success") {
+            if (responseData.status === "success") {
                 finishWithMessage("Hotel deleted successfully.");
-                queryClient.invalidateQueries({queryKey: ["hotels"]});
-                refetchHotels();
-            }
-            else{
-                finishWithMessage(`Failed to delete the hotel. ${responseData.message || ''}`);
+                queryClient.invalidateQueries({ queryKey: ["hotels"] });
+                refetch();
+            } else {
+                finishWithMessage(`Failed to delete the hotel. ${responseData.message || ""}`);
             }
         },
-        () => {
-            finishWithMessage("Failed to delete the hotel. An error occured on the server.");
-        }
+        () => finishWithMessage("Failed to delete the hotel. An error occured on the server.")
     );
-
-    const handleDeleteHotel = (tourSpotId: string) => {
-        showLoadingContent(true);
-        deleteHotelMutate(tourSpotId);
-    }
 
     const finishWithMessage = (message: string) => {
         showLoadingContent(false);
         openNotificationPopUpMessage(message);
     };
-    
-    useEffect(() => {
-        const qString = (window.location.search).slice(1);
-        setQueryString(qString);
-    }, [searchParams]);
-
-    useEffect(() => {
-        refetchHotels();
-    }, [queryString]);
-
-    useEffect(() => {
-        if (!isFetched || isPending || isFetching) return;
-        if (!isAuthenticated) {
-            router.replace("/login");
-            return;
-        }
-        if (currentUserRole !== "MASTER_ADMIN") {
-            router.replace("/");
-        }
-    }, [isFetched, isPending, isFetching, isAuthenticated, currentUserRole, router]);
-
-    if (!isMasterAdmin) {
-        return null;
-    }
 
     return (
-        <div className="flex flex-col p-2 font-sans mt-5">
-            <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="theme-label">Hotels</h3>
-                {(hotels && hotels.length > 0) ? 
-                    <p className="theme-text-muted">Showing {hotels?.length} of {hotels?.length} active Hotels. <span className="theme-text-subtle">(Pagination not implemented yet)</span></p> : 
-                    <p className="theme-text-muted">No Hotels found.</p>
-                }
-
-                <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="w-full">
-                        <div
-                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
-                            style={{
-                                backgroundColor: "var(--theme-card-bg)",
-                                borderColor: "var(--theme-deep-green)",
-                            }}
-                        >
-                            {
-                                isHotelsLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
-                                isHotelsError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
-                                (hotels && Array.isArray(hotels) && hotels.length <= 0) ? 
-                                (<NoContentTableRow displayMessage="No hotels found" tdColSpan={1}/>) :
-                                
-                                (hotels ?? []).map((hotel, index) => {
-                                    return (
-                                        <HotelViewListTableRow 
-                                            key={hotel.id} 
-                                            id={index + 1} 
-                                            hotelName={hotel.name || ''}
-                                            hotelLocation={hotel.location?.name || 'N/A'}
-                                            hotel_id={hotel.id} 
-                                            hotelImageURL={hotel.images?.[0]?.url || '/image-not-found.png'} 
-                                            hotelType={hotel.hotelType || 'N/A'}
-                                            rating={hotel.rating || 0}
-                                            totalRooms={hotel.totalRooms}
-                                            onClickNavigate={() => router.push(`/hotels/${hotel.id}`)}
-                                            onEdit={() => router.push(`/hotels/${hotel.id}/edit`)}
-                                            onDelete={() => handleDeleteHotel(hotel.id)}
-                                        />
-                                    );
-                                })
-                            }
-                        </div>
-                    </div>
-                </TableLayout>
-
-                <button className="green-button w-fit" onClick={() => router.push('/hotels/create')}>
-                    Add new Hotel
-                </button>
-            </div>
-        </div>
-    )
+        <AdminEntityListShell
+            title="Hotels"
+            entityLabel="hotels"
+            entityLabelSingular="hotel"
+            createHref="/hotels/create"
+            createLabel="Add new Hotel"
+            listQuery={listQuery}
+            extraFilters={
+                <CustomSelectInput
+                    options={[
+                        { value: "", label: "-- All hotels --" },
+                        { value: "true", label: "Shift booking allowed" },
+                        { value: "false", label: "Shift booking not allowed" },
+                    ]}
+                    onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                        listQuery.replaceListParams({
+                            name: listQuery.draftName,
+                            extras: { allowShiftBooking: event.target.value },
+                            page: 1,
+                        })
+                    }
+                    value={listQuery.extraParams.allowShiftBooking ?? ""}
+                    name="allowShiftBooking"
+                    label="Shift booking"
+                    className="min-w-[180px]"
+                />
+            }
+            pagination={hotelsData?.pagination}
+            isLoading={isLoading}
+            isError={isError}
+            itemCount={hotels.length}
+        >
+            {({ rowNumber, router }) =>
+                hotels.map((hotel, index) => (
+                    <HotelViewListTableRow
+                        key={hotel.id}
+                        id={rowNumber(index)}
+                        hotelName={hotel.name || ""}
+                        hotelLocation={hotel.location?.name || "N/A"}
+                        hotel_id={hotel.id}
+                        hotelImageURL={hotel.images?.[0]?.url || "/image-not-found.png"}
+                        hotelType={hotel.hotelType || "N/A"}
+                        rating={hotel.rating || 0}
+                        totalRooms={hotel.totalRooms}
+                        onClickNavigate={() => router.push(`/hotels/${hotel.id}`)}
+                        onEdit={() => router.push(`/hotels/${hotel.id}/edit`)}
+                        onDelete={() => {
+                            showLoadingContent(true);
+                            deleteHotelMutate(hotel.id);
+                        }}
+                    />
+                ))
+            }
+        </AdminEntityListShell>
+    );
 }
 
 export default function HotelListPage() {
@@ -145,4 +107,3 @@ export default function HotelListPage() {
         </Suspense>
     );
 }
-

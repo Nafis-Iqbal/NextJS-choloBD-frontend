@@ -2,6 +2,7 @@
 import { HotelType, HotelRoomCategory } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { unwrapPaginatedList, type PaginatedListResponse } from "@/utilities/adminEntityList";
 
 interface HotelSearchParams {
     name?: string;
@@ -58,20 +59,21 @@ interface UpdateHotelCoreData {
 }
 
 async function getAllHotels(queryString?: string) {
-    const response = await apiFetch<ApiResponse<any[]>>(
+    const response = await apiFetch<ApiResponse<any>>(
         `/hotels${queryString ? `?${queryString}` : ""}`,
         { method: "GET" }
     );
-    return response;
+    return unwrapPaginatedList<any>(response);
 }
 
-export function useGetAllHotelsRQ(queryString?: string) {
-    return useQuery<ApiResponse<any[]>>({
+export function useGetAllHotelsRQ(queryString?: string, enabled = true) {
+    return useQuery<PaginatedListResponse<any>>({
         queryFn: () => getAllHotels(queryString),
         queryKey: ["hotels", queryString],
         staleTime: 30_000,
         gcTime: 5 * 60_000,
         refetchOnMount: false,
+        enabled,
     });
 }
 
@@ -86,58 +88,6 @@ export function useGetPopularHotelsRQ() {
         queryKey: ["hotels", "popular"],
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
-    });
-}
-
-async function searchHotels(searchParams: HotelSearchParams) {
-    const params = new URLSearchParams();
-    Object.entries(searchParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-            params.append(key, String(value));
-        }
-    });
-
-    const queryString = params.toString();
-    const response = await apiFetch<ApiResponse<any[]>>(
-        `/hotels/search${queryString ? `?${queryString}` : ""}`,
-        { method: "GET" }
-    );
-    return response;
-}
-
-export function useSearchHotelsRQ(searchParams?: HotelSearchParams) {
-    const queryString = searchParams
-        ? new URLSearchParams(
-              Object.entries(searchParams)
-                  .filter(([, v]) => v !== undefined && v !== null)
-                  .map(([k, v]) => [k, String(v)])
-          ).toString()
-        : undefined;
-
-    return useQuery<ApiResponse<any[]>>({
-        queryFn: () => searchHotels(searchParams || {}),
-        queryKey: ["hotels", "search", queryString],
-        staleTime: queryString ? 0 : 30_000,
-        gcTime: 30_000,
-        refetchOnMount: queryString ? "always" : false,
-        enabled: !!searchParams && Object.keys(searchParams).length > 0,
-    });
-}
-
-async function getHotelsByLocation(locationId: string) {
-    const response = await apiFetch<ApiResponse<any[]>>(`/hotels/location/${locationId}`, {
-        method: "GET",
-    });
-    return response;
-}
-
-export function useGetHotelsByLocationRQ(locationId: string) {
-    return useQuery<ApiResponse<any[]>>({
-        queryFn: () => getHotelsByLocation(locationId),
-        queryKey: ["hotels", "location", locationId],
-        enabled: !!locationId,
-        staleTime: 30_000,
-        gcTime: 30_000,
     });
 }
 

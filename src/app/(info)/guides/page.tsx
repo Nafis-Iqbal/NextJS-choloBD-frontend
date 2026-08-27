@@ -1,143 +1,81 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { AuthApi, GuideApi } from "@/services/api";
+import { Suspense } from "react";
+import { GuideApi } from "@/services/api";
 import { queryClient } from "@/services/apiInstance";
+import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
+import { useAdminEntityListQuery } from "@/hooks/useAdminEntityListQuery";
+import { AdminEntityListShell } from "@/components/layout-elements/AdminEntityListShell";
+import { GuideViewListTableRow } from "@/components/data-elements/DataTableRowElements";
 import SuspenseFallback from "@/components/page-content/SuspenseFallback";
 
-import TableLayout from "@/components/layout-elements/TableLayout";
-import { GuideViewListTableRow } from "@/components/data-elements/DataTableRowElements";
-import { useEffect, useState, Suspense } from "react";
-import { NoContentTableRow } from "@/components/placeholder-components/NoContentTableRow";
-import { useGlobalUI } from "@/hooks/state-hooks/globalStateHooks";
-
 function GuideListingsPage() {
+    const listQuery = useAdminEntityListQuery("/guides");
+    const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
+
     const {
-        data: authResponse,
-        isPending,
-        isFetching,
-        isFetched,
-    } = AuthApi.useGetUserAuthenticationRQ(true);
-    const isAuthenticated = authResponse?.data?.isAuthenticated === true;
-    const currentUserRole = authResponse?.data?.userRole;
-    const isMasterAdmin = isAuthenticated && currentUserRole === "MASTER_ADMIN";
+        data: guidesData,
+        isLoading,
+        isError,
+        refetch,
+    } = GuideApi.useGetAllGuidesRQ(listQuery.queryString);
+    const guides = guidesData?.data ?? [];
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const [queryString, setQueryString] = useState<string>('');
-
-    const {showLoadingContent, openNotificationPopUpMessage} = useGlobalUI();
-
-    const {data: guidesData, isLoading: isGuidesLoading, isError: isGuidesError, refetch: refetchGuides} = GuideApi.useGetAllGuidesRQ();
-    const guidesRaw = guidesData?.data;
-    const guides = Array.isArray(guidesRaw) ? guidesRaw : (guidesRaw?.results ?? []);
-
-    const {mutate: deleteGuideMutate} = GuideApi.useDeleteGuideRQ(
+    const { mutate: deleteGuideMutate } = GuideApi.useDeleteGuideRQ(
         (responseData) => {
-            if(responseData.status === "success") {
+            if (responseData.status === "success") {
                 finishWithMessage("Guide deleted successfully.");
-                queryClient.invalidateQueries({queryKey: ["guides"]});
-                refetchGuides();
-            }
-            else{
-                finishWithMessage(`Failed to delete the guide. ${responseData.message || ''}`);
+                queryClient.invalidateQueries({ queryKey: ["guides"] });
+                refetch();
+            } else {
+                finishWithMessage(`Failed to delete the guide. ${responseData.message || ""}`);
             }
         },
-        () => {
-            finishWithMessage("Failed to delete the guide. An error occured on the server.");
-        }
+        () => finishWithMessage("Failed to delete the guide. An error occured on the server.")
     );
-
-    const handleDeleteGuide = (guideId: string) => {
-        showLoadingContent(true);
-        deleteGuideMutate(guideId);
-    }
 
     const finishWithMessage = (message: string) => {
         showLoadingContent(false);
         openNotificationPopUpMessage(message);
     };
-    
-    useEffect(() => {
-        const qString = (window.location.search).slice(1);
-        setQueryString(qString);
-    }, [searchParams]);
-
-    useEffect(() => {
-        refetchGuides();
-    }, [queryString]);
-
-    useEffect(() => {
-        if (!isFetched || isPending || isFetching) return;
-        if (!isAuthenticated) {
-            router.replace("/login");
-            return;
-        }
-        if (currentUserRole !== "MASTER_ADMIN") {
-            router.replace("/");
-        }
-    }, [isFetched, isPending, isFetching, isAuthenticated, currentUserRole, router]);
-
-    if (!isMasterAdmin) {
-        return null;
-    }
 
     return (
-        <div className="flex flex-col p-2 font-sans mt-5">
-            <div className="md:ml-6 flex flex-col space-y-2">
-                <h3 className="theme-label">Guides</h3>
-                {(guides && guides.length > 0) ? 
-                    <p className="theme-text-muted">Showing {guides?.length} of {guides?.length} Guides. <span className="theme-text-subtle">(Pagination not implemented yet)</span></p> : 
-                    <p className="theme-text-muted">No Guides found.</p>
-                }
-
-                <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="w-full">
-                        <div
-                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
-                            style={{
-                                backgroundColor: "var(--theme-card-bg)",
-                                borderColor: "var(--theme-deep-green)",
-                            }}
-                        >
-                            {
-                                isGuidesLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1}/>) :
-                                isGuidesError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1}/>) :
-                                (guides && Array.isArray(guides) && guides.length <= 0) ?
-                                (<NoContentTableRow displayMessage="No guides found" tdColSpan={1}/>) :
-
-                                (guides ?? []).map((guide, index) => {
-                                    return (
-                                        <GuideViewListTableRow
-                                            key={guide.id}
-                                            id={index + 1}
-                                            guideName={`${guide.firstName || ''} ${guide.lastName || ''}`.trim()}
-                                            guideLocation={guide.location?.name || 'N/A'}
-                                            guide_id={guide.id}
-                                            guideImageURL={guide.images?.[0]?.url || '/image-not-found.png'}
-                                            specializations={(guide.specializations || []).join(', ') || 'N/A'}
-                                            rating={guide.rating || 0}
-                                            pricePerDay={guide.pricePerDay}
-                                            isVerified={guide.isVerified}
-                                            onClickNavigate={() => router.push(`/guides/${guide.id}`)}
-                                            onEdit={() => router.push(`/guides/${guide.id}/edit`)}
-                                            onDelete={() => handleDeleteGuide(guide.id)}
-                                        />
-                                    );
-                                })
-                            }
-                        </div>
-                    </div>
-                </TableLayout>
-
-                <button className="green-button w-fit" onClick={() => router.push('/guides/create')}>
-                    Add new Guide
-                </button>
-            </div>
-        </div>
-    )
+        <AdminEntityListShell
+            title="Guides"
+            entityLabel="guides"
+            entityLabelSingular="guide"
+            createHref="/guides/create"
+            createLabel="Add new Guide"
+            listQuery={listQuery}
+            pagination={guidesData?.pagination}
+            isLoading={isLoading}
+            isError={isError}
+            itemCount={guides.length}
+        >
+            {({ rowNumber, router }) =>
+                guides.map((guide, index) => (
+                    <GuideViewListTableRow
+                        key={guide.id}
+                        id={rowNumber(index)}
+                        guideName={`${guide.firstName || ""} ${guide.lastName || ""}`.trim()}
+                        guideLocation={guide.location?.name || "N/A"}
+                        guide_id={guide.id}
+                        guideImageURL={guide.images?.[0]?.url || "/image-not-found.png"}
+                        specializations={(guide.specializations || []).join(", ") || "N/A"}
+                        rating={guide.rating || 0}
+                        pricePerDay={guide.pricePerDay}
+                        isVerified={guide.isVerified}
+                        onClickNavigate={() => router.push(`/guides/${guide.id}`)}
+                        onEdit={() => router.push(`/guides/${guide.id}/edit`)}
+                        onDelete={() => {
+                            showLoadingContent(true);
+                            deleteGuideMutate(guide.id);
+                        }}
+                    />
+                ))
+            }
+        </AdminEntityListShell>
+    );
 }
 
 export default function GuideListPage() {

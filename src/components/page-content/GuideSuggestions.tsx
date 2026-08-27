@@ -59,11 +59,9 @@ export const GuideSuggestions: React.FC<GuideSuggestionsProps> = ({
   });
 
   const formattedGuides = useMemo<GuideCardData[]>(() => {
-    const rawGuides = Array.isArray(guidesResponse?.data)
-      ? guidesResponse.data
-      : guidesResponse?.data?.results || [];
+    const rawGuides = guidesResponse?.data ?? [];
 
-    return rawGuides.map((guide: Guide) => ({
+    return rawGuides.map((guide) => ({
       id: guide.id,
       name: `${guide.firstName || ""} ${guide.lastName || ""}`.trim() || "Guide",
       location: guide.location?.name || "N/A",

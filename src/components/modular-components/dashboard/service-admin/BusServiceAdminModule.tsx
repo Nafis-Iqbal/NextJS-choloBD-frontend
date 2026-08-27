@@ -1,41 +1,46 @@
 "use client";
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { PlaceholderFeatureWarning } from "@/components/placeholder-components/FeatureUnderDevelopment";
+import { TransportApi } from "@/services/api";
 import { AdminStatsDashboard } from "./bus/AdminStatsDashboard";
 import { BusManagementSection } from "./bus/BusManagementSection";
 import { RideManagementSection } from "./bus/RideManagementSection";
 import { SalesReportSection } from "./bus/SalesReportSection";
+import { TicketManagementSection } from "./bus/TicketManagementSection";
 import { TabSwitchContainer } from "./bus/TabSwitchContainer";
 import {
   FAKE_ADMIN_STATS,
-  FAKE_BUSES,
-  FAKE_RIDES,
   FAKE_SALES_REPORTS,
+  resolveMyTransport,
 } from "./bus/types";
 
-export type BusAdminTabId = "buses" | "rides" | "sales";
+export type BusAdminTabId = "buses" | "rides" | "tickets" | "sales";
 
 interface AdminTab {
   id: BusAdminTabId;
   label: string;
   description: string;
-  /** Matches sidebar /dashboard#... hashes and section root ids */
   hash: string;
 }
 
 export const BUS_ADMIN_TABS: AdminTab[] = [
   {
     id: "buses",
-    label: "Bus Management",
-    description: "Add, activate, and manage your bus fleet inventory",
+    label: "Coach Inventory",
+    description: "Manage coach classes and seat layouts for your buses",
     hash: "bus_admin_buses",
   },
   {
     id: "rides",
-    label: "Ride Management",
-    description: "Create rides, track occupancy, and update ride status",
+    label: "Routes & Trips",
+    description: "Create routes and schedule trips against a coach layout",
     hash: "bus_admin_rides",
+  },
+  {
+    id: "tickets",
+    label: "Tickets",
+    description: "Review passenger bookings and cancel occupying tickets",
+    hash: "bus_admin_tickets",
   },
   {
     id: "sales",
@@ -74,6 +79,16 @@ function preserveViewportScroll() {
 export const BusServiceAdminModule = () => {
   const [activeTab, setActiveTab] = useState<BusAdminTabId>("buses");
   const pendingMenuScrollHashRef = useRef<string | null>(null);
+
+  const {
+    data: myTransportResponse,
+    isLoading: isTransportLoading,
+    isFetched: isTransportFetched,
+    isError: isTransportError,
+  } = TransportApi.useGetMyTransportRQ(true);
+
+  const transport = resolveMyTransport(myTransportResponse?.data);
+  const transportId = transport?.id || "";
 
   const applyHashFromUrl = useCallback((options?: { scroll?: boolean }) => {
     const hash = getLocationHash();
@@ -141,7 +156,7 @@ export const BusServiceAdminModule = () => {
 
   useEffect(() => {
     const hash = pendingMenuScrollHashRef.current;
-    if (!hash) return;
+    if (!hash || !transportId) return;
 
     const tryScroll = () => {
       if (scrollToHashTarget(hash)) {
@@ -163,7 +178,39 @@ export const BusServiceAdminModule = () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
-  }, [activeTab]);
+  }, [activeTab, transportId]);
+
+  if (isTransportLoading) {
+    return (
+      <section
+        className="flex flex-col space-y-2 mt-4 w-full bg-inherit theme-text min-h-screen md:p-6 rounded-lg"
+        id="bus_service_admin_module"
+      >
+        <div className="max-w-7xl w-full">
+          <h1 className="text-4xl font-bold theme-text">Bus Service Admin Dashboard</h1>
+          <p className="theme-text-subtle mt-2">Loading your transport operator...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (isTransportFetched && (isTransportError || !transportId)) {
+    return (
+      <section
+        className="flex flex-col space-y-2 mt-4 w-full bg-inherit theme-text min-h-screen md:p-6 rounded-lg"
+        id="bus_service_admin_module"
+      >
+        <div className="max-w-7xl w-full">
+          <h1 className="text-4xl font-bold theme-text">Bus Service Admin Dashboard</h1>
+          <p className="theme-text-subtle mt-2">
+            {isTransportError
+              ? "Could not load the transport operator for this account."
+              : "No transport operator is assigned to this service admin account yet."}
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -176,11 +223,11 @@ export const BusServiceAdminModule = () => {
             Bus Service Admin Dashboard
           </h1>
           <p className="theme-text-subtle mt-2">
-            Manage buses, rides, and sales reports
+            {transport?.name
+              ? `Manage ${transport.name} classes, trips, and tickets`
+              : "Manage buses, trips, and tickets"}
           </p>
         </div>
-
-        <PlaceholderFeatureWarning moduleName="Bus Service Admin Dashboard" />
 
         <AdminStatsDashboard
           stats={FAKE_ADMIN_STATS}
@@ -196,7 +243,7 @@ export const BusServiceAdminModule = () => {
         >
           {activeTab === "buses" && (
             <BusManagementSection
-              buses={FAKE_BUSES}
+              transportId={transportId}
               id="bus_admin_buses"
               className="scroll-mt-24 p-1 rounded-md mb-0 max-h-[90vh] overflow-y-auto"
             />
@@ -204,8 +251,17 @@ export const BusServiceAdminModule = () => {
 
           {activeTab === "rides" && (
             <RideManagementSection
-              rides={FAKE_RIDES}
+              transportId={transportId}
+              operatorName={transport?.name}
               id="bus_admin_rides"
+              className="scroll-mt-24 p-1 rounded-md mb-0 max-h-[90vh] overflow-y-auto"
+            />
+          )}
+
+          {activeTab === "tickets" && (
+            <TicketManagementSection
+              transportId={transportId}
+              id="bus_admin_tickets"
               className="scroll-mt-24 p-1 rounded-md mb-0 max-h-[90vh] overflow-y-auto"
             />
           )}

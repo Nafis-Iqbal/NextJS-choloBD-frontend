@@ -192,8 +192,9 @@ function buildActivityServiceAdminDashboardSections(): MenuItem[] {
 
 function buildBusServiceAdminDashboardSections(): MenuItem[] {
     return [
-        { label: 'Bus Management', href: '/dashboard#bus_admin_buses', icon: FaBus },
-        { label: 'Ride Management', href: '/dashboard#bus_admin_rides', icon: FaRoute },
+        { label: 'Coach Inventory', href: '/dashboard#bus_admin_buses', icon: FaBus },
+        { label: 'Routes & Trips', href: '/dashboard#bus_admin_rides', icon: FaRoute },
+        { label: 'Tickets', href: '/dashboard#bus_admin_tickets', icon: FaTicketAlt },
         { label: 'Sales Report', href: '/dashboard#bus_admin_sales', icon: FaWallet },
     ];
 }
@@ -308,8 +309,9 @@ function buildSitePagesMenu({
             { label: 'Tour Spots', href: '/tour-spots', icon: FaMapMarkedAlt },
             { label: 'Activity Spots', href: '/activity-spots', icon: FaHiking },
             { label: 'Guides', href: '/guides', icon: FaUserTie },
+            { label: 'Transport Services', href: '/transports', icon: FaBus },
             { label: 'Users', href: '/user_profile', icon: FaUsers },
-            { label: 'Tour Packages', href: '/tour-builder/tours', icon: FaSuitcase },
+            { label: 'Tour Packages', href: '/tour-builder/platform/tours', icon: FaSuitcase },
         ],
         SERVICE_ADMIN: [
             { label: 'Dashboard', href: '/dashboard', icon: serviceAdminDashboardIcon },
@@ -388,8 +390,8 @@ function buildQuickActionsMenu(
             { label: 'Create New Hotel', href: '/hotels/create', icon: FaHotel },
             { label: 'List New Guide', href: '/guides/create', icon: FaUserTie },
             { label: 'Add New Activity Provider', href: '/activity-spots/create', icon: FaHiking },
-            { label: 'Build Tour Package', href: '/tour-builder', icon: FaSuitcase },
-            { label: 'Create New Transport Service', href: '/tour-builder', icon: FaSuitcase },
+            { label: 'Build Tour Package', href: '/tour-builder/platform', icon: FaSuitcase },
+            { label: 'Create New Transport Service', href: '/transports/create', icon: FaSuitcase },
             { label: 'Review Community Posts', href: '/community/pending-posts-admin', icon: FaComments },
         ],
         SERVICE_ADMIN: buildServiceAdminQuickActions(serviceType, serviceEntityId),

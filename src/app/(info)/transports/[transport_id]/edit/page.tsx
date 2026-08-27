@@ -1,42 +1,69 @@
 "use client";
 
-import Link from "next/link";
-import { use } from "react";
-import { FeatureUnderDevelopment } from "@/components/placeholder-components/FeatureUnderDevelopment";
+import { useParams, useRouter } from "next/navigation";
+import { TransportApi, AuthApi } from "@/services/api";
+import { TransportForm } from "@/components/forms/TransportForm";
+import LoadingSpinnerBlock from "@/components/placeholder-components/LoadingSpinnerBlock";
+import { useEffect } from "react";
 
-export default function EditTransportPage({
-  params,
-}: {
-  params: Promise<{ transport_id: string }>;
-}) {
-  const { transport_id } = use(params);
+export default function EditTransportPage() {
+    const router = useRouter();
 
-  return (
-    <div className="flex flex-col p-2 font-sans mt-5 theme-text">
-      <div className="md:ml-6 flex flex-col space-y-4 max-w-5xl">
-        <div>
-          <h1 className="text-3xl font-bold theme-text">Edit Transport</h1>
-          <p className="theme-text-muted mt-2 text-sm">
-            Editing transport{" "}
-            <span className="theme-text-teal font-mono">{transport_id}</span> is
-            not available yet.
-          </p>
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
+    const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+    const currentUserRole = authResponse?.data?.userRole;
+
+    const params = useParams();
+
+    const {
+        data: transportDetailData,
+        isLoading: detailFetchLoading,
+    } = TransportApi.useGetTransportDetailRQ(params.transport_id as string);
+    const transportDetail = transportDetailData?.data;
+
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+            return;
+        }
+
+        if (
+            !isLoading &&
+            currentUserRole !== "MASTER_ADMIN" &&
+            currentUserRole !== "SERVICE_ADMIN"
+        ) {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, currentUserRole, router]);
+
+    if (isLoading) {
+        return null;
+    }
+
+    if (currentUserRole !== "MASTER_ADMIN" && currentUserRole !== "SERVICE_ADMIN") {
+        return null;
+    }
+
+    return (
+        <div className="flex flex-col p-2 mt-5">
+            <div className="flex flex-col space-y-2 w-full md:w-auto font-sans mx-auto">
+                <h3 className="theme-label p-2">Edit Transport</h3>
+                <div className="flex space-x-10 items-center p-2 h-[40px]">
+                    <p className="theme-text-muted">Update transport operator details.</p>
+                    <LoadingSpinnerBlock isOpen={detailFetchLoading} className="w-[30px] h-[30px]" />
+                </div>
+
+                <TransportForm
+                    mode="edit"
+                    editMode={
+                        currentUserRole === "MASTER_ADMIN" || currentUserRole === "SERVICE_ADMIN"
+                            ? currentUserRole
+                            : "MASTER_ADMIN"
+                    }
+                    transportData={transportDetail ?? {}}
+                    transport_id={params.transport_id as string}
+                />
+            </div>
         </div>
-
-        <FeatureUnderDevelopment moduleName="Edit Transport" />
-
-        <div className="flex flex-wrap gap-4 text-sm">
-          <Link
-            href={`/transports/${transport_id}`}
-            className="theme-text-teal font-medium"
-          >
-            ← Transport details
-          </Link>
-          <Link href="/transports" className="theme-text-muted font-medium">
-            Listings
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }

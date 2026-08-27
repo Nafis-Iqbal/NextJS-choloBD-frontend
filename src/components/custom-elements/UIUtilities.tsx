@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
+import { FaMagic } from "react-icons/fa";
+import { FieldHelpInfo } from "./CustomInputElements";
 
 export const Logo = ({width = 120, height = 50, position = "ml-5"} : {width?: number, height?: number, position?: string}) => {
     return (
@@ -74,6 +76,33 @@ export const HorizontalDividerWithText = ({className, children} : {className?: s
 
 export const VerticalDivider = ({ className = "", height = "h-full" }: {className?: string, height?: string}) => (
   <div className={`border-l ${height} ${className}`} style={{borderColor: 'var(--theme-deep-green)'}} />
+);
+
+export const SampleFillButton = ({
+	label,
+	onClick,
+}: {
+	label: string;
+	onClick: () => void;
+}) => (
+	<button
+		type="button"
+		onClick={onClick}
+		className="inline-flex items-center justify-center rounded-md p-1.5"
+		style={{
+			backgroundColor: "transparent",
+			color: "var(--theme-teal)",
+			border: "1px solid var(--theme-teal)",
+		}}
+		aria-label={label}
+		title={label}
+	>
+		<FaMagic className="h-3.5 w-3.5" />
+	</button>
+);
+
+export const HoverDisclaimer = ({ message }: { message: string }) => (
+	<FieldHelpInfo helpInfo={message} openOnHover />
 );
 
 const DivGap = ({customHeightGap = "h-[50px]"} : {customHeightGap?: string}) => {

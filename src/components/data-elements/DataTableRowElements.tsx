@@ -698,6 +698,114 @@ export const GuideViewListTableRow = ({
     )
 }
 
+export const TransportViewListTableRow = ({
+    id,
+    transportName,
+    transportLocation,
+    transport_id,
+    transportImageURL,
+    transportType,
+    rating,
+    vehicleCount,
+    isVerified,
+    onClickNavigate,
+    onEdit,
+    onDelete
+} : {
+    id: number,
+    transportName: string,
+    transportLocation: string,
+    transport_id: string,
+    transportImageURL?: string,
+    transportType: string,
+    rating: number,
+    vehicleCount?: number,
+    isVerified?: boolean,
+    onClickNavigate: () => void,
+    onEdit: () => void,
+    onDelete: () => void
+}) =>
+{
+    return (
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={transportImageURL || "/image-not-found.png"}
+                        alt={transportName}
+                    />
+                </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                            <button
+                                type="button"
+                                onClick={onClickNavigate}
+                                className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0 break-words"
+                            >
+                                {transportName}
+                            </button>
+                            <p className="text-sm theme-text-muted mt-0.5 break-words">
+                                📍 {transportLocation}
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                            <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="p-1.5 rounded-sm hover:scale-110"
+                                style={{
+                                    backgroundColor: "var(--theme-red)",
+                                    color: "var(--theme-text)",
+                                }}
+                                aria-label="Delete transport"
+                            >
+                                <FaTrash className="cursor-pointer" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <MetaChip label="Type" value={transportType} />
+                        <MetaChip
+                            label="Vehicles"
+                            value={vehicleCount ?? "N/A"}
+                        />
+                        <MetaChip
+                            label="Verified"
+                            value={isVerified ? "Yes" : "No"}
+                        />
+                        <span className="inline-flex items-center">
+                            <StarRating rating={rating} />
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={onClickNavigate}
+                        className="text-xs theme-text-subtle hover:theme-text-teal break-all bg-transparent p-0 text-left"
+                    >
+                        ID: {transport_id}
+                    </button>
+                </div>
+            </div>
+        </article>
+    )
+}
+
 export const ReviewListTableRow = ({
     reviewUserId,
     reviewUserName, 
@@ -802,9 +910,10 @@ export const AddressDataBlock = ({
 export const TourPackageViewListTableRow = ({
     id,
     packageName,
-    tourPackage_id,
-    division,
-    tourType,
+    packageImageURL,
+    shortDescription,
+    totalBudget,
+    rating,
     duration,
     daySegments,
     onClickNavigate,
@@ -813,9 +922,10 @@ export const TourPackageViewListTableRow = ({
 } : {
     id: number,
     packageName: string,
-    tourPackage_id: string,
-    division: string,
-    tourType: string,
+    packageImageURL?: string,
+    shortDescription?: string,
+    totalBudget?: number,
+    rating?: number,
     duration: number,
     daySegments: Array<{
         dayNumber: number,
@@ -828,70 +938,109 @@ export const TourPackageViewListTableRow = ({
     onEdit: () => void,
     onDelete: () => void
 }) => {
-    // Group segments by day number and limit to duration
-    const groupedSegments = daySegments.reduce((acc, segment) => {
-        if (segment.dayNumber <= duration && segment.dayNumber > 0) {
-            if (!acc[segment.dayNumber]) {
-                acc[segment.dayNumber] = [];
-            }
-            acc[segment.dayNumber].push(segment);
-        }
-        return acc;
-    }, {} as Record<number, Array<{dayNumber: number, tourSpotName?: string, activitySpotName?: string}>>);
-
-    // Create summary of first 3 days with their spots
-    const daysSummary = Array.from({length: Math.min(duration, 3)}, (_, i) => i + 1)
-        .map(dayNum => {
-            const segments = groupedSegments[dayNum] || [];
-            const spots = segments
-                .map(s => s.tourSpotName || s.activitySpotName)
-                .filter(Boolean)
-                .slice(0, 3);
-            
-            if (spots.length === 0) return `Day ${dayNum}: No spots`;
-            if (spots.length > 1) return `Day ${dayNum}: ${spots[0]} +${spots.length - 1}`;
-            return `Day ${dayNum}: ${spots[0]}`;
-        });
+    const visitedSpots = Array.from(
+        new Set(
+            daySegments
+                .map((segment) => segment.tourSpotName)
+                .filter((name): name is string => Boolean(name))
+        )
+    );
+    const visibleSpots = visitedSpots.slice(0, 5);
+    const extraSpotCount = visitedSpots.length - visibleSpots.length;
+    const description = shortDescription?.trim() || "";
 
     return (
-        <div className="flex items-center p-2 w-full h-[150px] text-center" style={{borderBottom: '1px solid var(--theme-deep-green)'}}>
-            <p className="w-[5%] text-sm">{id}</p>
-            
-            <button 
-                className="w-[20%] hover:theme-text-teal hover:scale-105 transition-all duration-150 cursor-pointer px-2"
-                onClick={() => onClickNavigate()}
-            >
-                <span className="font-semibold">{packageName}</span>
-            </button>
-            
-            <p className="w-[12%] text-sm" style={{color: 'var(--theme-text-muted)'}}>{division}</p>
-            <p className="w-[10%] text-sm">{tourType}</p>
-            <p className="w-[8%] text-sm font-medium" style={{color: 'var(--theme-text-teal)'}}>{duration} days</p>
-            
-            <div className="w-[25%] text-xs p-2 ml-15 space-y-1 overflow-hidden text-left">
-                {daysSummary.map((summary, idx) => (
-                    <p key={idx} className="truncate leading-tight" style={{color: 'var(--theme-text-subtle)'}}>{summary}</p>
-                ))}
-                {Object.keys(groupedSegments).length === 0 && 
-                    <p className="italic" style={{color: 'var(--theme-text-subtle)'}}>No segments added</p>
-                }
-            </div>
-            
-            <button 
-                className="w-[10%] hover:theme-text-teal hover:scale-105 transition-all duration-150 cursor-pointer text-xs"
-                style={{color: 'var(--theme-text-subtle)'}}
-                onClick={() => onClickNavigate()}
-            >
-                {tourPackage_id}
-            </button>
-            
-            <div className="w-[10%] flex items-center justify-center space-x-2">
-                <EditButton className="scale-90 hover:scale-110" onClick={onEdit}></EditButton>
-                <button onClick={onDelete} className="p-1 rounded hover:scale-110" style={{backgroundColor: 'var(--theme-red)', color: 'var(--theme-text)'}}>
-                    <FaTrash className="cursor-pointer"/>
+        <article className={infoCardClass} style={infoCardStyle}>
+            <div className="flex flex-col sm:flex-row sm:items-start gap-3 min-w-0">
+                <button
+                    type="button"
+                    onClick={onClickNavigate}
+                    className={imageFrameClass}
+                    style={{
+                        backgroundColor: "var(--theme-section-bg)",
+                        borderColor: "var(--theme-deep-green)",
+                    }}
+                >
+                    <NextImage
+                        className="absolute inset-0 w-full h-full"
+                        nextImageClassName="object-cover"
+                        src={packageImageURL || "/image-not-found.png"}
+                        alt={packageName}
+                    />
                 </button>
+
+                <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                        <button
+                            type="button"
+                            onClick={onClickNavigate}
+                            className="text-left text-base md:text-lg font-semibold theme-text hover:theme-text-teal transition-colors bg-transparent p-0 break-words min-w-0 flex-1"
+                        >
+                            {packageName}
+                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-xs theme-text-subtle">#{id}</span>
+                            <EditButton className="scale-90 hover:scale-110" onClick={onEdit} />
+                            <button
+                                type="button"
+                                onClick={onDelete}
+                                className="p-1.5 rounded-sm hover:scale-110"
+                                style={{
+                                    backgroundColor: "var(--theme-red)",
+                                    color: "var(--theme-text)",
+                                }}
+                                aria-label="Delete tour package"
+                            >
+                                <FaTrash className="cursor-pointer" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {description ? (
+                        <p className="text-sm theme-text-muted leading-snug line-clamp-2 break-words">
+                            {description}
+                        </p>
+                    ) : (
+                        <p className="text-sm theme-text-subtle italic">No description yet</p>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {visibleSpots.length > 0 ? (
+                            <>
+                                {visibleSpots.map((spot) => (
+                                    <span key={spot} className="theme-badge rounded-full px-2.5 py-1 text-xs">
+                                        {spot}
+                                    </span>
+                                ))}
+                                {extraSpotCount > 0 ? (
+                                    <span className="text-xs theme-text-subtle">+{extraSpotCount} more</span>
+                                ) : null}
+                            </>
+                        ) : (
+                            <span className="text-xs theme-text-subtle italic">No tour spots listed</span>
+                        )}
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <MetaChip
+                            label="Cost"
+                            value={totalBudget != null ? `৳ ${totalBudget.toLocaleString()}` : "N/A"}
+                        />
+                        <MetaChip
+                            label="Days"
+                            value={`${duration} day${duration === 1 ? "" : "s"}`}
+                        />
+                        <span className="inline-flex items-center">
+                            {rating ? (
+                                <StarRating rating={rating} />
+                            ) : (
+                                <span className="text-xs theme-text-subtle">No rating</span>
+                            )}
+                        </span>
+                    </div>
+                </div>
             </div>
-        </div>
+        </article>
     )
 }
 

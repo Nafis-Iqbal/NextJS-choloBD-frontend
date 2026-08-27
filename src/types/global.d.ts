@@ -19,6 +19,7 @@ import {
   BusServiceType,
   FlightServiceType,
   TrainServiceType,
+  VehicleRentalCategory,
 
   HotelRoomType,
   HotelRoomCategory,
@@ -147,6 +148,12 @@ declare global {
     hotels?: Hotel[];
     transports?: Transport[];
     guides?: Guide[];
+    _count?: {
+      tourPackages?: number;
+      tourSpots?: number;
+      activitySpots?: number;
+      hotels?: number;
+    };
   }
 
   interface Category {
@@ -175,63 +182,46 @@ declare global {
     createdAt: Date;
     updatedAt: Date;
     location: Location;
+    images?: Image[];
     daySegments?: TourDaySegment[];
     userTripPlans?: UserTripPlan[];
+    kind?: string;
+    ownerUserId?: string;
+    basedOnPackageId?: string;
+    basedOnPackage?: {
+      id: string;
+      packageName: string;
+      duration: number;
+      kind?: string;
+    };
+    startDate?: Date | string;
+    endDate?: Date | string;
+    status?: UserTripStatus;
+    estimatedBudget?: number;
+    actualCost?: number;
+    participantCount?: number;
+    preferredHotelType?: HotelType;
+    preferredTransport?: TransportServiceType;
+    generalNotes?: string[] | string;
+    isPublic?: boolean;
   }
 
   interface TourDaySegment {
     id: string;
     tourPackageId: string;
+    shortDescription: string;
     dayNumber: number;
-    tourSpotId: string;
+    segmentOrder?: number;
+    tourSpotId?: string;
     activitySpotId?: string;
     tourSpotName?: string;
     activitySpotName?: string;
-    transportOption: TransportServiceType;
-    hotelOption: HotelType;
+    transportOption?: TransportServiceType;
+    hotelOption?: HotelType;
+    hotelId?: string;
+    notes?: string;
     tourPackage: TourPackage;
     userSegments?: UserTripSegment[];
-  }
-
-  interface UserTripPlan {
-    id: string;
-    userId: string;
-    name: string;
-    description?: string;
-    basedOnPackageId?: string;
-    startDate: Date;
-    endDate: Date;
-    status: UserTripStatus;
-    estimatedBudget?: number;
-    actualCost?: number;
-    isPublic: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    user: User;
-    basedOnPackage?: TourPackage;
-    userSegments?: UserTripSegment[];
-    tripBookings?: TripBooking[];
-    communityPosts?: CommunityPost[];
-  }
-
-  interface UserTripSegment {
-    id: string;
-    userTripPlanId: string;
-    dayNumber: number;
-    segmentOrder: number;
-    basedOnSegmentId?: string;
-    customTourSpotId?: string;
-    customActivitySpotId?: string;
-    customTransport?: TransportServiceType;
-    customHotel?: HotelType;
-    customNotes?: string;
-    estimatedCost?: number;
-    startTime?: string;
-    endTime?: string;
-    createdAt: Date;
-    updatedAt: Date;
-    userTripPlan: UserTripPlan;
-    basedOnSegment?: TourDaySegment;
   }
 
   interface HotelRoomBooking {
@@ -306,7 +296,29 @@ declare global {
     cancellationReason: string | null;
     user: User;
     transport: Transport | null;
+    items?: TransportBookingItem[];
     userTripSegments: UserTripSegment[];
+  }
+
+  interface TransportBookingItem {
+    id: string;
+    transportBookingId: string;
+    transportTripId: string | null;
+    transportSeatId: string | null;
+    transportVehicleId: string | null;
+    transportClassId: string | null;
+    serviceClassLabel: string | null;
+    unitPrice: number;
+    subtotal: number;
+    quantity: number;
+    passengerName: string | null;
+    passengerAge: number | null;
+    passengerDocument: string | null;
+    assignedSeatLabel: string | null;
+    externalPnr: string | null;
+    externalOrderId: string | null;
+    externalTicketNo: string | null;
+    createdAt: Date;
   }
 
   interface ActivityBooking {
@@ -438,6 +450,7 @@ declare global {
     nearbyAttractions: string[];
     rating: number;
     hotelType: HotelType;
+    allowShiftBooking?: boolean;
     checkInTime?: string;
     checkOutTime?: string;
     nearbyActivitySpotsCount?: number;
@@ -499,7 +512,8 @@ declare global {
     transportType: TransportServiceType;
     locationId: string | null;
     contactEmail: string;
-    contactPhone: string;
+    phoneNumber: string;
+    extraPhoneNumbers: string[];
     website: string | null;
     vehicleCount: number;
     capacity: number | null;
@@ -517,6 +531,133 @@ declare global {
     addresses: Address[];
     images: Image[];
     reviews: Review[];
+    classes?: TransportClass[];
+    routes?: TransportRoute[];
+    layouts?: TransportLayout[];
+    trips?: TransportTrip[];
+    vehicles?: TransportVehicle[];
+    _count?: {
+      reviews?: number;
+      images?: number;
+      classes?: number;
+      routes?: number;
+      trips?: number;
+      vehicles?: number;
+    };
+  }
+
+  interface TransportClass {
+    id: string;
+    transportId: string;
+    name: string;
+    busServiceType: BusServiceType | null;
+    vehicleRentalCategory: VehicleRentalCategory | null;
+    basePrice: number;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    transport?: Transport;
+    seats?: TransportSeat[];
+    vehicles?: TransportVehicle[];
+  }
+
+  interface TransportRouteStop {
+    id: string;
+    transportRouteId: string;
+    locationId: string;
+    name: string;
+    stopOrder: number;
+    arrivalOffsetMinutes: number | null;
+    createdAt: Date;
+    location?: Location;
+  }
+
+  interface TransportRoute {
+    id: string;
+    transportId: string;
+    originLocationId: string;
+    destinationLocationId: string;
+    name: string | null;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    transport?: Transport;
+    originLocation?: Location;
+    destinationLocation?: Location;
+    stops?: TransportRouteStop[];
+    trips?: TransportTrip[];
+  }
+
+  interface TransportLayout {
+    id: string;
+    transportId: string;
+    name: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    transport?: Transport;
+    compartments?: TransportCompartment[];
+    trips?: TransportTrip[];
+  }
+
+  interface TransportCompartment {
+    id: string;
+    layoutId: string;
+    name: string;
+    sortOrder: number;
+    createdAt: Date;
+    layout?: TransportLayout;
+    seats?: TransportSeat[];
+  }
+
+  interface TransportSeat {
+    id: string;
+    compartmentId: string;
+    transportClassId: string;
+    seatLabel: string;
+    rowLabel: string | null;
+    columnLabel: string | null;
+    isActive: boolean;
+    createdAt: Date;
+    compartment?: TransportCompartment;
+    transportClass?: TransportClass;
+    compartmentName?: string;
+    isAvailable?: boolean;
+  }
+
+  interface TransportTrip {
+    id: string;
+    transportId: string;
+    transportRouteId: string;
+    layoutId: string;
+    departureDateTime: Date | string;
+    arrivalDateTime: Date | string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    transport?: Transport;
+    route?: TransportRoute;
+    layout?: TransportLayout;
+  }
+
+  interface TransportTripSeatMap {
+    tripId: string;
+    layoutId: string;
+    seats: TransportSeat[];
+  }
+
+  interface TransportVehicle {
+    id: string;
+    transportId: string;
+    transportClassId: string;
+    name: string | null;
+    licensePlate: string | null;
+    vehicleStatus: HotelRoomStatus;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    transport?: Transport;
+    transportClass?: TransportClass;
   }
 
   interface Guide {

@@ -19,7 +19,7 @@ const EXPLORE_LINKS = [
 const PLAN_LINKS = [
     { label: "Bookings", href: "/booking" },
     { label: "Booking Tracker", href: "/booking/trackers" },
-    { label: "Tour Builder", href: "/tour-builder" },
+    { label: "Tour Builder", href: "/tour-builder/platform" },
     { label: "Search", href: "/search" },
     { label: "About CholoBD", href: "/about-cholobd" },
 ];

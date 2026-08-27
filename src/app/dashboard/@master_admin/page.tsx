@@ -305,6 +305,21 @@ export default function MasterAdminDashboard() {
                         <div className="flex justify-between mx-2 gap-2">
                             <button
                                 className="green-underline-button text-lg md:text-xl"
+                                onClick={() => router.push("/guides")}
+                            >
+                                View Guide List
+                            </button>
+                            <button
+                                className="green-button text-sm md:text-base shrink-0"
+                                onClick={() => router.push("/guides/create")}
+                            >
+                                Add new Guide
+                            </button>
+                        </div>
+
+                        <div className="flex justify-between mx-2 gap-2">
+                            <button
+                                className="green-underline-button text-lg md:text-xl"
                                 onClick={() => router.push("/tour-spots")}
                             >
                                 View Tour Spot List
@@ -332,18 +347,33 @@ export default function MasterAdminDashboard() {
                             </button>
                         </ul>
 
+                        <div className="flex justify-between mx-2 gap-2">
+                            <button
+                                className="green-underline-button text-lg md:text-xl"
+                                onClick={() => router.push("/transports")}
+                            >
+                                View Transport Services List
+                            </button>
+                            <button
+                                className="green-button text-sm md:text-base shrink-0"
+                                onClick={() => router.push("/transports/create")}
+                            >
+                                Add new Transport Service
+                            </button>
+                        </div>
+
                         <DivGap />
 
                         <ul className="flex justify-between mx-2 gap-2">
                             <button
                                 className="green-underline-button text-lg md:text-xl"
-                                onClick={() => router.push("/tour-builder/tours")}
+                                onClick={() => router.push("/tour-builder/platform/tours")}
                             >
                                 View Tour Plan Templates List
                             </button>
                             <button
                                 className="green-button text-sm md:text-base shrink-0"
-                                onClick={() => router.push("/tour-builder")}
+                                onClick={() => router.push("/tour-builder/platform")}
                             >
                                 Add new Tour Plan Template
                             </button>

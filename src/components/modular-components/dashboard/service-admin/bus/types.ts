@@ -1,41 +1,3 @@
-export type BusType = "AC" | "Non-AC" | "Sleeper" | "Semi-Sleeper" | "Deluxe";
-
-export interface Bus {
-  id: string;
-  busNumber: string;
-  busType: BusType;
-  totalSeats: number;
-  operatorName: string;
-  registrationNumber: string;
-  isActive: boolean;
-}
-
-export interface BusRide {
-  id: string;
-  busId: string;
-  busNumber: string;
-  route: string;
-  departureTime: string;
-  arrivalTime: string;
-  departureDate: string;
-  price: number;
-  totalSeats: number;
-  bookedSeats: number;
-  status: "scheduled" | "ongoing" | "completed" | "cancelled";
-  operatorName: string;
-}
-
-export interface Ticket {
-  id: string;
-  rideId: string;
-  passengerName: string;
-  seatNumber: string;
-  phoneNumber: string;
-  price: number;
-  bookingDate: string;
-  status: "confirmed" | "cancelled";
-}
-
 export interface SalesReport {
   date: string;
   totalRides: number;
@@ -58,127 +20,6 @@ export interface AdminStats {
   occupancyRate: number;
   cancellationRate: number;
 }
-
-export const FAKE_BUSES: Bus[] = [
-  {
-    id: "bus-001",
-    busNumber: "BD-02-1001",
-    busType: "AC",
-    totalSeats: 45,
-    operatorName: "Greenline Transport",
-    registrationNumber: "REG-001",
-    isActive: true,
-  },
-  {
-    id: "bus-002",
-    busNumber: "BD-02-1002",
-    busType: "Sleeper",
-    totalSeats: 32,
-    operatorName: "Greenline Transport",
-    registrationNumber: "REG-002",
-    isActive: true,
-  },
-  {
-    id: "bus-003",
-    busNumber: "BD-02-1003",
-    busType: "Semi-Sleeper",
-    totalSeats: 36,
-    operatorName: "Pathao Coach",
-    registrationNumber: "REG-003",
-    isActive: true,
-  },
-  {
-    id: "bus-004",
-    busNumber: "BD-02-1004",
-    busType: "Non-AC",
-    totalSeats: 50,
-    operatorName: "Pathao Coach",
-    registrationNumber: "REG-004",
-    isActive: true,
-  },
-  {
-    id: "bus-005",
-    busNumber: "BD-02-1005",
-    busType: "Deluxe",
-    totalSeats: 28,
-    operatorName: "Royal Travels",
-    registrationNumber: "REG-005",
-    isActive: false,
-  },
-];
-
-export const FAKE_RIDES: BusRide[] = [
-  {
-    id: "ride-001",
-    busId: "bus-001",
-    busNumber: "BD-02-1001",
-    route: "Dhaka → Chittagong",
-    departureTime: "6:00 PM",
-    arrivalTime: "11:00 PM",
-    departureDate: "Feb 2, 2026",
-    price: 800,
-    totalSeats: 45,
-    bookedSeats: 38,
-    status: "ongoing",
-    operatorName: "Greenline Transport",
-  },
-  {
-    id: "ride-002",
-    busId: "bus-002",
-    busNumber: "BD-02-1002",
-    route: "Dhaka → Sylhet",
-    departureTime: "8:00 PM",
-    arrivalTime: "5:00 AM",
-    departureDate: "Feb 2, 2026",
-    price: 1200,
-    totalSeats: 32,
-    bookedSeats: 28,
-    status: "scheduled",
-    operatorName: "Greenline Transport",
-  },
-  {
-    id: "ride-003",
-    busId: "bus-003",
-    busNumber: "BD-02-1003",
-    route: "Dhaka → Khulna",
-    departureTime: "10:00 AM",
-    arrivalTime: "5:00 PM",
-    departureDate: "Feb 2, 2026",
-    price: 950,
-    totalSeats: 36,
-    bookedSeats: 32,
-    status: "scheduled",
-    operatorName: "Pathao Coach",
-  },
-  {
-    id: "ride-004",
-    busId: "bus-004",
-    busNumber: "BD-02-1004",
-    route: "Dhaka → Rajshahi",
-    departureTime: "2:00 PM",
-    arrivalTime: "9:00 PM",
-    departureDate: "Feb 1, 2026",
-    price: 700,
-    totalSeats: 50,
-    bookedSeats: 48,
-    status: "completed",
-    operatorName: "Pathao Coach",
-  },
-  {
-    id: "ride-005",
-    busId: "bus-001",
-    busNumber: "BD-02-1001",
-    route: "Dhaka → Cox's Bazar",
-    departureTime: "11:00 PM",
-    arrivalTime: "8:00 AM",
-    departureDate: "Feb 3, 2026",
-    price: 1500,
-    totalSeats: 45,
-    bookedSeats: 35,
-    status: "scheduled",
-    operatorName: "Greenline Transport",
-  },
-];
 
 export const FAKE_SALES_REPORTS: SalesReport[] = [
   {
@@ -231,3 +72,53 @@ export const FAKE_ADMIN_STATS: AdminStats = {
   occupancyRate: 84.4,
   cancellationRate: 2.1,
 };
+
+export function resolveMyTransport(
+  data: Transport | Transport[] | null | undefined
+): Transport | undefined {
+  if (!data) return undefined;
+  return Array.isArray(data) ? data[0] : data;
+}
+
+export function formatTransportEnumLabel(value?: string | null): string {
+  if (!value) return "N/A";
+  return value
+    .split("_")
+    .map((part) => part.charAt(0) + part.slice(1).toLowerCase())
+    .join(" ");
+}
+
+export function layoutSeatCount(layout?: TransportLayout | null): number {
+  if (!layout?.compartments) return 0;
+  return layout.compartments.reduce((sum, compartment) => {
+    const counted = (compartment as TransportCompartment & { _count?: { seats?: number } })
+      ._count?.seats;
+    if (typeof counted === "number") return sum + counted;
+    return sum + (compartment.seats?.length ?? 0);
+  }, 0);
+}
+
+export function toDateTimeLocalValue(value?: Date | string | null): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function fromDateTimeLocalValue(value: string): string {
+  if (!value) return "";
+  return new Date(value).toISOString();
+}
+
+export function deriveTripStatus(
+  trip: Pick<TransportTrip, "departureDateTime" | "arrivalDateTime" | "isActive">
+): "scheduled" | "ongoing" | "completed" | "inactive" {
+  if (!trip.isActive) return "inactive";
+  const now = Date.now();
+  const departure = new Date(trip.departureDateTime).getTime();
+  const arrival = new Date(trip.arrivalDateTime).getTime();
+  if (now < departure) return "scheduled";
+  if (now <= arrival) return "ongoing";
+  return "completed";
+}

@@ -28,7 +28,11 @@ interface FormProps {
     tourSpot_Id?: string;
 }
 
-export const TourSpotForm = ({ mode, tourSpotData = {tourType: TourType.ADVENTURE}, tourSpot_Id }: FormProps) => {
+const DEFAULT_TOUR_SPOT_DATA: Partial<TourSpot> = {
+    tourType: TourType.ADVENTURE,
+};
+
+export const TourSpotForm = ({ mode, tourSpotData = DEFAULT_TOUR_SPOT_DATA, tourSpot_Id }: FormProps) => {
     const router = useRouter();
     const { showLoadingContent, openNotificationPopUpMessage } = useGlobalUI();
 
@@ -78,8 +82,9 @@ export const TourSpotForm = ({ mode, tourSpotData = {tourType: TourType.ADVENTUR
     );
 
     useEffect(() => {
+        if (mode !== "edit") return;
         setTourSpotFormData(tourSpotData);
-    }, [tourSpotData]);
+    }, [mode, tourSpotData]);
     /* ===================== SUBMIT ===================== */
 
     const onPageFormSubmit = (e: React.FormEvent) => {
@@ -253,7 +258,7 @@ export const TourSpotForm = ({ mode, tourSpotData = {tourType: TourType.ADVENTUR
                     deleteTourSpotImagesMutate({tourSpotId: id, imageIds}) 
                 }
                 
-                oldResourceImages={tourSpotFormData.images || []}
+                oldResourceImages={tourSpotFormData.images}
             />
 
             <button type="submit" className="px-6 py-2 bg-green-600 text-white rounded">

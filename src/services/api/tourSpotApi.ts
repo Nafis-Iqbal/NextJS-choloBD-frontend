@@ -2,6 +2,7 @@
 import { TourType } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { unwrapPaginatedList, type PaginatedListResponse } from "@/utilities/adminEntityList";
 
 interface TourSpotSearchParams {
     name?: string;
@@ -42,19 +43,20 @@ interface UpdateTourSpotData {
     isPopular?: boolean;
 }
 
-async function getAllTourSpots(queryString?: string) {
-    const response = await apiFetch<ApiResponse<TourSpot[]>>(
+export type TourSpotListResponse = PaginatedListResponse<TourSpot>;
+
+async function getAllTourSpots(queryString?: string): Promise<TourSpotListResponse> {
+    const response = await apiFetch<ApiResponse<any>>(
         `/tour-spots${queryString ? `?${queryString}` : ""}`,
         {
             method: "GET",
         }
     );
-
-    return response;
+    return unwrapPaginatedList<TourSpot>(response);
 }
 
 export function useGetAllTourSpotsRQ(queryString?: string) {
-    return useQuery<ApiResponse<TourSpot[]>>({
+    return useQuery<TourSpotListResponse>({
         queryFn: () => getAllTourSpots(queryString),
         queryKey: ["tour-spots", queryString],
         staleTime: queryString ? 0 : 30_000,
@@ -80,46 +82,6 @@ export function useGetPopularTourSpotsRQ() {
         queryKey: ["tour-spots", "popular"],
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
-    });
-}
-
-async function searchTourSpots(searchParams: TourSpotSearchParams) {
-    const params = new URLSearchParams();
-
-    Object.entries(searchParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-            params.append(key, String(value));
-        }
-    });
-
-    const queryString = params.toString();
-
-    const response = await apiFetch<ApiResponse<TourSpot[]>>(
-        `/tour-spots/search${queryString ? `?${queryString}` : ""}`,
-        {
-            method: "GET",
-        }
-    );
-
-    return response;
-}
-
-export function useSearchTourSpotsRQ(searchParams?: TourSpotSearchParams) {
-    const queryString = searchParams
-        ? new URLSearchParams(
-              Object.entries(searchParams)
-                  .filter(([, v]) => v !== undefined && v !== null)
-                  .map(([k, v]) => [k, String(v)])
-          ).toString()
-        : undefined;
-
-    return useQuery<ApiResponse<TourSpot[]>>({
-        queryFn: () => searchTourSpots(searchParams || {}),
-        queryKey: ["tour-spots", "search", queryString],
-        staleTime: queryString ? 0 : 30_000,
-        gcTime: 30_000,
-        refetchOnMount: queryString ? "always" : false,
-        enabled: !!searchParams && Object.keys(searchParams).length > 0,
     });
 }
 

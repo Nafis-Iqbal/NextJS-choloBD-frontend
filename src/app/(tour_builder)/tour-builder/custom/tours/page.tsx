@@ -80,52 +80,44 @@ function TourPackageListingsPage() {
                 }
 
                 <TableLayout className="mt-5 md:mr-5 mb-5 md:mb-10">
-                    <div className="overflow-x-auto w-full">
-                        <div className="min-w-[1200px]">
-                            <div className="flex border-1 border-green-800 p-2 bg-gray-600 text-center">
-                                <p className="w-[5%] text-sm">Sr. No.</p>
-                                <p className="w-[20%]">Package Name</p>
-                                <p className="w-[12%]">Division</p>
-                                <p className="w-[10%]">Tour Type</p>
-                                <p className="w-[8%]">Duration</p>
-                                <p className="w-[25%]">Day Segments</p>
-                                <p className="w-[10%]">Package ID</p>
-                                <p className="w-[10%]">Actions</p>
-                            </div>
-                            <div className="flex flex-col border-1 border-green-800 text-center">
-                                {
-                                    isFetchLoading ? (<NoContentTableRow displayMessage="Loading Data" tdColSpan={1} />) :
-                                        isFetchError ? (<NoContentTableRow displayMessage="An error occurred" tdColSpan={1} />) :
-                                            (tourPackages && Array.isArray(tourPackages) && tourPackages.length <= 0) ?
-                                                (<NoContentTableRow displayMessage="No tour packages found" tdColSpan={1} />) :
-
-                                                (tourPackages ?? []).map((tourPackage, index) => {
-                                                    return (
-                                                        <TourPackageViewListTableRow
-                                                            key={tourPackage.id}
-                                                            id={index + 1}
-                                                            packageName={tourPackage.packageName || ''}
-                                                            tourPackage_id={tourPackage.id}
-                                                            division={tourPackage.location?.name || 'N/A'}
-                                                            tourType={tourPackage.tourType || 'N/A'}
-                                                            duration={tourPackage.duration}
-                                                            daySegments={
-                                                                (tourPackage.daySegments ?? []).map(segment => ({
-                                                                    dayNumber: segment.dayNumber,
-                                                                    tourSpotName: segment.tourSpotName,
-                                                                    activitySpotName: segment.activitySpotName,
-                                                                    transportOption: segment.transportOption,
-                                                                    hotelOption: segment.hotelOption
-                                                                }))
-                                                            }
-                                                            onClickNavigate={() => router.push(`/tour-builder/tours/${tourPackage.id}`)}
-                                                            onEdit={() => router.push(`/tour-builder/tours/${tourPackage.id}/edit`)}
-                                                            onDelete={() => handleDeleteTourPackage(tourPackage.id)}
-                                                        />
-                                                    );
-                                                })
-                                }
-                            </div>
+                    <div className="w-full">
+                        <div
+                            className="block rounded-sm md:rounded-md border-0 md:border px-0 py-1 md:p-2"
+                            style={{
+                                backgroundColor: "var(--theme-card-bg)",
+                                borderColor: "var(--theme-deep-green)",
+                            }}
+                        >
+                            {isFetchLoading ? (
+                                <NoContentTableRow displayMessage="Loading Data" tdColSpan={1} />
+                            ) : isFetchError ? (
+                                <NoContentTableRow displayMessage="An error occurred" tdColSpan={1} />
+                            ) : (tourPackages && Array.isArray(tourPackages) && tourPackages.length <= 0) ? (
+                                <NoContentTableRow displayMessage="No tour packages found" tdColSpan={1} />
+                            ) : (
+                                (tourPackages ?? []).map((tourPackage, index) => (
+                                    <TourPackageViewListTableRow
+                                        key={tourPackage.id}
+                                        id={index + 1}
+                                        packageName={tourPackage.packageName || ""}
+                                        packageImageURL={tourPackage.images?.[0]?.url}
+                                        shortDescription={tourPackage.shortDescription}
+                                        totalBudget={tourPackage.totalBudget}
+                                        rating={tourPackage.rating}
+                                        duration={tourPackage.duration}
+                                        daySegments={(tourPackage.daySegments ?? []).map((segment) => ({
+                                            dayNumber: segment.dayNumber,
+                                            tourSpotName: segment.tourSpotName,
+                                            activitySpotName: segment.activitySpotName,
+                                            transportOption: segment.transportOption,
+                                            hotelOption: segment.hotelOption,
+                                        }))}
+                                        onClickNavigate={() => router.push(`/tour-builder/custom/tours/${tourPackage.id}`)}
+                                        onEdit={() => router.push(`/tour-builder/custom/tours/${tourPackage.id}/edit`)}
+                                        onDelete={() => handleDeleteTourPackage(tourPackage.id)}
+                                    />
+                                ))
+                            )}
                         </div>
                     </div>
                 </TableLayout>

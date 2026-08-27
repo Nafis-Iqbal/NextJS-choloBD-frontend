@@ -2,6 +2,7 @@
 import { ActivityType } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { unwrapPaginatedList, type PaginatedListResponse } from "@/utilities/adminEntityList";
 
 interface ActivitySpotSearchParams {
     name?: string;
@@ -47,18 +48,17 @@ interface UpdateActivitySpotData {
 }
 
 export async function getAllActivitySpots(queryString?: string) {
-    const response = await apiFetch<ApiResponse<ActivitySpot[]>>(
+    const response = await apiFetch<ApiResponse<any>>(
         `/activity-spots${queryString ? `?${queryString}` : ""}`,
         {
             method: "GET",
         }
     );
-
-    return response;
+    return unwrapPaginatedList<ActivitySpot>(response);
 }
 
 export function useGetAllActivitySpotsRQ(queryString?: string) {
-    return useQuery<ApiResponse<ActivitySpot[]>>({
+    return useQuery<PaginatedListResponse<ActivitySpot>>({
         queryFn: () => getAllActivitySpots(queryString),
         queryKey: ["activity-spots", queryString],
         staleTime: queryString ? 0 : 30_000,
@@ -84,46 +84,6 @@ export function useGetPopularActivitySpotsRQ() {
         queryKey: ["activity-spots", "popular"],
         staleTime: 5 * 60_000,
         gcTime: 10 * 60_000,
-    });
-}
-
-export async function searchActivitySpots(searchParams: ActivitySpotSearchParams) {
-    const params = new URLSearchParams();
-
-    Object.entries(searchParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-            params.append(key, String(value));
-        }
-    });
-
-    const queryString = params.toString();
-
-    const response = await apiFetch<ApiResponse<ActivitySpot[]>>(
-        `/activity-spots/search${queryString ? `?${queryString}` : ""}`,
-        {
-            method: "GET",
-        }
-    );
-
-    return response;
-}
-
-export function useSearchActivitySpotsRQ(searchParams?: ActivitySpotSearchParams) {
-    const queryString = searchParams
-        ? new URLSearchParams(
-              Object.entries(searchParams)
-                  .filter(([, value]) => value !== undefined && value !== null)
-                  .map(([key, value]) => [key, String(value)])
-          ).toString()
-        : undefined;
-
-    return useQuery<ApiResponse<ActivitySpot[]>>({
-        queryFn: () => searchActivitySpots(searchParams || {}),
-        queryKey: ["activity-spots", "search", queryString],
-        staleTime: queryString ? 0 : 30_000,
-        gcTime: 30_000,
-        refetchOnMount: queryString ? "always" : false,
-        enabled: !!searchParams && Object.keys(searchParams).length > 0,
     });
 }
 

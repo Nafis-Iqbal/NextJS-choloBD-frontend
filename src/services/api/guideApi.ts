@@ -2,6 +2,7 @@
 import { Language, TourType } from "@/types/enums";
 import { apiFetch } from "../apiInstance";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { unwrapPaginatedList, type PaginatedListResponse } from "@/utilities/adminEntityList";
 
 interface GuideSearchParams {
     q: string;
@@ -14,8 +15,10 @@ interface GuideSearchParams {
 
 interface GuideListParams {
     locationId?: string;
+    divisionId?: string;
     specialization?: TourType;
     language?: Language;
+    name?: string;
     isActive?: boolean;
     isVerified?: boolean;
     minRating?: number;
@@ -111,77 +114,36 @@ function buildQueryString(params?: object) {
     return queryString ? `?${queryString}` : "";
 }
 
-export async function getAllGuides(params?: GuideListParams) {
+export async function getAllGuides(params?: GuideListParams | string) {
+    const query = typeof params === "string"
+        ? (params ? `?${params}` : "")
+        : buildQueryString(params);
+
     const response = await apiFetch<ApiResponse<Guide[] | PaginatedGuideList>>(
-        `/guides${buildQueryString(params)}`,
+        `/guides${query}`,
         { method: "GET" }
     );
 
-    return response;
+    return unwrapPaginatedList<Guide>(response);
 }
 
-export function useGetAllGuidesRQ(params?: GuideListParams) {
-    const queryString = params
-        ? new URLSearchParams(
-              Object.entries(params)
-                  .filter(([, value]) => value !== undefined && value !== null)
-                  .map(([key, value]) => [key, String(value)])
-          ).toString()
-        : undefined;
+export function useGetAllGuidesRQ(params?: GuideListParams | string) {
+    const queryString = typeof params === "string"
+        ? params
+        : params
+            ? new URLSearchParams(
+                  Object.entries(params)
+                      .filter(([, value]) => value !== undefined && value !== null && value !== "")
+                      .map(([key, value]) => [key, String(value)])
+              ).toString()
+            : undefined;
 
-    return useQuery<ApiResponse<Guide[] | PaginatedGuideList>>({
+    return useQuery<PaginatedListResponse<Guide>>({
         queryFn: () => getAllGuides(params),
         queryKey: ["guides", queryString],
         staleTime: queryString ? 0 : 30_000,
         gcTime: 30_000,
         refetchOnMount: queryString ? "always" : false,
-    });
-}
-
-export async function searchGuides(searchParams: GuideSearchParams) {
-    const response = await apiFetch<ApiResponse<Guide[] | PaginatedGuideList>>(
-        `/guides/search${buildQueryString(searchParams)}`,
-        { method: "GET" }
-    );
-
-    return response;
-}
-
-export function useSearchGuidesRQ(searchParams?: GuideSearchParams) {
-    const queryString = searchParams
-        ? new URLSearchParams(
-              Object.entries(searchParams)
-                  .filter(([, value]) => value !== undefined && value !== null)
-                  .map(([key, value]) => [key, String(value)])
-          ).toString()
-        : undefined;
-
-    return useQuery<ApiResponse<Guide[] | PaginatedGuideList>>({
-        queryFn: () => searchGuides(searchParams as GuideSearchParams),
-        queryKey: ["guides", "search", queryString],
-        staleTime: 0,
-        gcTime: 30_000,
-        refetchOnMount: "always",
-        enabled: !!searchParams?.q?.trim(),
-    });
-}
-
-export async function getGuidesByLocation(locationId: string) {
-    const response = await apiFetch<ApiResponse<Guide[]>>(
-        `/guides/location/${locationId}`,
-        { method: "GET" }
-    );
-
-    return response;
-}
-
-export function useGetGuidesByLocationRQ(locationId: string) {
-    return useQuery<ApiResponse<Guide[]>>({
-        queryFn: () => getGuidesByLocation(locationId),
-        queryKey: ["guides", "location", locationId],
-        enabled: !!locationId,
-        staleTime: 30_000,
-        gcTime: 30_000,
     });
 }
 

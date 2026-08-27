@@ -45,7 +45,7 @@ export const TourSuggestions: React.FC<TourSuggestionsProps> = ({
       <TourSuggestionsHeading />
 
       {tours.length === 0 ? (
-        <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl border border-[var(--theme-border-subtle)] bg-[var(--theme-bg)] px-6 py-10 text-center">
+        <div className="mx-auto flex max-w-md flex-col items-center gap-3 rounded-2xl border border-[var(--theme-border-subtle)] bg-[var(--theme-bg)] px-6 py-10 text-center font-sans">
           <span className="flex h-12 w-12 items-center justify-center rounded-full theme-section">
             <Route className="h-5 w-5 theme-text-teal" strokeWidth={1.75} />
           </span>
@@ -92,7 +92,7 @@ export const TourSuggestions: React.FC<TourSuggestionsProps> = ({
 
           <div className="mt-8 flex justify-center font-sans">
             <Link
-              href="/tour-builder/tours"
+              href="/tour-builder/platform/tours"
               className="theme-btn-teal group inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold tracking-wide"
             >
               Browse all tours
@@ -125,7 +125,7 @@ export const TourSuggestions: React.FC<TourSuggestionsProps> = ({
         <div className="mt-6 flex flex-col items-center justify-center gap-3 font-sans md:flex-row md:gap-4">
           <Link
             className="theme-btn-teal group inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold tracking-wide"
-            href="/tour-builder"
+            href="/tour-builder/custom"
           >
             Start Building
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" strokeWidth={2.25} />
@@ -133,7 +133,7 @@ export const TourSuggestions: React.FC<TourSuggestionsProps> = ({
 
           <Link
             className="inline-flex items-center gap-2 rounded-full border border-[var(--theme-teal)] bg-[var(--theme-bg)] px-6 py-2.5 text-sm font-semibold tracking-wide theme-text-teal transition-colors hover:bg-[var(--theme-card-bg)]"
-            href="/tour-builder/tours"
+            href="/tour-builder/platform/tours"
           >
             Explore Ideas
           </Link>
@@ -208,7 +208,7 @@ const TourSuggestionsCard: React.FC<{ tour: Tour; width: number }> = ({ tour, wi
         )}
 
         <Link
-          href={`/tour-builder/tours/${tour.id}`}
+          href={`/tour-builder/platform/tours/${tour.id}`}
           className="theme-btn-teal flex-shrink-0 rounded-full px-4 py-2 text-xs font-semibold tracking-wide"
         >
           View Details

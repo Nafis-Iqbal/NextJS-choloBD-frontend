@@ -1,4 +1,5 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { FaInfoCircle } from "react-icons/fa";
 
 /** Thin theme-aware field outline — keeps inputs visible against card/section backgrounds */
@@ -10,22 +11,48 @@ const themeFieldBorder = (hasError = false): React.CSSProperties => ({
 
 type HelpInfoProps = {
     helpInfo?: string;
+    openOnHover?: boolean;
+    children?: React.ReactNode;
 };
 
-export const FieldHelpInfo = ({ helpInfo = "" }: HelpInfoProps) => {
+export const FieldHelpInfo = ({ helpInfo = "", openOnHover = false, children }: HelpInfoProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [coords, setCoords] = useState({ top: 0, left: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const tooltipRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (!isOpen) return;
 
+        const updatePosition = () => {
+            const rect = buttonRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const tooltipWidth = 288;
+            const gutter = 8;
+            const left = Math.min(
+                Math.max(gutter, rect.left),
+                window.innerWidth - tooltipWidth - gutter
+            );
+            const estimatedHeight = 120;
+            const showAbove = rect.bottom + gutter + estimatedHeight > window.innerHeight;
+            const top = showAbove
+                ? Math.max(gutter, rect.top - estimatedHeight - gutter)
+                : rect.bottom + gutter;
+            setCoords({ top, left });
+        };
+
+        updatePosition();
+
         const handleOutsideClick = (event: MouseEvent) => {
+            const target = event.target as Node;
             if (
-                containerRef.current &&
-                !containerRef.current.contains(event.target as Node)
+                containerRef.current?.contains(target) ||
+                tooltipRef.current?.contains(target)
             ) {
-                setIsOpen(false);
+                return;
             }
+            setIsOpen(false);
         };
 
         const handleEscape = (event: KeyboardEvent) => {
@@ -36,10 +63,14 @@ export const FieldHelpInfo = ({ helpInfo = "" }: HelpInfoProps) => {
 
         document.addEventListener("mousedown", handleOutsideClick);
         document.addEventListener("keydown", handleEscape);
+        window.addEventListener("scroll", updatePosition, true);
+        window.addEventListener("resize", updatePosition);
 
         return () => {
             document.removeEventListener("mousedown", handleOutsideClick);
             document.removeEventListener("keydown", handleEscape);
+            window.removeEventListener("scroll", updatePosition, true);
+            window.removeEventListener("resize", updatePosition);
         };
     }, [isOpen]);
 
@@ -48,14 +79,22 @@ export const FieldHelpInfo = ({ helpInfo = "" }: HelpInfoProps) => {
     }
 
     return (
-        <div ref={containerRef} className="relative inline-flex items-center">
+        <div
+            ref={containerRef}
+            className={`relative inline-flex items-center ${children ? "gap-1.5" : ""}`}
+            onMouseEnter={openOnHover ? () => setIsOpen(true) : undefined}
+            onMouseLeave={openOnHover ? () => setIsOpen(false) : undefined}
+        >
+            {children}
             <button
                 type="button"
+                ref={buttonRef}
                 aria-label="Show field help"
                 aria-expanded={isOpen}
                 onClick={(event) => {
                     event.preventDefault();
                     event.stopPropagation();
+                    if (openOnHover) return;
                     setIsOpen((prev) => !prev);
                 }}
                 className="inline-flex items-center justify-center rounded-full p-0.5 transition-opacity hover:opacity-80"
@@ -68,11 +107,14 @@ export const FieldHelpInfo = ({ helpInfo = "" }: HelpInfoProps) => {
                 <FaInfoCircle className="w-4 h-4" />
             </button>
 
-            {isOpen && (
+            {isOpen && typeof document !== "undefined" && createPortal(
                 <div
+                    ref={tooltipRef}
                     role="tooltip"
-                    className="absolute left-0 top-full mt-2 z-30 w-64 sm:w-72 rounded-md px-3 py-2 text-sm leading-relaxed"
+                    className="fixed z-[200] w-64 sm:w-72 rounded-md px-3 py-2 text-sm leading-relaxed"
                     style={{
+                        top: coords.top,
+                        left: coords.left,
                         backgroundColor: "var(--theme-card-bg)",
                         color: "var(--theme-text)",
                         border: "1px solid var(--theme-deep-green)",
@@ -80,8 +122,9 @@ export const FieldHelpInfo = ({ helpInfo = "" }: HelpInfoProps) => {
                             "0 10px 25px rgba(0, 0, 0, 0.18), 0 4px 10px rgba(0, 0, 0, 0.12)",
                     }}
                 >
-                    <p style={{ color: "var(--theme-text-muted)" }}>{helpInfo}</p>
-                </div>
+                    <p className="font-mono" style={{ color: "var(--theme-text-muted)" }}>{helpInfo}</p>
+                </div>,
+                document.body
             )}
         </div>
     );

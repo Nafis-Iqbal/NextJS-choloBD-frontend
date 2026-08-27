@@ -1,30 +1,44 @@
 "use client";
 
-import Link from "next/link";
-import { FeatureUnderDevelopment } from "@/components/placeholder-components/FeatureUnderDevelopment";
+import { useRouter } from "next/navigation";
+import { AuthApi } from "@/services/api";
+import { TransportForm } from "@/components/forms/TransportForm";
+import { useEffect } from "react";
 
 export default function CreateTransportPage() {
-  return (
-    <div className="flex flex-col p-2 font-sans mt-5 theme-text">
-      <div className="md:ml-6 flex flex-col space-y-4 max-w-5xl">
-        <div>
-          <h1 className="text-3xl font-bold theme-text">Create Transport</h1>
-          <p className="theme-text-muted mt-2 text-sm">
-            Creating a transport entity is not available yet.
-          </p>
-        </div>
+    const router = useRouter();
 
-        <FeatureUnderDevelopment moduleName="Create Transport" />
+    const { data: authResponse, isLoading } = AuthApi.useGetUserAuthenticationRQ(true);
+    const isAuthenticated = authResponse?.data?.isAuthenticated || false;
+    const currentUserRole = authResponse?.data?.userRole;
 
-        <div className="flex flex-wrap gap-4 text-sm">
-          <Link href="/transports" className="theme-text-teal font-medium">
-            ← Transport listings
-          </Link>
-          <Link href="/dashboard" className="theme-text-muted font-medium">
-            Dashboard
-          </Link>
+    useEffect(() => {
+        if (!isLoading && (isAuthenticated === false || isAuthenticated === undefined)) {
+            router.replace("/");
+            return;
+        }
+
+        if (!isLoading && currentUserRole !== "MASTER_ADMIN") {
+            router.replace("/");
+        }
+    }, [isLoading, isAuthenticated, currentUserRole, router]);
+
+    if (isLoading) {
+        return null;
+    }
+
+    if (currentUserRole !== "MASTER_ADMIN") {
+        return null;
+    }
+
+    return (
+        <div className="flex flex-col p-2 mt-5">
+            <div className="flex flex-col space-y-2 font-sans mx-auto">
+                <h3 className="theme-label">Create New Transport</h3>
+                <p className="theme-text-muted">Add a new transport operator to the platform.</p>
+
+                <TransportForm mode="create" editMode="MASTER_ADMIN" />
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }

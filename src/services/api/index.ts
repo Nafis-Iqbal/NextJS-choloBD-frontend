@@ -11,6 +11,9 @@ import * as ActivitySpotBookingApi from "./activitySpotBookingApi";
 import * as HotelApi from "./hotelApi";
 import * as HotelRoomApi from "./hotelRoomApi";
 import * as HotelBookingApi from "./hotelBookingApi";
+import * as TransportApi from "./transportApi";
+import * as TransportInventoryApi from "./transportInventoryApi";
+import * as TransportBookingApi from "./transportBookingApi";
 import * as ReviewApi from "./reviewApi";
 import * as TourBuilderApi from "./tourBuilderApi";
 import * as SearchApi from "./searchApi";
@@ -22,5 +25,5 @@ import * as BookmarkApi from "./bookmarkApi";
 import * as NotificationApi from "./notificationApi";
 import * as ComplaintApi from "./complaintApi";
 
-export { AuthApi, UserApi, LocationApi, CategoryApi, CommunityApi, TourSpotApi, ActivitySpotApi, GuideApi, GuideBookingApi, ActivitySpotBookingApi, HotelApi, HotelRoomApi, HotelBookingApi, 
+export { AuthApi, UserApi, LocationApi, CategoryApi, CommunityApi, TourSpotApi, ActivitySpotApi, GuideApi, GuideBookingApi, ActivitySpotBookingApi, HotelApi, HotelRoomApi, HotelBookingApi, TransportApi, TransportInventoryApi, TransportBookingApi, 
     ReviewApi, SearchApi, PaymentApi, WalletApi, AddressApi, ConfigApi, TourBuilderApi, BookmarkApi, NotificationApi, ComplaintApi };

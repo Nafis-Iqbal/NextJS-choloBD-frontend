@@ -189,6 +189,15 @@ export enum TrainServiceType {
   CHAIR_CAR = "CHAIR_CAR"
 }
 
+export enum VehicleRentalCategory {
+  SEDAN = "SEDAN",
+  SUV = "SUV",
+  HATCHBACK = "HATCHBACK",
+  VAN = "VAN",
+  MICROBUS = "MICROBUS",
+  OTHER = "OTHER"
+}
+
 // Payment and Transaction Enums
 export enum PaymentStatus {
   UNPAID = "UNPAID",
