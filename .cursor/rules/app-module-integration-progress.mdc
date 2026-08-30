@@ -1,0 +1,35 @@
+---
+alwaysApply: true
+---
+Done, Tested, and Visually polished modules:
+============================================
+User Management and Profile Info
+Location, Category management
+Tour Builder (Create, Edit, and List) [ADMIN]
+Community Posts, Notification System
+Bookmarking, Combined Search
+
+
+Tested, but requires visual polish:
+===================================
+Hotel, Guide, ActivitySpot, TourSpot Create + Edit + Info page
+HotelBooking, GuideBooking, ActivitySpotBooking
+
+All Dashboard sections for Guide, Hotel, Activity Spot Service_Admin + Employee
+
+
+Done BUT Untested:
+==================
+Custom Tour Builder (User)
+Tour Package Booking (Admin and Custom both)
+Transport System (Create + Edit + Info + Dashboard sections) (Unsure about completion, prompted only)
+Transport Booking (Bus + Rental)
+Payment Module (Not tested for ALL payment instance/places in the site for proper connectivity)
+Complaint Management Dashboards(Service Admin + Master Admin + Employee)
+
+
+Upcoming/To DO:
+===============
+Refund System (dashboard sections, and initiator button placement)
+B2B marketing, Homepage refinement
+About page refinement
